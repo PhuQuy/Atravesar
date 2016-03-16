@@ -2,6 +2,7 @@ package com.example.npquy.map;
 
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -19,7 +20,7 @@ import flexjson.JSONSerializer;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private EditText edLagitude;
+    private EditText edLongitude;
     private EditText edLatitude;
 
 
@@ -27,7 +28,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        edLagitude = (EditText) findViewById(R.id.pick_up);;
+        edLongitude = (EditText) findViewById(R.id.pick_up);;
         edLatitude = (EditText) findViewById(R.id.drop_off);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -36,7 +37,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
     }
 
-    public void getNearestDriver(View vw) {
+    public void getNearestDriver(View v) {
 
         String url = WebServiceTaskManager.URL + "NearestDriver";
 
@@ -50,13 +51,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         Location location = new Location();
         String latitude = edLatitude.getText().toString();
-        String lagitude = edLagitude.getText().toString();
-        if(lagitude.length() == 0 || latitude.length() == 0) {
-            lagitude = "0";
+        String longitude = edLongitude.getText().toString();
+        if(longitude.length() == 0 || latitude.length() == 0) {
+            longitude = "0";
             latitude = "0";
         }
         location.setLat(Double.parseDouble(latitude));
-        location.setLgn(Double.parseDouble(lagitude));
+        location.setLgn(Double.parseDouble(longitude));
         String json = new JSONSerializer().exclude("*.class").serialize(
                 location);
         wst.addNameValuePair("", json);
@@ -67,6 +68,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void showResponse(String response) {
         Toast.makeText(this, response, Toast.LENGTH_SHORT).show();
+        Log.e("aaaa", response, null);
     }
 
 
@@ -91,6 +93,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(mGPS.getLatitude(), mGPS.getLongitude());
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 12.0f));
     }
 }
