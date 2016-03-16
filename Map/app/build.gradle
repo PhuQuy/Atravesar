@@ -24,7 +24,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.2.1'
     compile 'com.google.android.gms:play-services:8.4.0'
-    compile files ('libs/apache-httpcomponents-httpcore')
+    compile files ('libs/apache-httpcomponents-httpcore.jar')
     compile files ('libs/http-core-4.1.jar')
     compile files ('libs/httpclient-4.0.3.jar')
     compile files ('libs/flexjson-2.1.jar')
