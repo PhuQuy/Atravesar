@@ -1,8 +1,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:map="http://schemas.android.com/apk/res-auto"
-android:id="@+id/root_container"
-android:layout_width="match_parent"
-android:layout_height="match_parent">
+    xmlns:map="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:map="http://schemas.android.com/apk/res-auto"
@@ -13,10 +13,48 @@ android:layout_height="match_parent">
         android:layout_height="fill_parent"
         tools:context="com.example.npquy.map.MapsActivity" />
 
-    <TextView
-    android:id="@+id/dismiss_overlay"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:layout_below="@+id/map"
-    android:text="Type here :"/>
+    <RelativeLayout
+        android:id="@+id/content_data"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/common_google_signin_btn_text_dark_default"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/pick_up"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:hint="Pick Up"></EditText>
+
+        <EditText
+            android:id="@+id/drop_off"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/pick_up"
+            android:hint="Drop off"></EditText>
+        <RelativeLayout
+            android:id="@+id/re"
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_below="@+id/drop_off"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/total"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:text="Total"></Button>
+
+            <Button
+                android:id="@+id/book"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/total"
+                android:onClick="getNearestDriver"
+                android:layout_centerHorizontal="true"
+                android:text="Book"></Button>
+        </RelativeLayout>
+    </RelativeLayout>
 </RelativeLayout>

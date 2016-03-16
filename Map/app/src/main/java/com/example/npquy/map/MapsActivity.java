@@ -2,7 +2,11 @@ package com.example.npquy.map;
 
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
 
+import com.example.npquy.entity.Location;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -10,19 +14,61 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import flexjson.JSONSerializer;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    private EditText edLagitude;
+    private EditText edLatitude;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        edLagitude = (EditText) findViewById(R.id.pick_up);;
+        edLatitude = (EditText) findViewById(R.id.drop_off);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
+
+    public void getNearestDriver(View vw) {
+
+        String url = WebServiceTaskManager.URL + "NearestDriver";
+
+        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "Retrieving the nearest driver ...") {
+
+            @Override
+            public void handleResponse(String response) {
+                showResponse(response);
+            }
+        };
+
+        Location location = new Location();
+        String latitude = edLatitude.getText().toString();
+        String lagitude = edLagitude.getText().toString();
+        if(lagitude.length() == 0 || latitude.length() == 0) {
+            lagitude = "0";
+            latitude = "0";
+        }
+        location.setLat(Double.parseDouble(latitude));
+        location.setLgn(Double.parseDouble(lagitude));
+        String json = new JSONSerializer().exclude("*.class").serialize(
+                location);
+        wst.addNameValuePair("", json);
+
+        wst.execute(new String[]{url});
+
+    }
+
+    public void showResponse(String response) {
+        Toast.makeText(this, response, Toast.LENGTH_SHORT).show();
+    }
+
 
 
     /**
