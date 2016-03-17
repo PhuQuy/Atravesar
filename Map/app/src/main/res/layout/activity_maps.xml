@@ -25,6 +25,7 @@
             android:id="@+id/pick_up"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:onClick="getPickUp"
             android:hint="Pick Up"></EditText>
 
         <EditText
@@ -32,6 +33,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/pick_up"
+            android:onClick="getDropOff"
             android:hint="Drop off"></EditText>
         <RelativeLayout
             android:id="@+id/re"
@@ -52,7 +54,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/total"
-                android:onClick="getNearestDriver"
                 android:layout_centerHorizontal="true"
                 android:text="Book"></Button>
         </RelativeLayout>

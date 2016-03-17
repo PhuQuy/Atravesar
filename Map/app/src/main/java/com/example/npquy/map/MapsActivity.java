@@ -1,5 +1,6 @@
 package com.example.npquy.map;
 
+import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,16 +21,16 @@ import flexjson.JSONSerializer;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private EditText edLongitude;
-    private EditText edLatitude;
+    private EditText pickUp;
+    private EditText dropOff;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        edLongitude = (EditText) findViewById(R.id.pick_up);;
-        edLatitude = (EditText) findViewById(R.id.drop_off);
+        pickUp = (EditText) findViewById(R.id.pick_up);;
+        dropOff = (EditText) findViewById(R.id.drop_off);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -37,7 +38,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
     }
 
-    public void getNearestDriver(View v) {
+/*    public void getNearestDriver(View v) {
 
         String url = WebServiceTaskManager.URL + "NearestDriver";
 
@@ -60,15 +61,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         location.setLgn(Double.parseDouble(longitude));
         String json = new JSONSerializer().exclude("*.class").serialize(
                 location);
+        Log.e("json", json, null);
         wst.addNameValuePair("", json);
 
         wst.execute(new String[]{url});
 
+    }*/
+
+    public void getPickUp (View v) {
+        Intent myIntent=new Intent(MapsActivity.this, GetAddressActivity.class);
+        startActivityForResult(myIntent, 1);
+    }
+
+    public void getDropOff (View v) {
+        Intent myIntent=new Intent(MapsActivity.this, GetAddressActivity.class);
+        startActivityForResult(myIntent, 2);
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 1 && resultCode == RESULT_OK) {
+            if (data.hasExtra("pickUp")) {
+                pickUp.setText(data.getExtras().getString("pickUp"));
+            }
+        }else if (requestCode == 2 && resultCode == RESULT_OK) {
+            if (data.hasExtra("dropOff")) {
+                pickUp.setText(data.getExtras().getString("dropOff"));
+            }
+        }
     }
 
     public void showResponse(String response) {
         Toast.makeText(this, response, Toast.LENGTH_SHORT).show();
-        Log.e("aaaa", response, null);
+        Log.e("response", response, null);
     }
 
 
@@ -85,8 +110,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         GPSTracker mGPS = new GPSTracker(this);
-        if(mGPS.canGetLocation ) {
-            mGPS.getLocation();
+        try {
+            if (mGPS.canGetLocation) {
+                mGPS.getLocation();
+            }
+        }catch (Exception e) {
+            Log.e("Exception", e.getLocalizedMessage(), e);
         }
         mMap = googleMap;
 
@@ -94,5 +123,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng sydney = new LatLng(mGPS.getLatitude(), mGPS.getLongitude());
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 12.0f));
+        findNearestDriver(sydney);
+    }
+
+    private void findNearestDriver(LatLng location) {
+        String url = WebServiceTaskManager.URL + "NearestDriver";
+
+        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "Retrieving the nearest driver ...") {
+
+            @Override
+            public void handleResponse(String response) {
+                showResponse(response);
+            }
+        };
+
+        Location locate = new Location();
+        locate.setLat(location.latitude);
+        locate.setLgn(location.longitude);
+        String json = new JSONSerializer().exclude("*.class").serialize(
+                location);
+        Log.e("json", json, null);
+        wst.addNameValuePair("", json);
+
+        wst.execute(new String[]{url});
     }
 }
