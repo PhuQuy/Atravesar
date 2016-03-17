@@ -86,7 +86,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }else if (requestCode == 2 && resultCode == RESULT_OK) {
             if (data.hasExtra("dropOff")) {
-                pickUp.setText(data.getExtras().getString("dropOff"));
+                dropOff.setText(data.getExtras().getString("dropOff"));
             }
         }
     }
