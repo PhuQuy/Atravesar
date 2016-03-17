@@ -13,6 +13,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
@@ -100,14 +101,14 @@ public abstract class WebServiceTaskManager extends
 
     @SuppressWarnings("deprecation")
     private void showProgressDialog() {
-
         pDlg = new ProgressDialog(mContext);
         pDlg.setMessage(processMessage);
         pDlg.setProgressDrawable(mContext.getWallpaper());
         pDlg.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         pDlg.setCancelable(false);
-        pDlg.show();
-
+        if(processMessage.length() > 0) {
+            pDlg.show();
+        }
     }
 
     @Override

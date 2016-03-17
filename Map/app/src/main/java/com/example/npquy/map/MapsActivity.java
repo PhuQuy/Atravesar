@@ -92,7 +92,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void showResponse(String response) {
-        Toast.makeText(this, response, Toast.LENGTH_SHORT).show();
+      //  Toast.makeText(this, response, Toast.LENGTH_SHORT).show();
         Log.e("response", response, null);
     }
 
