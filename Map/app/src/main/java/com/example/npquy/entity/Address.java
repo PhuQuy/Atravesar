@@ -1,45 +1,47 @@
 package com.example.npquy.entity;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
 /**
  * Created by npquy on 3/17/2016.
  */
-public class Address {
-    private Objects outCode;
-    private String postCode;
-    private String fullAddress;
+public class Address implements Serializable{
+
+    private String Outcode;
+    private String Postcode;
+    private String Fulladdress;
     private String Category;
-    private String icon_Path;
+    private String Icon_Path;
     private Double Latitude;
     private Double Longitude;
 
     public Address() {
     }
 
-    public Objects getOutCode() {
-        return outCode;
+    public String getOutcode() {
+        return Outcode;
     }
 
-    public void setOutCode(Objects outCode) {
-        this.outCode = outCode;
+    public void setOutcode(String outcode) {
+        Outcode = outcode;
     }
 
-    public String getPostCode() {
-        return postCode;
+    public String getPostcode() {
+        return Postcode;
     }
 
-    public void setPostCode(String postCode) {
-        this.postCode = postCode;
+    public void setPostcode(String postcode) {
+        Postcode = postcode;
     }
 
-    public String getFullAddress() {
-        return fullAddress;
+    public String getFulladdress() {
+        return Fulladdress;
     }
 
-    public void setFullAddress(String fullAddress) {
-        this.fullAddress = fullAddress;
+    public void setFulladdress(String fulladdress) {
+        Fulladdress = fulladdress;
     }
 
     public String getCategory() {
@@ -51,11 +53,11 @@ public class Address {
     }
 
     public String getIcon_Path() {
-        return icon_Path;
+        return Icon_Path;
     }
 
     public void setIcon_Path(String icon_Path) {
-        this.icon_Path = icon_Path;
+        Icon_Path = icon_Path;
     }
 
     public Double getLatitude() {
@@ -72,5 +74,18 @@ public class Address {
 
     public void setLongitude(Double longitude) {
         Longitude = longitude;
+    }
+
+    @Override
+    public String toString() {
+        return "Address{" +
+                "Outcode='" + Outcode + '\'' +
+                ", Postcode='" + Postcode + '\'' +
+                ", Fulladdress='" + Fulladdress + '\'' +
+                ", Category='" + Category + '\'' +
+                ", Icon_Path='" + Icon_Path + '\'' +
+                ", Latitude=" + Latitude +
+                ", Longitude=" + Longitude +
+                '}';
     }
 }

@@ -8,7 +8,9 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.npquy.entity.Address;
 import com.example.npquy.entity.Location;
+import com.example.npquy.entity.Quotation;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -38,11 +40,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
     }
 
-/*    public void getNearestDriver(View v) {
+    private void postQuotation(double pickLat, double pickLong, double dropLat, double dropLong) {
 
-        String url = WebServiceTaskManager.URL + "NearestDriver";
+        String url = WebServiceTaskManager.URL + "Quotation";
 
-        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "Retrieving the nearest driver ...") {
+        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
 
             @Override
             public void handleResponse(String response) {
@@ -50,23 +52,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         };
 
-        Location location = new Location();
-        String latitude = edLatitude.getText().toString();
-        String longitude = edLongitude.getText().toString();
-        if(longitude.length() == 0 || latitude.length() == 0) {
-            longitude = "0";
-            latitude = "0";
-        }
-        location.setLat(Double.parseDouble(latitude));
-        location.setLgn(Double.parseDouble(longitude));
+        Quotation quotation = new Quotation();
+        quotation.setCustid(0);
+        quotation.setPickLat(pickLat);
+        quotation.setPickLong(pickLong);
+        quotation.setDoffLat(dropLat);
+        quotation.setDoffLong(dropLong);
+        quotation.setBookingdate("0001-01-01T00:00:00");
+        quotation.setPaq(0);
+        quotation.setBags(0);
+
         String json = new JSONSerializer().exclude("*.class").serialize(
-                location);
+                quotation);
         Log.e("json", json, null);
         wst.addNameValuePair("", json);
 
         wst.execute(new String[]{url});
 
-    }*/
+    }
 
     public void getPickUp (View v) {
         Intent myIntent=new Intent(MapsActivity.this, GetAddressActivity.class);
@@ -80,19 +83,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        double pickLat = 0.0;
+        double pickLong = 0.0;
+        double dropLat = 0.0;
+        double dropLong = 0.0;
         if(requestCode == 1 && resultCode == RESULT_OK) {
             if (data.hasExtra("pickUp")) {
-                pickUp.setText(data.getExtras().getString("pickUp"));
+                Address address = (Address) data.getExtras().get("pickUp");
+                pickUp.setText(address.getFulladdress());
+                pickLat = address.getLatitude();
+                pickLong = address.getLongitude();
             }
         }else if (requestCode == 2 && resultCode == RESULT_OK) {
             if (data.hasExtra("dropOff")) {
-                dropOff.setText(data.getExtras().getString("dropOff"));
+                Address address = (Address) data.getExtras().get("dropOff");
+                dropOff.setText(address.getFulladdress());
+                dropLat = address.getLatitude();
+                dropLong = address.getLongitude();
             }
+        }
+        if(!pickUp.getText().toString().isEmpty() && !dropOff.getText().toString().isEmpty()) {
+            postQuotation(pickLat, pickLong, dropLat, dropLong);
         }
     }
 
     public void showResponse(String response) {
-      //  Toast.makeText(this, response, Toast.LENGTH_SHORT).show();
+     //   Toast.makeText(this, response, Toast.LENGTH_SHORT).show();
         Log.e("response", response, null);
     }
 

@@ -75,47 +75,45 @@ public class GPSTracker implements LocationListener {
                 this.canGetLocation = true;
                 if (isNetworkEnabled) {
                     location = null;
-                    if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        locationManager.requestLocationUpdates(
-                                LocationManager.NETWORK_PROVIDER,
-                                MIN_TIME_BW_UPDATES,
-                                MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                    }
-
-                    Log.d("Network", "Network");
-                    if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        if (locationManager != null) {
-                            location = locationManager
-                                    .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                            if (location != null) {
-                                latitude = location.getLatitude();
-                                longitude = location.getLongitude();
-                            }
-                        }
+                    locationManager.requestLocationUpdates(
+                            LocationManager.NETWORK_PROVIDER,
+                            MIN_TIME_BW_UPDATES,
+                            MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                }
+                Log.d("Network", "Network");
+                if (locationManager != null) {
+                    location = locationManager
+                            .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                    if (location != null) {
+                        latitude = location.getLatitude();
+                        longitude = location.getLongitude();
                     }
                 }
-                // if GPS Enabled get lat/long using GPS Services
-                if (isGPSEnabled) {
-                    location = null;
-                    if (location == null) {
-                        locationManager.requestLocationUpdates(
-                                LocationManager.GPS_PROVIDER,
-                                MIN_TIME_BW_UPDATES,
-                                MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                        Log.d("GPS Enabled", "GPS Enabled");
-                        if (locationManager != null) {
-                            location = locationManager
-                                    .getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                            if (location != null) {
-                                latitude = location.getLatitude();
-                                longitude = location.getLongitude();
-                            }
+            }
+            // if GPS Enabled get lat/long using GPS Services
+            if (isGPSEnabled) {
+                location = null;
+                if (location == null) {
+                    locationManager.requestLocationUpdates(
+                            LocationManager.GPS_PROVIDER,
+                            MIN_TIME_BW_UPDATES,
+                            MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                    Log.d("GPS Enabled", "GPS Enabled");
+                    if (locationManager != null) {
+                        location = locationManager
+                                .getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                        if (location != null) {
+                            latitude = location.getLatitude();
+                            longitude = location.getLongitude();
                         }
                     }
                 }
             }
+        } catch (
+                Exception e
+                )
 
-        } catch (Exception e) {
+        {
             e.printStackTrace();
         }
 
@@ -125,18 +123,16 @@ public class GPSTracker implements LocationListener {
     /**
      * Stop using GPS listener Calling this function will stop using GPS in your
      * app
-     * */
+     */
     public void stopUsingGPS() {
         if (locationManager != null) {
-            if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                locationManager.removeUpdates(GPSTracker.this);
-            }
+            locationManager.removeUpdates(GPSTracker.this);
         }
     }
 
     /**
      * Function to get latitude
-     * */
+     */
     public double getLatitude() {
         if (location != null) {
             latitude = location.getLatitude();
@@ -148,7 +144,7 @@ public class GPSTracker implements LocationListener {
 
     /**
      * Function to get longitude
-     * */
+     */
     public double getLongitude() {
         if (location != null) {
             longitude = location.getLongitude();
@@ -162,7 +158,7 @@ public class GPSTracker implements LocationListener {
      * Function to check GPS/wifi enabled
      *
      * @return boolean
-     * */
+     */
     public boolean canGetLocation() {
         return this.canGetLocation;
     }
@@ -170,7 +166,7 @@ public class GPSTracker implements LocationListener {
     /**
      * Function to show settings alert dialog On pressing Settings button will
      * lauch Settings Options
-     * */
+     */
     public void showSettingsAlert() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
 
