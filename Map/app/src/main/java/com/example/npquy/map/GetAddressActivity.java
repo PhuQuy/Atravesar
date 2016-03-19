@@ -43,7 +43,23 @@ public class GetAddressActivity extends AppCompatActivity {
         lv = (ListView) findViewById(R.id.live_search_view);
 
         inputSearch = (EditText) findViewById(R.id.inputSearch);
+        Address address = new Address();
+        address.setFulladdress("Test 1, ,test 1");
+        address.setLatitude(0.0);
+        address.setLongitude(0.0);
+        addressesData.add(address);
 
+        Address address1 = new Address();
+        address1.setFulladdress("Test 2 , ,test 2");
+        address1.setLatitude(0.0);
+        address1.setLongitude(0.0);
+        addressesData.add(address1);
+
+        Address address2 = new Address();
+        address2.setFulladdress("Test 3 , ,test 3");
+        address2.setLatitude(0.0);
+        address2.setLongitude(0.0);
+        addressesData.add(address2);
         addressArrayAdapter = new AddressAdapter(this,
                 R.layout.list_item,
                 addressesData);
@@ -110,6 +126,7 @@ public class GetAddressActivity extends AppCompatActivity {
                             .use(null, ArrayList.class).use("values", Address.class).deserialize(addressArray.toString());
                     Log.e("message", message.toString(), null);
                     Log.e("code", code.toString(), null);
+                    addressesData.clear();
                     addressesData.addAll(addresses);
                     addressArrayAdapter.notifyDataSetChanged();
                     lv.setAdapter(addressArrayAdapter);

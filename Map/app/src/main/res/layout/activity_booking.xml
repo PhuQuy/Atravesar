@@ -1,0 +1,161 @@
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.example.npquy.map.BookingActivity">
+
+    <EditText
+        android:id="@+id/pick_up_booking"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:hint="Pick Up"
+        android:onClick="getPickUp"></EditText>
+
+    <EditText
+        android:id="@+id/drop_off_booking"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/pick_up_booking"
+        android:clickable="true"
+        android:hint="Drop off"
+        android:onClick="getDropOff"></EditText>
+
+    <EditText
+        android:id="@+id/date_time"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/drop_off_booking"
+        android:clickable="true"
+        android:hint="Date time"></EditText>
+
+    <LinearLayout
+        android:id="@+id/first_line"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/date_time"
+        android:orientation="horizontal"
+        android:weightSum="1.0">
+
+        <Switch
+            android:id="@+id/swich1"
+            android:layout_width="0dip"
+            android:layout_weight="0.5"
+            android:layout_height="wrap_content"
+            android:text="Wait and Return"></Switch>
+
+        <Switch
+            android:id="@+id/switch2"
+            android:layout_width="0dip"
+            android:layout_weight="0.5"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/total"
+            android:text="Child seat"></Switch>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/second_line"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/first_line"
+        android:orientation="horizontal"
+        android:weightSum="1.0">
+
+        <Switch
+            android:id="@+id/swich3"
+            android:layout_width="0dip"
+            android:layout_weight="0.5"
+            android:layout_height="wrap_content"
+            android:text="Pet friendly"></Switch>
+
+        <Switch
+            android:id="@+id/switch4"
+            android:layout_width="0dip"
+            android:layout_weight="0.5"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/total"
+            android:text="Eco friendly"></Switch>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/third_line"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/second_line"
+        android:orientation="horizontal"
+        android:weightSum="1.0">
+
+        <TextView
+            android:id="@+id/pay_by"
+            android:layout_width="0dip"
+            android:layout_weight="0.2"
+            android:layout_height="wrap_content"
+            android:text="Pay by"></TextView>
+
+        <EditText
+            android:id="@+id/pay_by_edit"
+            android:layout_width="0dip"
+            android:layout_weight="0.8"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/pay_by"
+            android:text="Cash"></EditText>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/fourth_line"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/third_line"
+        android:orientation="horizontal"
+        android:weightSum="1.0">
+
+        <TextView
+            android:id="@+id/note"
+            android:layout_width="0dip"
+            android:layout_weight="0.2"
+            android:layout_height="wrap_content"
+            android:text="Notes"></TextView>
+
+        <EditText
+            android:id="@+id/content_note"
+            android:layout_width="0dip"
+            android:layout_weight="0.8"
+            android:lines="8"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/note"
+            android:maxLines="10"
+            android:hint="Please write any notes"></EditText>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/end_line"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_height="wrap_content"
+        android:weightSum="1.0">
+
+        <Button
+            android:id="@+id/total_booking"
+            android:layout_width="0dip"
+            android:layout_weight="0.5"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:text="Total \n $30.00"></Button>
+
+        <Button
+            android:id="@+id/book_booking"
+            android:layout_width="0dip"
+            android:layout_weight="0.5"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/total"
+            android:textAlignment="center"
+            android:onClick="booking"
+            android:text="Confirm \n Booking"></Button>
+    </LinearLayout>
+
+</RelativeLayout>

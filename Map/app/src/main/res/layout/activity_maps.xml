@@ -37,27 +37,31 @@
             android:clickable="true"
             android:onClick="getDropOff"
             android:hint="Drop off"></EditText>
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/re"
             android:orientation="horizontal"
             android:layout_width="fill_parent"
             android:layout_below="@+id/drop_off"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:weightSum="1.0">
 
             <Button
                 android:id="@+id/total"
-                android:layout_width="wrap_content"
+                android:layout_width="0dip"
+                android:layout_weight="0.5"
                 android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
+                android:textAlignment="center"
                 android:text="Total"></Button>
 
             <Button
                 android:id="@+id/book"
-                android:layout_width="wrap_content"
+                android:layout_width="0dip"
+                android:layout_weight="0.5"
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/total"
-                android:layout_centerHorizontal="true"
+                android:textAlignment="center"
+                android:onClick="booking"
                 android:text="Book"></Button>
-        </RelativeLayout>
+        </LinearLayout>
     </RelativeLayout>
 </RelativeLayout>

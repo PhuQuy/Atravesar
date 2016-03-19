@@ -1,10 +1,13 @@
 package com.example.npquy.map;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -18,6 +21,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.Calendar;
+
 import flexjson.JSONSerializer;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -25,7 +30,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private EditText pickUp;
     private EditText dropOff;
-
+    private Button book;
+    private Button total;
+    private Boolean isCheck = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +40,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
         pickUp = (EditText) findViewById(R.id.pick_up);;
         dropOff = (EditText) findViewById(R.id.drop_off);
+        book = (Button) findViewById(R.id.book);
+        total = (Button) findViewById(R.id.total);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -104,7 +113,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         if(!pickUp.getText().toString().isEmpty() && !dropOff.getText().toString().isEmpty()) {
             postQuotation(pickLat, pickLong, dropLat, dropLong);
+            book.setText("Continue \n Booking");
+            total.setText("Total \n 30$");
+            isCheck = true;
         }
+    }
+
+    public void booking(View v) {
+        Intent myIntent=new Intent(MapsActivity.this, BookingActivity.class);
+        startActivity(myIntent);
     }
 
     public void showResponse(String response) {
