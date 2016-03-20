@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.npquy.map">
+    package="com.example.npquy.activity">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -39,7 +39,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".MapsActivity"
+            android:name="com.example.npquy.activity.MapsActivity"
             android:label="@string/title_activity_maps"
             android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter>
@@ -49,9 +49,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".GetAddressActivity"
+            android:name="com.example.npquy.activity.GetAddressActivity"
             android:windowSoftInputMode="stateHidden"></activity>
-        <activity android:name=".BookingActivity"></activity>
+        <activity android:name="com.example.npquy.activity.BookingActivity"></activity>
     </application>
 
 </manifest>

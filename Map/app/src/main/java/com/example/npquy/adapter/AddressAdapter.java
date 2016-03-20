@@ -1,4 +1,4 @@
-package com.example.npquy.map;
+package com.example.npquy.adapter;
 
 import android.app.Activity;
 import android.content.Context;
@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.npquy.activity.R;
 import com.example.npquy.entity.Address;
 
 import java.util.ArrayList;

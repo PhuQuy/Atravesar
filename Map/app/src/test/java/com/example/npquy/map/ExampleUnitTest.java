@@ -1,4 +1,4 @@
-package com.example.npquy.map;
+package com.example.npquy.activity;
 
 import org.junit.Test;
 

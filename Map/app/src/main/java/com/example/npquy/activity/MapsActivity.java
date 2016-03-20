@@ -1,27 +1,24 @@
-package com.example.npquy.map;
+package com.example.npquy.activity;
 
-import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.example.npquy.entity.Address;
 import com.example.npquy.entity.Location;
-import com.example.npquy.entity.Quotation;
+import com.example.npquy.entity.RetrieveQuote;
+import com.example.npquy.service.GPSTracker;
+import com.example.npquy.service.WebServiceTaskManager;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import java.util.Calendar;
 
 import flexjson.JSONSerializer;
 
@@ -33,6 +30,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Button book;
     private Button total;
     private Boolean isCheck = false;
+    private Address pickUpAddress;
+    private Address dropOffAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +60,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         };
 
-        Quotation quotation = new Quotation();
+        RetrieveQuote quotation = new RetrieveQuote();
         quotation.setCustid(0);
         quotation.setPickLat(pickLat);
         quotation.setPickLong(pickLong);
@@ -99,6 +98,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if(requestCode == 1 && resultCode == RESULT_OK) {
             if (data.hasExtra("pickUp")) {
                 Address address = (Address) data.getExtras().get("pickUp");
+                pickUpAddress = address;
                 pickUp.setText(address.getFulladdress());
                 pickLat = address.getLatitude();
                 pickLong = address.getLongitude();
@@ -106,6 +106,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }else if (requestCode == 2 && resultCode == RESULT_OK) {
             if (data.hasExtra("dropOff")) {
                 Address address = (Address) data.getExtras().get("dropOff");
+                dropOffAddress = address;
                 dropOff.setText(address.getFulladdress());
                 dropLat = address.getLatitude();
                 dropLong = address.getLongitude();
@@ -120,8 +121,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void booking(View v) {
-        Intent myIntent=new Intent(MapsActivity.this, BookingActivity.class);
-        startActivity(myIntent);
+        if(isCheck) {
+            Intent myIntent = new Intent(MapsActivity.this, BookingActivity.class);
+            Bundle bundle = new Bundle();
+            String pickUpJson = new JSONSerializer().exclude("*.class").serialize(
+                    pickUpAddress);
+            String dropOffJson = new JSONSerializer().exclude("*.class").serialize(
+                    dropOffAddress);
+            bundle.putString("pickUpAddress", pickUpJson);
+            bundle.putString("dropOffAddress", dropOffJson);
+            myIntent.putExtra("data", bundle);
+            startActivity(myIntent);
+        }
     }
 
     public void showResponse(String response) {
@@ -144,7 +155,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         GPSTracker mGPS = new GPSTracker(this);
         try {
-            if (mGPS.canGetLocation) {
+            if (mGPS.isCanGetLocation()) {
                 mGPS.getLocation();
             }
         }catch (Exception e) {

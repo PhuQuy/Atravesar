@@ -1,10 +1,11 @@
-package com.example.npquy.map;
+package com.example.npquy.service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.logging.Handler;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -13,17 +14,21 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.example.npquy.activity.MapsActivity;
 
 public abstract class WebServiceTaskManager extends
         AsyncTask<String, Integer, String> {
@@ -40,7 +45,7 @@ public abstract class WebServiceTaskManager extends
     private static final int SOCKET_TIMEOUT = 10000;
 
     private int taskType = GET_TASK;
-    private Context mContext = null;
+    private Activity mContext = null;
     private String processMessage = "Processing...";
 
     private ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
@@ -56,7 +61,7 @@ public abstract class WebServiceTaskManager extends
         this.response = response;
     }
 
-    public WebServiceTaskManager(int taskType, Context mContext,
+    public WebServiceTaskManager(int taskType, Activity mContext,
                                  String processMessage) {
 
         this.taskType = taskType;
@@ -64,7 +69,7 @@ public abstract class WebServiceTaskManager extends
         this.processMessage = processMessage;
     }
 
-    public WebServiceTaskManager(int taskType, Context mContext) {
+    public WebServiceTaskManager(int taskType, Activity mContext) {
         this.taskType = taskType;
         this.mContext = mContext;
     }
@@ -160,10 +165,14 @@ public abstract class WebServiceTaskManager extends
                     response = httpclient.execute(httpget);
                     break;
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
+            mContext.runOnUiThread(new Runnable() {
+                public void run() {
+                    Toast.makeText(mContext, "Connection to server refused! Please check your connection!", Toast.LENGTH_SHORT).show();
 
+                }});
             Log.e(TAG, e.getLocalizedMessage(), e);
-
         }
 
         return response;

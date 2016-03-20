@@ -1,4 +1,4 @@
-package com.example.npquy.map;
+package com.example.npquy.activity;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -8,19 +8,18 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ExpandableListView;
 import android.widget.ListView;
 
+import com.example.npquy.adapter.AddressAdapter;
 import com.example.npquy.entity.Address;
+import com.example.npquy.service.WebServiceTaskManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import flexjson.JSONDeserializer;

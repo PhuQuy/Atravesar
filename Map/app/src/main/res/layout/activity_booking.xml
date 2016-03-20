@@ -7,15 +7,14 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.npquy.map.BookingActivity">
+    tools:context="com.example.npquy.activity.BookingActivity">
 
     <EditText
         android:id="@+id/pick_up_booking"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
-        android:hint="Pick Up"
-        android:onClick="getPickUp"></EditText>
+        android:hint="Pick Up"></EditText>
 
     <EditText
         android:id="@+id/drop_off_booking"
@@ -23,8 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/pick_up_booking"
         android:clickable="true"
-        android:hint="Drop off"
-        android:onClick="getDropOff"></EditText>
+        android:hint="Drop off"></EditText>
 
     <EditText
         android:id="@+id/date_time"
@@ -43,14 +41,14 @@
         android:weightSum="1.0">
 
         <Switch
-            android:id="@+id/swich1"
+            android:id="@+id/w8"
             android:layout_width="0dip"
             android:layout_weight="0.5"
             android:layout_height="wrap_content"
             android:text="Wait and Return"></Switch>
 
         <Switch
-            android:id="@+id/switch2"
+            android:id="@+id/child_seat"
             android:layout_width="0dip"
             android:layout_weight="0.5"
             android:layout_height="wrap_content"
@@ -67,14 +65,14 @@
         android:weightSum="1.0">
 
         <Switch
-            android:id="@+id/swich3"
+            android:id="@+id/pet"
             android:layout_width="0dip"
             android:layout_weight="0.5"
             android:layout_height="wrap_content"
             android:text="Pet friendly"></Switch>
 
         <Switch
-            android:id="@+id/switch4"
+            android:id="@+id/eco"
             android:layout_width="0dip"
             android:layout_weight="0.5"
             android:layout_height="wrap_content"
@@ -124,10 +122,10 @@
             android:id="@+id/content_note"
             android:layout_width="0dip"
             android:layout_weight="0.8"
-            android:lines="8"
+            android:lines="7"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/note"
-            android:maxLines="10"
+            android:maxLines="8"
             android:hint="Please write any notes"></EditText>
     </LinearLayout>
 
@@ -154,7 +152,6 @@
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/total"
             android:textAlignment="center"
-            android:onClick="booking"
             android:text="Confirm \n Booking"></Button>
     </LinearLayout>
 
