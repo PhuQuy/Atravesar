@@ -145,6 +145,8 @@ public class BookingActivity extends AppCompatActivity implements
             startActivityForResult(myIntent, 2);
         }else if (v == confirmBooking) {
             postQuotation(pickUpAddress, dropOffAddress);
+            Intent myIntent=new Intent(BookingActivity.this, LoginActivity.class);
+            startActivity(myIntent);
         }
     }
 
@@ -166,7 +168,11 @@ public class BookingActivity extends AppCompatActivity implements
         quotation.setPickLong(pickUpAddress.getLongitude());
         quotation.setDoffLat(dropOffAddress.getLatitude());
         quotation.setDoffLong(dropOffAddress.getLongitude());
-        quotation.setBookingdate(dateBook.toLocaleString());
+        if(dateBook != null) {
+            quotation.setBookingdate(dateBook.toLocaleString());
+        }else {
+            quotation.setBookingdate("0001-01-01T00:00:00");
+        }
         quotation.setPaq(0);
         quotation.setBags(0);
         quotation.setNote(note.getText().toString());

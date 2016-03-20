@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.npquy.entity.Address;
 import com.example.npquy.entity.Location;
@@ -163,11 +164,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(mGPS.getLatitude(), mGPS.getLongitude());
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 12.0f));
-        findNearestDriver(sydney);
+        double latitude, longitude;
+
+        latitude = mGPS.getLatitude();
+        longitude = mGPS.getLongitude();
+
+        if(latitude != 0 && longitude != 0) {
+            // Add a marker in Sydney and move the camera
+            LatLng sydney = new LatLng(mGPS.getLatitude(), mGPS.getLongitude());
+            mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 12.0f));
+            findNearestDriver(sydney);
+        }else {
+            Toast.makeText(this,"Can't find your location! Please check your GPS!", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void findNearestDriver(LatLng location) {

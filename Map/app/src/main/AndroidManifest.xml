@@ -14,6 +14,10 @@
         android:name="android.hardware.location.gps"
         android:required="true" />
 
+    <!-- To auto-complete the email text field in the login form with the user's emails -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.READ_PROFILE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -39,7 +43,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name="com.example.npquy.activity.MapsActivity"
+            android:name=".MapsActivity"
             android:label="@string/title_activity_maps"
             android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter>
@@ -49,9 +53,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.example.npquy.activity.GetAddressActivity"
-            android:windowSoftInputMode="stateHidden"></activity>
-        <activity android:name="com.example.npquy.activity.BookingActivity"></activity>
+            android:name=".GetAddressActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity android:name=".BookingActivity" />
+        <activity
+            android:name=".LoginActivity"
+            android:label="@string/title_activity_login"></activity>
     </application>
 
 </manifest>

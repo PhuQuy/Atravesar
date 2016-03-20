@@ -47,12 +47,25 @@ public class AddressAdapter extends ArrayAdapter<Address>{
                     convertView.findViewById(R.id.address);
 
             final Address address = myArray.get(position);
-            String[] data = address.getFulladdress().split(",");
-            roadName.setText(data[0]);
-            try {
-                addressName.setText(data[2]);
-            }catch (Exception e) {
-                addressName.setText(data[1]);
+            if(address != null) {
+                String fullAddress = address.getFulladdress();
+                if (!fullAddress.isEmpty()) {
+                    String[] data = fullAddress.split(",");
+                    roadName.setText(data[0]);
+                    try {
+                        addressName.setText(data[2]);
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        if (data.length == 1) {
+                            addressName.setText("");
+                        } else {
+                            addressName.setText(data[1]);
+                        }
+                    } catch (Exception e) {
+                        addressName.setText("");
+                    }
+                } else {
+                    roadName.setText("Unknown");
+                }
             }
             //lấy ImageView ra để thiết lập hình ảnh cho đúng
             final ImageView imgitem =(ImageView)
