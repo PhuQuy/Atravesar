@@ -67,15 +67,11 @@ public class AddressAdapter extends ArrayAdapter<Address>{
                     roadName.setText("Unknown");
                 }
             }
-            //lấy ImageView ra để thiết lập hình ảnh cho đúng
+
             final ImageView imgitem =(ImageView)
                     convertView.findViewById(R.id.imgitem);
         }
-        //Vì View là Object là dạng tham chiếu đối tượng, nên
-        //mọi sự thay đổi của các object bên trong convertView
-        //thì nó cũng biết sự thay đổi đó
-        return convertView;//trả về View này, tức là trả luôn
-        //về các thông số mới mà ta vừa thay đổi
+        return convertView;
     }
 
     public AddressAdapter(Context context, int resource, int textViewResourceId) {

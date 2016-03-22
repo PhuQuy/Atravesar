@@ -3,7 +3,7 @@ package com.example.npquy.activity;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.content.Intent;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
@@ -13,7 +13,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 
-import android.provider.Settings.Secure;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -42,7 +41,7 @@ import flexjson.JSONSerializer;
 /**
  * A login screen that offers login via email/password.
  */
-public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
+public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
     /**
      * A dummy authentication store containing known user names and passwords.
@@ -51,8 +50,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private static final String[] DUMMY_CREDENTIALS = new String[]{
             "foo@example.com:hello", "bar@example.com:world"
     };
-
-    private UserDb userDb;
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -60,24 +57,22 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     // UI references.
     private AutoCompleteTextView mEmailView;
-    private EditText phoneNumber;
-    private TextView createAccount;
+    private EditText mPhoneNumber;
+    private EditText mName;
     private View mProgressView;
     private View mLoginFormView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-
-        userDb = new UserDb(this);
+        setContentView(R.layout.activity_sign_up);
         // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mEmailView = (AutoCompleteTextView) findViewById(R.id.email_sign_up);
         populateAutoComplete();
 
-        phoneNumber = (EditText) findViewById(R.id.phone_number);
-        createAccount = (TextView) findViewById(R.id.create_account);
-        phoneNumber.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        mPhoneNumber = (EditText) findViewById(R.id.phone_number_sign_up);
+        mName = (EditText) findViewById(R.id.name);
+        mPhoneNumber.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
                 if (id == R.id.login || id == EditorInfo.IME_NULL) {
@@ -85,13 +80,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     return true;
                 }
                 return false;
-            }
-        });
-        createAccount.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent myIntent=new Intent(LoginActivity.this, SignUpActivity.class);
-                startActivity(myIntent);
             }
         });
 
@@ -124,19 +112,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         // Reset errors.
         mEmailView.setError(null);
-        phoneNumber.setError(null);
+        mPhoneNumber.setError(null);
 
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
-        String password = phoneNumber.getText().toString();
+        String phoneNumber = mPhoneNumber.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            phoneNumber.setError(getString(R.string.phone_number_invalid));
-            focusView = phoneNumber;
+        if (!TextUtils.isEmpty(phoneNumber) && !isPasswordValid(phoneNumber)) {
+            mPhoneNumber.setError(getString(R.string.error_invalid_password));
+            focusView = mPhoneNumber;
             cancel = true;
         }
 
@@ -159,17 +147,18 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
+            mAuthTask = new UserLoginTask(email, phoneNumber);
             mAuthTask.execute((Void) null);
         }
+
         User user = new User();
-        user.setEmail(mEmailView.getText().toString());
-        user.setMobile(phoneNumber.getText().toString());
-        String android_id =Secure.getString(this.getContentResolver(),
-                Secure.ANDROID_ID);
+        user.setEmail(email);
+        user.setName(mName.getText().toString() );
+        user.setMobile(phoneNumber);
+        String android_id = Settings.Secure.getString(this.getContentResolver(),
+                Settings.Secure.ANDROID_ID);
         user.setDeviceId(android_id);
-        login(user);
-        userDb.login(user);
+        signUp(user);
     }
 
     private boolean isEmailValid(String email) {
@@ -182,9 +171,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         return password.length() > 4;
     }
 
-    private void login(User user) {
+    private void signUp(User user) {
 
-        String url = WebServiceTaskManager.URL + "SignIn";
+        String url = WebServiceTaskManager.URL + "SignUp";
 
         WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
 
@@ -194,7 +183,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         };
 
-        String json = new JSONSerializer().exclude("name","*.class").serialize(
+        String json = new JSONSerializer().exclude("*.class").serialize(
                 user);
         Log.e("json", json, null);
         wst.addNameValuePair("", json);
@@ -276,7 +265,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
         //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
         ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(LoginActivity.this,
+                new ArrayAdapter<>(SignUpActivity.this,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
         mEmailView.setAdapter(adapter);
@@ -338,8 +327,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             if (success) {
                 finish();
             } else {
-                phoneNumber.setError(getString(R.string.error_incorrect_phone_number));
-                phoneNumber.requestFocus();
+                mPhoneNumber.setError(getString(R.string.error_incorrect_password));
+                mPhoneNumber.requestFocus();
             }
         }
 

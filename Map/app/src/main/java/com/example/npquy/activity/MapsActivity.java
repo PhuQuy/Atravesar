@@ -1,10 +1,14 @@
 package com.example.npquy.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -40,8 +44,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
         pickUp = (EditText) findViewById(R.id.pick_up);;
         dropOff = (EditText) findViewById(R.id.drop_off);
+        pickUp.setInputType(InputType.TYPE_NULL);
+        dropOff.setInputType(InputType.TYPE_NULL);
         book = (Button) findViewById(R.id.book);
         total = (Button) findViewById(R.id.total);
+
+        dropOff.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickLocation(2);
+            }
+        });
+        pickUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickLocation(1);
+            }
+        });
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -80,14 +99,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    public void getPickUp (View v) {
-        Intent myIntent=new Intent(MapsActivity.this, GetAddressActivity.class);
-        startActivityForResult(myIntent, 1);
+    public static void hideSoftKeyboard(Activity activity) {
+        InputMethodManager inputMethodManager = (InputMethodManager)  activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
     }
 
-    public void getDropOff (View v) {
+    public void pickLocation (int type) {
+     //   hideSoftKeyboard(MapsActivity.this);
         Intent myIntent=new Intent(MapsActivity.this, GetAddressActivity.class);
-        startActivityForResult(myIntent, 2);
+        startActivityForResult(myIntent, type);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

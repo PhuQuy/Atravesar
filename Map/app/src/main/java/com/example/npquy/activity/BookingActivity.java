@@ -5,6 +5,7 @@ import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -14,8 +15,10 @@ import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TimePicker;
 
+import com.example.npquy.database.UserDb;
 import com.example.npquy.entity.Address;
 import com.example.npquy.entity.RetrieveQuote;
+import com.example.npquy.entity.User;
 import com.example.npquy.service.WebServiceTaskManager;
 
 import java.util.Calendar;
@@ -47,12 +50,14 @@ public class BookingActivity extends AppCompatActivity implements
     private Boolean isChildSeat;
     private Boolean isPet;
     private Boolean isEco;
+    private UserDb userDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_booking);
         dateTime = (EditText) findViewById(R.id.date_time);
+        dateTime.setInputType(InputType.TYPE_NULL);
         pickUp = (EditText) findViewById(R.id.pick_up_booking);
         dropOff = (EditText) findViewById(R.id.drop_off_booking);
         confirmBooking = (Button) findViewById(R.id.book_booking);
@@ -61,6 +66,8 @@ public class BookingActivity extends AppCompatActivity implements
         pet = (Switch) findViewById(R.id.pet);
         eco = (Switch) findViewById(R.id.eco);
         note = (EditText) findViewById(R.id.content_note);
+
+        userDb = new UserDb(this);
 
         Intent callerIntent = getIntent();
         Bundle packageFromCaller=
@@ -145,8 +152,14 @@ public class BookingActivity extends AppCompatActivity implements
             startActivityForResult(myIntent, 2);
         }else if (v == confirmBooking) {
             postQuotation(pickUpAddress, dropOffAddress);
-            Intent myIntent=new Intent(BookingActivity.this, LoginActivity.class);
-            startActivity(myIntent);
+            User user = userDb.getCurrentUser();
+            if(user == null) {
+                Intent myIntent = new Intent(BookingActivity.this, LoginActivity.class);
+                startActivity(myIntent);
+            }else {
+                Intent myIntent = new Intent(BookingActivity.this, PaymentActivity.class);
+                startActivity(myIntent);
+            }
         }
     }
 
