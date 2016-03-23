@@ -68,6 +68,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
     }
 
+    /**
+     *
+     * @param pickLat
+     * @param pickLong
+     * @param dropLat
+     * @param dropLong
+     */
     private void postQuotation(double pickLat, double pickLong, double dropLat, double dropLong) {
 
         String url = WebServiceTaskManager.URL + "Quotation";
