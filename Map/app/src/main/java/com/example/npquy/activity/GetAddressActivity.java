@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -46,7 +48,7 @@ public class GetAddressActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_get_address);
-
+        getSupportActionBar().setHomeButtonEnabled(true);
         lv = (ListView) findViewById(R.id.live_search_view);
        // getDatabase();
         addressDb = new AddressDb(this);
@@ -94,6 +96,17 @@ public class GetAddressActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // app icon in action bar clicked; goto parent activity.
+                this.finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     private void findSearchAddress(String text) {
         String url = WebServiceTaskManager.URL + "SearchAddress";

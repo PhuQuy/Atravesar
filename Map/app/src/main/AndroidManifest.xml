@@ -47,15 +47,21 @@
         </activity>
         <activity
             android:name=".GetAddressActivity"
-            android:label="@string/title_activity_get_address" />
-        <activity android:name=".BookingActivity" />
+            android:parentActivityName=".MapsActivity"
+            android:label="@string/title_activity_get_address" >
+            </activity>
+        <activity android:name=".BookingActivity"
+            android:parentActivityName=".MapsActivity"/>
         <activity
             android:name=".LoginActivity"
+            android:parentActivityName=".BookingActivity"
             android:label="@string/title_activity_login" />
         <activity
             android:name=".SignUpActivity"
+            android:parentActivityName=".LoginActivity"
             android:label="@string/title_activity_sign_up" />
-        <activity android:name=".PaymentActivity"></activity>
+        <activity android:name=".PaymentActivity"
+            android:parentActivityName=".BookingActivity"></activity>
     </application>
 
 </manifest>

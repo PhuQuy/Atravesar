@@ -1,18 +1,24 @@
 package com.example.npquy.activity;
 
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.example.npquy.database.UserDb;
@@ -40,6 +46,12 @@ public class BookingActivity extends AppCompatActivity implements
     private Switch pet;
     private Switch eco;
     private EditText note;
+    private AutoCompleteTextView mEmailView;
+    private EditText phoneNumber;
+    private EditText mPhoneNumber;
+
+    private AutoCompleteTextView signUpEmail;
+    private EditText name;
 
     private Address pickUpAddress;
     private Address dropOffAddress;
@@ -110,6 +122,18 @@ public class BookingActivity extends AppCompatActivity implements
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // app icon in action bar clicked; goto parent activity.
+                this.finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     public void onClick(View v) {
         final Calendar c = Calendar.getInstance();
         mYear = c.get(Calendar.YEAR);
@@ -154,13 +178,161 @@ public class BookingActivity extends AppCompatActivity implements
             postQuotation(pickUpAddress, dropOffAddress);
             User user = userDb.getCurrentUser();
             if(user == null) {
-                Intent myIntent = new Intent(BookingActivity.this, LoginActivity.class);
-                startActivity(myIntent);
+                openDialogSignIn(this);
             }else {
-                Intent myIntent = new Intent(BookingActivity.this, PaymentActivity.class);
-                startActivity(myIntent);
+               /* Intent myIntent = new Intent(BookingActivity.this, PaymentActivity.class);
+                startActivity(myIntent);*/
+                openDialogPayment(this);
             }
         }
+    }
+
+    private void openDialogSignIn(Context context) {
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.activity_login);
+        dialog.setTitle("Login");
+
+        TextView dialogButton = (TextView) dialog.findViewById(R.id.close_dialog);
+        dialogButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        TextView createAccount = (TextView) dialog.findViewById(R.id.create_account);
+        createAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                openDialogSignUp(BookingActivity.this);
+            }
+        });
+
+        Button mEmailSignInButton = (Button) dialog.findViewById(R.id.email_sign_in_button);
+        mEmailView = (AutoCompleteTextView) dialog.findViewById(R.id.email);
+
+        phoneNumber = (EditText) dialog.findViewById(R.id.phone_number);
+        mEmailSignInButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                User user = new User();
+                user.setEmail(mEmailView.getText().toString());
+                user.setMobile(phoneNumber.getText().toString());
+                String android_id = Settings.Secure.getString(BookingActivity.this.getContentResolver(),
+                        Settings.Secure.ANDROID_ID);
+                user.setDeviceId(android_id);
+                login(user);
+                userDb.login(user);
+
+                dialog.dismiss();
+                openDialogPayment(BookingActivity.this);
+            }
+        });
+
+        dialog.show();
+    }
+
+    private void login(User user) {
+
+        String url = WebServiceTaskManager.URL + "SignIn";
+
+        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
+
+            @Override
+            public void handleResponse(String response) {
+                Log.e("response", response, null);
+            }
+        };
+
+        String json = new JSONSerializer().exclude("name","*.class").serialize(
+                user);
+        Log.e("json", json, null);
+        wst.addNameValuePair("", json);
+
+        wst.execute(new String[]{url});
+
+    }
+
+    private void openDialogSignUp(Context context) {
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.activity_sign_up);
+        dialog.setTitle("Login");
+
+        TextView dialogButton = (TextView) dialog.findViewById(R.id.close_dialog_sign_up);
+        dialogButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        TextView signIn = (TextView) dialog.findViewById(R.id.login_from_sign_in);
+        signIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                openDialogSignIn(BookingActivity.this);
+            }
+        });
+
+        Button signUpButton = (Button) dialog.findViewById(R.id.sign_up_button);
+        signUpEmail = (AutoCompleteTextView) dialog.findViewById(R.id.email_sign_up);
+        name = (EditText) dialog.findViewById(R.id.name);
+        mPhoneNumber = (EditText) dialog.findViewById(R.id.phone_number_sign_up);
+        signUpButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                User user = new User();
+                user.setEmail(signUpEmail.getText().toString());
+                user.setName(name.getText().toString());
+                user.setMobile(mPhoneNumber.getText().toString());
+                String android_id = Settings.Secure.getString(BookingActivity.this.getContentResolver(),
+                        Settings.Secure.ANDROID_ID);
+                user.setDeviceId(android_id);
+                signUp(user);
+
+                dialog.dismiss();
+                openDialogSignIn(BookingActivity.this);
+            }
+        });
+
+        dialog.show();
+    }
+
+    private void openDialogPayment(Context context) {
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.activity_payment);
+        TextView dialogButton = (TextView) dialog.findViewById(R.id.close_dialog_payment);
+        dialogButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+    }
+
+    private void signUp(User user) {
+
+        String url = WebServiceTaskManager.URL + "SignUp";
+
+        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
+
+            @Override
+            public void handleResponse(String response) {
+                Log.e("response", response, null);
+            }
+        };
+
+        String json = new JSONSerializer().exclude("*.class").serialize(
+                user);
+        Log.e("json", json, null);
+        wst.addNameValuePair("", json);
+
+        wst.execute(new String[]{url});
+
     }
 
     private void postQuotation(Address pickUpAddress, Address dropOffAddress) {
