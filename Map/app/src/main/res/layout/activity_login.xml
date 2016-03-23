@@ -19,14 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:visibility="gone" />
-    <TextView
-        android:id="@+id/close_dialog"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|right"
-        android:clickable="true"
-        android:textSize="30dp"
-        android:text="ˣ" />
+
     <ImageView
         android:id="@+id/imageView_close"
         android:layout_width="wrap_content"

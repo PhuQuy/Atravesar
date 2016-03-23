@@ -12,11 +12,13 @@ import android.text.InputType;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -189,10 +191,17 @@ public class BookingActivity extends AppCompatActivity implements
 
     private void openDialogSignIn(Context context) {
         final Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         dialog.setContentView(R.layout.activity_login);
-        dialog.setTitle("Login");
 
-        TextView dialogButton = (TextView) dialog.findViewById(R.id.close_dialog);
+        dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
+       // dialog.setTitle("Sign In");
+        dialog.setCanceledOnTouchOutside(true);
+
+        TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
+        title.setText("Sign In");
+
+        ImageView dialogButton = (ImageView) dialog.findViewById(R.id.close_img);
         dialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -256,10 +265,16 @@ public class BookingActivity extends AppCompatActivity implements
 
     private void openDialogSignUp(Context context) {
         final Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         dialog.setContentView(R.layout.activity_sign_up);
-        dialog.setTitle("Login");
 
-        TextView dialogButton = (TextView) dialog.findViewById(R.id.close_dialog_sign_up);
+        dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
+        dialog.setCanceledOnTouchOutside(true);
+
+        TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
+        title.setText("Sign Up");
+
+        ImageView dialogButton = (ImageView) dialog.findViewById(R.id.close_img);
         dialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
