@@ -19,30 +19,6 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:visibility="gone" />
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="100dp"
-        android:layout_gravity="center"
-        android:weightSum="1.0"
-        android:orientation="horizontal">
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Payment method"
-            android:textSize="30dp"
-            android:layout_weight="0.9"
-            android:textAlignment="center"/>
-        <TextView
-            android:id="@+id/close_dialog_payment"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|right"
-            android:layout_weight="0.1"
-            android:clickable="true"
-            android:textSize="30dp"
-            android:text="X" />
-    </LinearLayout>
-
 
     <ScrollView
         android:id="@+id/login_form"

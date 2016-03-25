@@ -25,6 +25,7 @@ import android.widget.TimePicker;
 
 import com.example.npquy.database.UserDb;
 import com.example.npquy.entity.Address;
+import com.example.npquy.entity.ElectronicPayment;
 import com.example.npquy.entity.RetrieveQuote;
 import com.example.npquy.entity.User;
 import com.example.npquy.service.WebServiceTaskManager;
@@ -54,6 +55,7 @@ public class BookingActivity extends AppCompatActivity implements
 
     private AutoCompleteTextView signUpEmail;
     private EditText name;
+    private EditText pay_by;
 
     private Address pickUpAddress;
     private Address dropOffAddress;
@@ -80,6 +82,8 @@ public class BookingActivity extends AppCompatActivity implements
         pet = (Switch) findViewById(R.id.pet);
         eco = (Switch) findViewById(R.id.eco);
         note = (EditText) findViewById(R.id.content_note);
+        pay_by = (EditText) findViewById(R.id.pay_by_edit);
+        pay_by.setInputType(InputType.TYPE_NULL);
 
         userDb = new UserDb(this);
 
@@ -100,6 +104,7 @@ public class BookingActivity extends AppCompatActivity implements
         pickUp.setOnClickListener(this);
         dropOff.setOnClickListener(this);
         confirmBooking.setOnClickListener(this);
+        pay_by.setOnClickListener(this);
 
         waitAndReturn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -182,10 +187,12 @@ public class BookingActivity extends AppCompatActivity implements
             if(user == null) {
                 openDialogSignIn(this);
             }else {
-               /* Intent myIntent = new Intent(BookingActivity.this, PaymentActivity.class);
-                startActivity(myIntent);*/
-                openDialogPayment(this);
+                postSaveBooking(new ElectronicPayment());//dsdsdsdsds
+                Intent myIntent=new Intent(BookingActivity.this, BookingSaved.class);
+                startActivity(myIntent);
             }
+        }else if(v == pay_by) {
+            openDialogPayment(this);
         }
     }
 
@@ -201,7 +208,7 @@ public class BookingActivity extends AppCompatActivity implements
         TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
         title.setText("Sign In");
 
-        ImageView dialogButton = (ImageView) dialog.findViewById(R.id.close_img);
+        Button dialogButton = (Button) dialog.findViewById(R.id.close_img);
         dialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -235,7 +242,6 @@ public class BookingActivity extends AppCompatActivity implements
                 userDb.login(user);
 
                 dialog.dismiss();
-                openDialogPayment(BookingActivity.this);
             }
         });
 
@@ -274,7 +280,7 @@ public class BookingActivity extends AppCompatActivity implements
         TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
         title.setText("Sign Up");
 
-        ImageView dialogButton = (ImageView) dialog.findViewById(R.id.close_img);
+        Button dialogButton = (Button) dialog.findViewById(R.id.close_img);
         dialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -317,15 +323,27 @@ public class BookingActivity extends AppCompatActivity implements
 
     private void openDialogPayment(Context context) {
         final Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         dialog.setContentView(R.layout.activity_payment);
-        TextView dialogButton = (TextView) dialog.findViewById(R.id.close_dialog_payment);
+
+        dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
+        dialog.setCanceledOnTouchOutside(true);
+
+        TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
+        title.setText("Payment method");
+
+        Button dialogButton = (Button) dialog.findViewById(R.id.close_img);
         dialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
             }
         });
-
+        ElectronicPayment electronicPayment = new ElectronicPayment();
+        electronicPayment.setNonce(null);
+        electronicPayment.setAmount(0.0);
+        electronicPayment.setCustID(0);
+        postElectronicPayment(electronicPayment);
         dialog.show();
     }
 
@@ -348,6 +366,44 @@ public class BookingActivity extends AppCompatActivity implements
 
         wst.execute(new String[]{url});
 
+    }
+
+    private void postElectronicPayment(ElectronicPayment electronicPayment) {
+        String url = WebServiceTaskManager.URL + "ElectronicPayment";
+
+        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
+
+            @Override
+            public void handleResponse(String response) {
+                Log.e("response", response, null);
+            }
+        };
+
+        String json = new JSONSerializer().exclude("*.class").serialize(
+                electronicPayment);
+        Log.e("json", json, null);
+        wst.addNameValuePair("", json);
+
+        wst.execute(new String[]{url});
+    }
+
+    private void postSaveBooking(ElectronicPayment electronicPayment) {
+        String url = WebServiceTaskManager.URL + "ElectronicPayment";
+
+        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
+
+            @Override
+            public void handleResponse(String response) {
+                Log.e("response", response, null);
+            }
+        };
+
+        String json = new JSONSerializer().exclude("*.class").serialize(
+                electronicPayment);
+        Log.e("json", json, null);
+        wst.addNameValuePair("", json);
+
+        wst.execute(new String[]{url});
     }
 
     private void postQuotation(Address pickUpAddress, Address dropOffAddress) {
