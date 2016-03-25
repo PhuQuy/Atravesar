@@ -11,6 +11,7 @@
 
     <EditText
         android:id="@+id/pick_up_booking"
+        android:drawableRight="@drawable/ic_swap"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
@@ -18,6 +19,7 @@
 
     <EditText
         android:id="@+id/drop_off_booking"
+        android:drawableRight="@drawable/ic_add"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/pick_up_booking"
@@ -44,16 +46,18 @@
             android:id="@+id/w8"
             android:layout_width="0dip"
             android:layout_weight="0.5"
+            android:drawableLeft="@drawable/restore"
             android:layout_height="wrap_content"
-            android:text="Wait and Return"></Switch>
+            android:text=" Wait &amp; Return"></Switch>
 
         <Switch
             android:id="@+id/child_seat"
             android:layout_width="0dip"
             android:layout_weight="0.5"
+            android:drawableLeft="@drawable/child_seat"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/total"
-            android:text="Child seat"></Switch>
+            android:text= "Child seat"></Switch>
     </LinearLayout>
 
     <LinearLayout
@@ -68,16 +72,18 @@
             android:id="@+id/pet"
             android:layout_width="0dip"
             android:layout_weight="0.5"
+            android:drawableLeft="@drawable/pet"
             android:layout_height="wrap_content"
-            android:text="Pet friendly"></Switch>
+            android:text=" Pet friendly"></Switch>
 
         <Switch
             android:id="@+id/eco"
             android:layout_width="0dip"
             android:layout_weight="0.5"
+            android:drawableLeft="@drawable/ic_eco"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/total"
-            android:text="Eco friendly"></Switch>
+            android:text=" Eco friendly"></Switch>
     </LinearLayout>
 
     <LinearLayout

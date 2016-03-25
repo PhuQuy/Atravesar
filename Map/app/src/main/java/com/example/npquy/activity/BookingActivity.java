@@ -27,6 +27,7 @@ import com.example.npquy.database.UserDb;
 import com.example.npquy.entity.Address;
 import com.example.npquy.entity.ElectronicPayment;
 import com.example.npquy.entity.RetrieveQuote;
+import com.example.npquy.entity.SaveBooking;
 import com.example.npquy.entity.User;
 import com.example.npquy.service.WebServiceTaskManager;
 
@@ -71,6 +72,7 @@ public class BookingActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+      //  requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         setContentView(R.layout.activity_booking);
         dateTime = (EditText) findViewById(R.id.date_time);
         dateTime.setInputType(InputType.TYPE_NULL);
@@ -187,7 +189,23 @@ public class BookingActivity extends AppCompatActivity implements
             if(user == null) {
                 openDialogSignIn(this);
             }else {
-                postSaveBooking(new ElectronicPayment());//dsdsdsdsds
+                postElectronicPayment(new ElectronicPayment());//dsdsdsdsds
+                SaveBooking saveBooking = new SaveBooking();
+                saveBooking.setCusid(0);
+                saveBooking.setRoutedistance(0.0);
+                saveBooking.setVehTypeID(0);
+                saveBooking.setTravelTime(0.0);
+                saveBooking.setTotalfare(0.0);
+                saveBooking.setFare(0.0);
+                saveBooking.setPkLat(0.0);
+                saveBooking.setPkLong(0.0);
+                saveBooking.setBookingdate("0001-01-01T00:00:00");
+                saveBooking.setPaq(0);
+                saveBooking.setBags(0);
+                saveBooking.setDoLat(0.0);
+                saveBooking.setDoLong(0.0);
+                getSaveBooking(saveBooking);
+
                 Intent myIntent=new Intent(BookingActivity.this, BookingSaved.class);
                 startActivity(myIntent);
             }
@@ -198,23 +216,28 @@ public class BookingActivity extends AppCompatActivity implements
 
     private void openDialogSignIn(Context context) {
         final Dialog dialog = new Dialog(context);
-        dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
-        dialog.setContentView(R.layout.activity_login);
+        try {
+            dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+            dialog.setContentView(R.layout.activity_login);
 
-        dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
+            dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
+            TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
+            title.setText("Sign In");
+
+            Button dialogButton = (Button) dialog.findViewById(R.id.close_img);
+            dialogButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.dismiss();
+                }
+            });
+
+        }catch (Exception e) {
+            Log.e("StyleError", e.getLocalizedMessage(), e);
+            dialog.setContentView(R.layout.activity_login);
+        }
        // dialog.setTitle("Sign In");
         dialog.setCanceledOnTouchOutside(true);
-
-        TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
-        title.setText("Sign In");
-
-        Button dialogButton = (Button) dialog.findViewById(R.id.close_img);
-        dialogButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
 
         TextView createAccount = (TextView) dialog.findViewById(R.id.create_account);
         createAccount.setOnClickListener(new View.OnClickListener() {
@@ -272,13 +295,11 @@ public class BookingActivity extends AppCompatActivity implements
     private void openDialogSignUp(Context context) {
         final Dialog dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
-        dialog.setContentView(R.layout.activity_sign_up);
+        dialog.setContentView(R.layout.activity_login);
 
         dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
-        dialog.setCanceledOnTouchOutside(true);
-
         TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
-        title.setText("Sign Up");
+        title.setText("Sign In");
 
         Button dialogButton = (Button) dialog.findViewById(R.id.close_img);
         dialogButton.setOnClickListener(new View.OnClickListener() {
@@ -387,24 +408,6 @@ public class BookingActivity extends AppCompatActivity implements
         wst.execute(new String[]{url});
     }
 
-    private void postSaveBooking(ElectronicPayment electronicPayment) {
-        String url = WebServiceTaskManager.URL + "ElectronicPayment";
-
-        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
-
-            @Override
-            public void handleResponse(String response) {
-                Log.e("response", response, null);
-            }
-        };
-
-        String json = new JSONSerializer().exclude("*.class").serialize(
-                electronicPayment);
-        Log.e("json", json, null);
-        wst.addNameValuePair("", json);
-
-        wst.execute(new String[]{url});
-    }
 
     private void postQuotation(Address pickUpAddress, Address dropOffAddress) {
 
@@ -443,6 +446,26 @@ public class BookingActivity extends AppCompatActivity implements
         wst.execute(new String[]{url});
 
     }
+
+    private void getSaveBooking(SaveBooking saveBooking) {
+        String url = WebServiceTaskManager.URL + "SaveBooking";
+
+        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
+
+            @Override
+            public void handleResponse(String response) {
+                Log.e("response", response, null);
+            }
+        };
+
+        String json = new JSONSerializer().exclude("*.class").serialize(
+                saveBooking);
+        Log.e("json", json, null);
+        wst.addNameValuePair("", json);
+
+        wst.execute(new String[]{url});
+    }
+
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
