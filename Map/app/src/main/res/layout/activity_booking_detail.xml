@@ -22,11 +22,11 @@
         android:layout_height="wrap_content">
 
         <EditText
-            android:id="@+id/pick_up"
+            android:id="@+id/pick_up_detail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Pick Up"
-            android:imeActionId="@+id/pick_up"
+            android:imeActionId="@+id/pick_up_detail_ime"
             android:imeActionLabel="Pick Up"
             android:imeOptions="actionUnspecified"
             android:maxLines="1"
@@ -41,7 +41,7 @@
         android:layout_below="@+id/pick_up_layout">
 
         <EditText
-            android:id="@+id/drop_off"
+            android:id="@+id/drop_off_detail"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:imeActionId="@+id/drop_off"

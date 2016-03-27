@@ -2,15 +2,22 @@ package com.example.npquy.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.npquy.entity.Address;
@@ -27,7 +34,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import flexjson.JSONSerializer;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,NavigationView.OnNavigationItemSelectedListener {
 
     private GoogleMap mMap;
     private EditText pickUp;
@@ -37,18 +44,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Boolean isCheck = false;
     private Address pickUpAddress;
     private Address dropOffAddress;
+    private NavigationView navigationView = null;
+    private Toolbar toolbar = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        setTitle("ZETA-X");
         pickUp = (EditText) findViewById(R.id.pick_up);;
         dropOff = (EditText) findViewById(R.id.drop_off);
         pickUp.setInputType(InputType.TYPE_NULL);
         dropOff.setInputType(InputType.TYPE_NULL);
         book = (Button) findViewById(R.id.book);
         total = (Button) findViewById(R.id.total);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
 
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        View headerView = navigationView.getHeaderView(0);
+        TextView emailText = (TextView) headerView.findViewById(R.id.email);
+
+
+        navigationView.setNavigationItemSelectedListener(MapsActivity.this);
         dropOff.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -220,5 +244,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         wst.addNameValuePair("", json);
 
         wst.execute(new String[]{url});
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_newbooking) {
+            Intent intent = new Intent(MapsActivity.this, MapsActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_booking_history) {
+
+            Intent intent = new Intent(MapsActivity.this, BookingHistoryActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_currentbooking) {
+            Intent intent = new Intent(MapsActivity.this, BookingDetailActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_logout) {
+
+        } else if (id == R.id.nav_profile) {
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 }

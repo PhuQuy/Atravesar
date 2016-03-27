@@ -4,6 +4,7 @@ package com.example.npquy.entity;
  * Created by npquy on 3/22/2016.
  */
 public class User {
+    private String cusId;
     private String name;
     private String mobile;
     private String email;
@@ -17,6 +18,14 @@ public class User {
         this.mobile = mobile;
         this.email = email;
         this.deviceId = deviceId;
+    }
+
+    public String getCusId() {
+        return cusId;
+    }
+
+    public void setCusId(String cusId) {
+        this.cusId = cusId;
     }
 
     public String getName() {

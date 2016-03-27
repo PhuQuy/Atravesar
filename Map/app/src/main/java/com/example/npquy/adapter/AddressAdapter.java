@@ -18,36 +18,35 @@ import java.util.List;
 /**
  * Created by ITACHI on 3/19/2016.
  */
-public class AddressAdapter extends ArrayAdapter<Address>{
-    Activity context=null;
-    ArrayList<Address> myArray=null;
+public class AddressAdapter extends ArrayAdapter<Address> {
+    Activity context = null;
+    ArrayList<Address> myArray = null;
     int layoutId;
 
 
     public AddressAdapter(Activity context,
                           int layoutId,
-                          ArrayList<Address>arr) {
+                          ArrayList<Address> arr) {
         super(context, layoutId, arr);
-        this.context=context;
-        this.layoutId=layoutId;
-        this.myArray=arr;
+        this.context = context;
+        this.layoutId = layoutId;
+        this.myArray = arr;
     }
 
     public View getView(int position, View convertView,
                         ViewGroup parent) {
-        LayoutInflater inflater=
+        LayoutInflater inflater =
                 context.getLayoutInflater();
-        convertView=inflater.inflate(layoutId, null);
-        //chỉ là test thôi, bạn có thể bỏ If đi
-        if(myArray.size()>0 && position>=0)
-        {
-            final TextView roadName=(TextView)
-                convertView.findViewById(R.id.road_name);
-            final TextView addressName=(TextView)
+        convertView = inflater.inflate(layoutId, null);
+
+        if (myArray.size() > 0 && position >= 0) {
+            final TextView roadName = (TextView)
+                    convertView.findViewById(R.id.road_name);
+            final TextView addressName = (TextView)
                     convertView.findViewById(R.id.address);
 
             final Address address = myArray.get(position);
-            if(address != null) {
+            if (address != null) {
                 String fullAddress = address.getFulladdress();
                 if (!fullAddress.isEmpty()) {
                     String[] data = fullAddress.split(",");
@@ -68,7 +67,7 @@ public class AddressAdapter extends ArrayAdapter<Address>{
                 }
             }
 
-            final ImageView imgitem =(ImageView)
+            final ImageView imgitem = (ImageView)
                     convertView.findViewById(R.id.imgitem);
         }
         return convertView;

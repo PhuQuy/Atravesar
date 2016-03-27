@@ -37,7 +37,7 @@
 
         <activity
             android:name=".MapsActivity"
-            android:label="@string/title_activity_maps">
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -50,7 +50,7 @@
             android:parentActivityName=".MapsActivity" />
         <activity
             android:name=".BookingActivity"
-            android:parentActivityName=".MapsActivity"/>
+            android:parentActivityName=".MapsActivity" />
         <activity
             android:name=".LoginActivity"
             android:label="@string/title_activity_login"
@@ -63,7 +63,8 @@
             android:name=".PaymentActivity"
             android:parentActivityName=".BookingActivity" />
         <activity android:name=".BookingSaved" />
-        <activity android:name=".BookingDetailActivity"></activity>
+        <activity android:name=".BookingDetailActivity" />
+        <activity android:name=".BookingHistoryActivity"></activity>
     </application>
 
 </manifest>

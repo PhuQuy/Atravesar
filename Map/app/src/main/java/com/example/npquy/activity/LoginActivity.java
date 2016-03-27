@@ -34,6 +34,9 @@ import com.example.npquy.database.UserDb;
 import com.example.npquy.entity.User;
 import com.example.npquy.service.WebServiceTaskManager;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +57,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     };
 
     private UserDb userDb;
+    private String cusId;
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -182,6 +186,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 Secure.ANDROID_ID);
         user.setDeviceId(android_id);
         login(user);
+        user.setCusId(cusId);
         userDb.login(user);
     }
 
@@ -204,6 +209,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             @Override
             public void handleResponse(String response) {
                 Log.e("response", response, null);
+                JSONObject root = null;
+                try {
+                    root = new JSONObject(response);
+                    cusId = root.getString("CustID");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         };
 

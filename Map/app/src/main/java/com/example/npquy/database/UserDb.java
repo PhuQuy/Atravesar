@@ -94,9 +94,10 @@ public class UserDb extends SQLiteOpenHelper {
     public User getCurrentUser() {
         SQLiteDatabase db = this.getReadableDatabase();
         User user = null;
+        Cursor cursor = null;
         if (db != null) {
             try {
-                Cursor cursor = db.query(UserDb.USER_TABLE_NAME, null, null, null, null, null, null);
+                cursor = db.query(UserDb.USER_TABLE_NAME, null, null, null, null, null, null);
                 if(cursor.getCount() != 0) {
                     cursor.moveToFirst();
                     user = new User();
@@ -107,6 +108,10 @@ public class UserDb extends SQLiteOpenHelper {
                 }
             } catch (Exception ex) {
                 Log.e("Error", ex.getLocalizedMessage(), ex);
+            }finally {
+                if (cursor != null && !cursor.isClosed()) {
+                    cursor.close();
+                }
             }
         }
         return user;

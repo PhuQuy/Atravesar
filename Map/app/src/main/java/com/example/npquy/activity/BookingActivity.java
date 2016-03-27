@@ -72,7 +72,7 @@ public class BookingActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-      //  requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+        //  requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         setContentView(R.layout.activity_booking);
         dateTime = (EditText) findViewById(R.id.date_time);
         dateTime.setInputType(InputType.TYPE_NULL);
@@ -90,7 +90,7 @@ public class BookingActivity extends AppCompatActivity implements
         userDb = new UserDb(this);
 
         Intent callerIntent = getIntent();
-        Bundle packageFromCaller=
+        Bundle packageFromCaller =
                 callerIntent.getBundleExtra("data");
         String pickUpJson = packageFromCaller.getString("pickUpAddress");
         pickUpAddress = new JSONDeserializer<Address>().use(null,
@@ -158,7 +158,7 @@ public class BookingActivity extends AppCompatActivity implements
                         @Override
                         public void onDateSet(DatePicker view, int year,
                                               int monthOfYear, int dayOfMonth) {
-                            dateBook = new Date(year, monthOfYear+1,dayOfMonth,hours,minutes);
+                            dateBook = new Date(year, monthOfYear + 1, dayOfMonth, hours, minutes);
                             dateTime.setText(dateBook.toString());
 
                         }
@@ -177,19 +177,19 @@ public class BookingActivity extends AppCompatActivity implements
                     }, mHour, mMinute, false);
             timePickerDialog.show();
 
-        }else if(v == pickUp) {
-            Intent myIntent=new Intent(BookingActivity.this, GetAddressActivity.class);
+        } else if (v == pickUp) {
+            Intent myIntent = new Intent(BookingActivity.this, GetAddressActivity.class);
             startActivityForResult(myIntent, 1);
-        }else if(v == dropOff) {
-            Intent myIntent=new Intent(BookingActivity.this, GetAddressActivity.class);
+        } else if (v == dropOff) {
+            Intent myIntent = new Intent(BookingActivity.this, GetAddressActivity.class);
             startActivityForResult(myIntent, 2);
-        }else if (v == confirmBooking) {
+        } else if (v == confirmBooking) {
             postQuotation(pickUpAddress, dropOffAddress);
             User user = userDb.getCurrentUser();
-            if(user == null) {
+            if (user == null) {
                 openDialogSignIn(this);
-            }else {
-                postElectronicPayment(new ElectronicPayment());//dsdsdsdsds
+            } else {
+                postElectronicPayment(new ElectronicPayment());
                 SaveBooking saveBooking = new SaveBooking();
                 saveBooking.setCusid(0);
                 saveBooking.setRoutedistance(0.0);
@@ -197,46 +197,50 @@ public class BookingActivity extends AppCompatActivity implements
                 saveBooking.setTravelTime(0.0);
                 saveBooking.setTotalfare(0.0);
                 saveBooking.setFare(0.0);
-                saveBooking.setPkLat(0.0);
-                saveBooking.setPkLong(0.0);
-                saveBooking.setBookingdate("0001-01-01T00:00:00");
+                saveBooking.setPick(pickUpAddress);
+                saveBooking.setDoff(dropOffAddress);
+                saveBooking.setPkLat(pickUpAddress.getLatitude());
+                saveBooking.setPkLong(pickUpAddress.getLongitude());
                 saveBooking.setPaq(0);
                 saveBooking.setBags(0);
-                saveBooking.setDoLat(0.0);
-                saveBooking.setDoLong(0.0);
+                saveBooking.setPetfriendly(isPet);
+                saveBooking.setChildseat(isChildSeat);
+                saveBooking.setExecutive(false);
+                saveBooking.setDoLat(dropOffAddress.getLatitude());
+                saveBooking.setDoLong(dropOffAddress.getLongitude());
+                saveBooking.setBookingdate(dateBook.toString());
                 getSaveBooking(saveBooking);
 
-                Intent myIntent=new Intent(BookingActivity.this, BookingSaved.class);
+                Intent myIntent = new Intent(BookingActivity.this, BookingSaved.class);
+
+                Bundle bundle = new Bundle();
+                String savedBooking = new JSONSerializer().exclude("*.class").serialize(
+                        saveBooking);
+                bundle.putString("savedBooking", savedBooking);
+                myIntent.putExtra("data", bundle);
                 startActivity(myIntent);
             }
-        }else if(v == pay_by) {
+        } else if (v == pay_by) {
             openDialogPayment(this);
         }
     }
 
     private void openDialogSignIn(Context context) {
         final Dialog dialog = new Dialog(context);
-        try {
-            dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
-            dialog.setContentView(R.layout.activity_login);
+        dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+        dialog.setContentView(R.layout.activity_login);
 
-            dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
-            TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
-            title.setText("Sign In");
+        dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
+        TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
+        title.setText("Sign In");
 
-            Button dialogButton = (Button) dialog.findViewById(R.id.close_img);
-            dialogButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    dialog.dismiss();
-                }
-            });
-
-        }catch (Exception e) {
-            Log.e("StyleError", e.getLocalizedMessage(), e);
-            dialog.setContentView(R.layout.activity_login);
-        }
-       // dialog.setTitle("Sign In");
+        Button dialogButton = (Button) dialog.findViewById(R.id.close_img);
+        dialogButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
         dialog.setCanceledOnTouchOutside(true);
 
         TextView createAccount = (TextView) dialog.findViewById(R.id.create_account);
@@ -283,7 +287,7 @@ public class BookingActivity extends AppCompatActivity implements
             }
         };
 
-        String json = new JSONSerializer().exclude("name","*.class").serialize(
+        String json = new JSONSerializer().exclude("name", "*.class").serialize(
                 user);
         Log.e("json", json, null);
         wst.addNameValuePair("", json);
@@ -295,11 +299,11 @@ public class BookingActivity extends AppCompatActivity implements
     private void openDialogSignUp(Context context) {
         final Dialog dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
-        dialog.setContentView(R.layout.activity_login);
+        dialog.setContentView(R.layout.activity_sign_up);
 
         dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
         TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
-        title.setText("Sign In");
+        title.setText("Sign Up");
 
         Button dialogButton = (Button) dialog.findViewById(R.id.close_img);
         dialogButton.setOnClickListener(new View.OnClickListener() {
@@ -380,7 +384,7 @@ public class BookingActivity extends AppCompatActivity implements
             }
         };
 
-        String json = new JSONSerializer().exclude("*.class").serialize(
+        String json = new JSONSerializer().exclude("cusId","*.class").serialize(
                 user);
         Log.e("json", json, null);
         wst.addNameValuePair("", json);
@@ -427,9 +431,9 @@ public class BookingActivity extends AppCompatActivity implements
         quotation.setPickLong(pickUpAddress.getLongitude());
         quotation.setDoffLat(dropOffAddress.getLatitude());
         quotation.setDoffLong(dropOffAddress.getLongitude());
-        if(dateBook != null) {
+        if (dateBook != null) {
             quotation.setBookingdate(dateBook.toLocaleString());
-        }else {
+        } else {
             quotation.setBookingdate("0001-01-01T00:00:00");
         }
         quotation.setPaq(0);
@@ -469,23 +473,19 @@ public class BookingActivity extends AppCompatActivity implements
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        double pickLat = 0.0;
-        double pickLong = 0.0;
-        double dropLat = 0.0;
-        double dropLong = 0.0;
-        if(requestCode == 1 && resultCode == RESULT_OK) {
+        if (requestCode == 1 && resultCode == RESULT_OK) {
             if (data.hasExtra("pickUp")) {
                 Address address = (Address) data.getExtras().get("pickUp");
                 pickUp.setText(address.getFulladdress());
-                pickLat = address.getLatitude();
-                pickLong = address.getLongitude();
+                pickUpAddress.setLatitude(address.getLatitude());
+                pickUpAddress.setLongitude(address.getLongitude());
             }
-        }else if (requestCode == 2 && resultCode == RESULT_OK) {
+        } else if (requestCode == 2 && resultCode == RESULT_OK) {
             if (data.hasExtra("dropOff")) {
                 Address address = (Address) data.getExtras().get("dropOff");
                 dropOff.setText(address.getFulladdress());
-                dropLat = address.getLatitude();
-                dropLong = address.getLongitude();
+                dropOffAddress.setLatitude(address.getLatitude());
+                dropOffAddress.setLongitude(address.getLongitude());
             }
         }
     }

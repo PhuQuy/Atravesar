@@ -286,4 +286,41 @@ public class SaveBooking {
     public void setInServiceArea(Boolean inServiceArea) {
         InServiceArea = inServiceArea;
     }
+
+    @Override
+    public String toString() {
+        return "SaveBooking{" +
+                "Outcode='" + Outcode + '\'' +
+                ", RtnOutcode='" + RtnOutcode + '\'' +
+                ", cusid=" + cusid +
+                ", pick=" + pick +
+                ", doff=" + doff +
+                ", via='" + via + '\'' +
+                ", routedistance=" + routedistance +
+                ", rtnroutedistance=" + rtnroutedistance +
+                ", vehType=" + vehType +
+                ", vehTypeID=" + vehTypeID +
+                ", travelTime=" + travelTime +
+                ", rtntraveltime=" + rtntraveltime +
+                ", totalfare=" + totalfare +
+                ", returnfare=" + returnfare +
+                ", fare=" + fare +
+                ", note='" + note + '\'' +
+                ", pkLat=" + pkLat +
+                ", pkLong=" + pkLong +
+                ", rjType=" + rjType +
+                ", bookingdate='" + bookingdate + '\'' +
+                ", paq=" + paq +
+                ", bags=" + bags +
+                ", doLat=" + doLat +
+                ", doLong=" + doLong +
+                ", viaLat=" + viaLat +
+                ", viaLong=" + viaLong +
+                ", childseat=" + childseat +
+                ", petfriendly=" + petfriendly +
+                ", executive=" + executive +
+                ", returndate=" + returndate +
+                ", InServiceArea=" + InServiceArea +
+                '}';
+    }
 }
