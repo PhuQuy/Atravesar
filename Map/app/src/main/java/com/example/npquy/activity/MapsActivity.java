@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,23 +48,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private NavigationView navigationView = null;
     private Toolbar toolbar = null;
 
+    private ImageView swap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTitle("sssss");
         setContentView(R.layout.activity_maps);
-        setTitle("ZETA-X");
         pickUp = (EditText) findViewById(R.id.pick_up);;
         dropOff = (EditText) findViewById(R.id.drop_off);
         pickUp.setInputType(InputType.TYPE_NULL);
         dropOff.setInputType(InputType.TYPE_NULL);
         book = (Button) findViewById(R.id.book);
         total = (Button) findViewById(R.id.total);
+        swap = (ImageView) findViewById(R.id.swap_location);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
+
         toggle.syncState();
 
 
@@ -73,16 +78,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         navigationView.setNavigationItemSelectedListener(MapsActivity.this);
-        dropOff.setOnClickListener(new View.OnClickListener() {
+        dropOff.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
-            public void onClick(View v) {
-                pickLocation(2);
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    pickLocation(2);
+                }
             }
         });
-        pickUp.setOnClickListener(new View.OnClickListener() {
+        pickUp.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    pickLocation(1);
+                }
+            }
+        });
+
+        swap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                pickLocation(1);
+                Address address = pickUpAddress.clone();
+                pickUpAddress = dropOffAddress;
+                pickUp.setText(pickUpAddress.getFulladdress());
+                dropOffAddress = address;
+                dropOff.setText(dropOffAddress.getFulladdress());
             }
         });
 
@@ -116,7 +136,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         String json = new JSONSerializer().exclude("*.class").serialize(
                 quotation);
-        Log.e("json", json, null);
+        Log.e("Quatation", json, null);
         wst.addNameValuePair("", json);
 
         wst.execute(new String[]{url});
@@ -160,7 +180,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if(!pickUp.getText().toString().isEmpty() && !dropOff.getText().toString().isEmpty()) {
             postQuotation(pickLat, pickLong, dropLat, dropLong);
             book.setText("Continue \n Booking");
-            total.setText("Total \n 30$");
+            total.setText("Total \n 30.00$");
             isCheck = true;
         }
     }
@@ -240,7 +260,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locate.setLgn(location.longitude);
         String json = new JSONSerializer().exclude("*.class").serialize(
                 location);
-        Log.e("json", json, null);
+        Log.e("NearestDriver", json, null);
         wst.addNameValuePair("", json);
 
         wst.execute(new String[]{url});
@@ -250,6 +270,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
+        setTitle("ZETA-X");
         int id = item.getItemId();
 
         if (id == R.id.nav_newbooking) {

@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.AutoCompleteTextView;
@@ -22,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.example.npquy.database.UserDb;
 import com.example.npquy.entity.Address;
@@ -29,6 +31,8 @@ import com.example.npquy.entity.ElectronicPayment;
 import com.example.npquy.entity.RetrieveQuote;
 import com.example.npquy.entity.SaveBooking;
 import com.example.npquy.entity.User;
+import com.example.npquy.service.CustomEditText;
+import com.example.npquy.service.DrawableClickListener;
 import com.example.npquy.service.WebServiceTaskManager;
 
 import java.util.Calendar;
@@ -43,7 +47,7 @@ public class BookingActivity extends AppCompatActivity implements
     private int mYear, mMonth, mDay, mHour, mMinute;
     private int hours, minutes;
     private EditText pickUp;
-    private EditText dropOff;
+    private CustomEditText dropOff;
     private Button confirmBooking;
     private Switch waitAndReturn;
     private Switch childSeat;
@@ -53,6 +57,8 @@ public class BookingActivity extends AppCompatActivity implements
     private AutoCompleteTextView mEmailView;
     private EditText phoneNumber;
     private EditText mPhoneNumber;
+
+    private Boolean isClickOnImage = false;
 
     private AutoCompleteTextView signUpEmail;
     private EditText name;
@@ -77,7 +83,7 @@ public class BookingActivity extends AppCompatActivity implements
         dateTime = (EditText) findViewById(R.id.date_time);
         dateTime.setInputType(InputType.TYPE_NULL);
         pickUp = (EditText) findViewById(R.id.pick_up_booking);
-        dropOff = (EditText) findViewById(R.id.drop_off_booking);
+        dropOff = (CustomEditText) findViewById(R.id.drop_off_booking);
         confirmBooking = (Button) findViewById(R.id.book_booking);
         waitAndReturn = (Switch) findViewById(R.id.w8);
         childSeat = (Switch) findViewById(R.id.child_seat);
@@ -102,11 +108,71 @@ public class BookingActivity extends AppCompatActivity implements
         pickUp.setText(pickUpAddress.getFulladdress());
         dropOff.setText(dropOffAddress.getFulladdress());
 
-        dateTime.setOnClickListener(this);
+        dateTime.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                final Calendar c = Calendar.getInstance();
+                mYear = c.get(Calendar.YEAR);
+                mMonth = c.get(Calendar.MONTH);
+                mDay = c.get(Calendar.DAY_OF_MONTH);
+                mHour = c.get(Calendar.HOUR_OF_DAY);
+                mMinute = c.get(Calendar.MINUTE);
+                if (hasFocus) {
+                    DatePickerDialog datePickerDialog = new DatePickerDialog(BookingActivity.this,
+                            new DatePickerDialog.OnDateSetListener() {
+
+                                @Override
+                                public void onDateSet(DatePicker view, int year,
+                                                      int monthOfYear, int dayOfMonth) {
+                                    dateBook = new Date(year, monthOfYear + 1, dayOfMonth, hours, minutes);
+                                    dateTime.setText(dateBook.toString());
+
+                                }
+                            }, mYear, mMonth, mDay);
+                    datePickerDialog.show();
+                    TimePickerDialog timePickerDialog = new TimePickerDialog(BookingActivity.this,
+                            new TimePickerDialog.OnTimeSetListener() {
+
+                                @Override
+                                public void onTimeSet(TimePicker view, int hourOfDay,
+                                                      int minute) {
+
+                                    hours = hourOfDay;
+                                    minutes = minute;
+                                }
+                            }, mHour, mMinute, false);
+                    timePickerDialog.show();
+
+                }
+            }
+        });
         pickUp.setOnClickListener(this);
         dropOff.setOnClickListener(this);
+        dropOff.setDrawableClickListener(new DrawableClickListener() {
+
+
+            public void onClick(DrawablePosition target) {
+                isClickOnImage = true;
+                switch (target) {
+                    case RIGHT:
+                        Toast.makeText(BookingActivity.this, "aaa", Toast.LENGTH_LONG).show();
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+        });
         confirmBooking.setOnClickListener(this);
-        pay_by.setOnClickListener(this);
+        pay_by.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    openDialogPayment(BookingActivity.this);
+                }
+            }
+        });
 
         waitAndReturn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -144,40 +210,7 @@ public class BookingActivity extends AppCompatActivity implements
 
     @Override
     public void onClick(View v) {
-        final Calendar c = Calendar.getInstance();
-        mYear = c.get(Calendar.YEAR);
-        mMonth = c.get(Calendar.MONTH);
-        mDay = c.get(Calendar.DAY_OF_MONTH);
-        mHour = c.get(Calendar.HOUR_OF_DAY);
-        mMinute = c.get(Calendar.MINUTE);
-
-        if (v == dateTime) {
-            DatePickerDialog datePickerDialog = new DatePickerDialog(this,
-                    new DatePickerDialog.OnDateSetListener() {
-
-                        @Override
-                        public void onDateSet(DatePicker view, int year,
-                                              int monthOfYear, int dayOfMonth) {
-                            dateBook = new Date(year, monthOfYear + 1, dayOfMonth, hours, minutes);
-                            dateTime.setText(dateBook.toString());
-
-                        }
-                    }, mYear, mMonth, mDay);
-            datePickerDialog.show();
-            TimePickerDialog timePickerDialog = new TimePickerDialog(this,
-                    new TimePickerDialog.OnTimeSetListener() {
-
-                        @Override
-                        public void onTimeSet(TimePicker view, int hourOfDay,
-                                              int minute) {
-
-                            hours = hourOfDay;
-                            minutes = minute;
-                        }
-                    }, mHour, mMinute, false);
-            timePickerDialog.show();
-
-        } else if (v == pickUp) {
+        if (v == pickUp) {
             Intent myIntent = new Intent(BookingActivity.this, GetAddressActivity.class);
             startActivityForResult(myIntent, 1);
         } else if (v == dropOff) {
@@ -220,21 +253,19 @@ public class BookingActivity extends AppCompatActivity implements
                 myIntent.putExtra("data", bundle);
                 startActivity(myIntent);
             }
-        } else if (v == pay_by) {
-            openDialogPayment(this);
         }
     }
 
     private void openDialogSignIn(Context context) {
         final Dialog dialog = new Dialog(context);
-        dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+        // dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         dialog.setContentView(R.layout.activity_login);
 
-        dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
-        TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
-        title.setText("Sign In");
+        //   dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
+        //   TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
+        //   title.setText("Sign In");
 
-        Button dialogButton = (Button) dialog.findViewById(R.id.close_img);
+        ImageView dialogButton = (ImageView) dialog.findViewById(R.id.imageView_close);
         dialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -298,14 +329,14 @@ public class BookingActivity extends AppCompatActivity implements
 
     private void openDialogSignUp(Context context) {
         final Dialog dialog = new Dialog(context);
-        dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+        //  dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         dialog.setContentView(R.layout.activity_sign_up);
 
-        dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
-        TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
-        title.setText("Sign Up");
+        // dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
+        //  TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
+        //  title.setText("Sign Up");
 
-        Button dialogButton = (Button) dialog.findViewById(R.id.close_img);
+        ImageView dialogButton = (ImageView) dialog.findViewById(R.id.imageView_close);
         dialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -348,16 +379,16 @@ public class BookingActivity extends AppCompatActivity implements
 
     private void openDialogPayment(Context context) {
         final Dialog dialog = new Dialog(context);
-        dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+        //    dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         dialog.setContentView(R.layout.activity_payment);
 
-        dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
+        //    dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
         dialog.setCanceledOnTouchOutside(true);
 
-        TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
-        title.setText("Payment method");
+        //  TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
+        //   title.setText("Payment method");
 
-        Button dialogButton = (Button) dialog.findViewById(R.id.close_img);
+        ImageView dialogButton = (ImageView) dialog.findViewById(R.id.imageView_close);
         dialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -384,7 +415,7 @@ public class BookingActivity extends AppCompatActivity implements
             }
         };
 
-        String json = new JSONSerializer().exclude("cusId","*.class").serialize(
+        String json = new JSONSerializer().exclude("cusId", "*.class").serialize(
                 user);
         Log.e("json", json, null);
         wst.addNameValuePair("", json);

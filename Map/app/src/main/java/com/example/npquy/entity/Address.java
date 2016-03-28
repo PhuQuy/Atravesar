@@ -88,4 +88,16 @@ public class Address implements Serializable{
                 ", Longitude=" + Longitude +
                 '}';
     }
+
+    public Address clone() {
+        Address a = new Address();
+        a.setCategory(getCategory());
+        a.setFulladdress(getFulladdress());
+        a.setIcon_Path(getIcon_Path());
+        a.setLatitude(getLatitude());
+        a.setLongitude(getLongitude());
+        a.setOutcode(getOutcode());
+        a.setPostcode(getPostcode());
+        return a;
+    }
 }

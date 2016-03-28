@@ -62,9 +62,15 @@
         <activity
             android:name=".PaymentActivity"
             android:parentActivityName=".BookingActivity" />
-        <activity android:name=".BookingSaved" />
-        <activity android:name=".BookingDetailActivity" />
-        <activity android:name=".BookingHistoryActivity"></activity>
+        <activity
+            android:name=".BookingSaved"
+            android:parentActivityName=".BookingActivity" />
+        <activity
+            android:name=".BookingDetailActivity"
+            android:parentActivityName=".BookingSaved" />
+        <activity
+            android:name=".BookingHistoryActivity"
+            android:parentActivityName=".MapsActivity"></activity>
     </application>
 
 </manifest>

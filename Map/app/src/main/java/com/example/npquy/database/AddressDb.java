@@ -104,9 +104,10 @@ public class AddressDb extends SQLiteOpenHelper {
     public List<Address> getAddressFromDb() {
         SQLiteDatabase db = this.getReadableDatabase();
         List<Address> addresses = new ArrayList<>();
+        Cursor cursor = null;
         if (db != null) {
             try {
-                Cursor cursor = db.query(ADDRESS_TABLE_NAME, null, null, null, null, null, null);
+                cursor = db.query(ADDRESS_TABLE_NAME, null, null, null, null, null, null);
                 cursor.moveToFirst();
                 while (cursor.isAfterLast() == false) {
                     Address address = new Address();
@@ -122,6 +123,10 @@ public class AddressDb extends SQLiteOpenHelper {
                 }
             } catch (Exception ex) {
                 Log.e("Error", ex.getLocalizedMessage(), ex);
+            }finally {
+                if (cursor != null && !cursor.isClosed()) {
+                    cursor.close();
+                }
             }
         }
         return addresses;
