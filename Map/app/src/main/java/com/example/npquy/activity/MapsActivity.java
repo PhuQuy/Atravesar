@@ -78,6 +78,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         navigationView.setNavigationItemSelectedListener(MapsActivity.this);
+        pickUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickLocation(1);
+            }
+        });
+        dropOff.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickLocation(2);
+            }
+        });
         dropOff.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {

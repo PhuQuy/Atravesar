@@ -258,7 +258,7 @@ public class BookingActivity extends AppCompatActivity implements
 
     private void openDialogSignIn(Context context) {
         final Dialog dialog = new Dialog(context);
-        // dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.activity_login);
 
         //   dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
@@ -329,7 +329,7 @@ public class BookingActivity extends AppCompatActivity implements
 
     private void openDialogSignUp(Context context) {
         final Dialog dialog = new Dialog(context);
-        //  dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.activity_sign_up);
 
         // dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
@@ -379,7 +379,7 @@ public class BookingActivity extends AppCompatActivity implements
 
     private void openDialogPayment(Context context) {
         final Dialog dialog = new Dialog(context);
-        //    dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.activity_payment);
 
         //    dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);

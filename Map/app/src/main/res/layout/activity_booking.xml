@@ -8,16 +8,49 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="@dimen/activity_vertical_margin"
         android:orientation="vertical">
-        <EditText
-            android:id="@+id/pick_up_booking"
-            android:drawableRight="@drawable/ic_swap"
-            android:layout_width="fill_parent"
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:clickable="true"
-            android:hint="Pick Up"></EditText>
+            android:background="@drawable/bottom_line">
 
+            <EditText
+                android:id="@+id/pick_up_booking"
+                android:layout_width="match_parent"
+                android:drawableRight="@drawable/ic_swap"
+                android:layout_height="wrap_content"
+                android:paddingBottom="10dp"
+                android:paddingRight="10dp"
+                android:paddingLeft="10dp"
+                android:clickable="true"
+                android:background="@android:color/transparent"
+                android:hint="Pick Up"
+                android:maxLines="1"
+                android:singleLine="true" />
+
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bottom_line">
+
+            <com.example.npquy.service.CustomEditText
+                android:id="@+id/drop_off_booking"
+                android:layout_width="match_parent"
+                android:drawableRight="@drawable/ic_add"
+                android:layout_height="wrap_content"
+                android:paddingBottom="10dp"
+                android:paddingRight="10dp"
+                android:paddingLeft="10dp"
+                android:clickable="true"
+                android:background="@android:color/transparent"
+                android:hint="Drop off"
+                android:maxLines="1"
+                android:singleLine="true" />
+
+        </android.support.design.widget.TextInputLayout>
+<!--
         <com.example.npquy.service.CustomEditText
             android:id="@+id/drop_off_booking"
             android:drawableRight="@drawable/ic_add"
@@ -25,12 +58,13 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/pick_up_booking"
             android:clickable="true"
-            android:hint="Drop off"></com.example.npquy.service.CustomEditText>
+            android:hint="Drop off"></com.example.npquy.service.CustomEditText>-->
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_below="@+id/drop_off_booking"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="@drawable/bottom_line">
 
             <EditText
                 android:id="@+id/date_time"
@@ -40,6 +74,10 @@
                 android:imeActionId="@+id/login"
                 android:imeActionLabel="@string/phone_number"
                 android:imeOptions="actionUnspecified"
+                android:background="@android:color/transparent"
+                android:paddingBottom="10dp"
+                android:paddingRight="10dp"
+                android:paddingLeft="10dp"
                 android:maxLines="1"
                 android:singleLine="true"
                 android:textAlignment="center" />
@@ -61,15 +99,27 @@
                 android:layout_weight="0.5"
                 android:drawableLeft="@drawable/restore"
                 android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:switchMinWidth="50dp"
+                android:background="@drawable/bottom_right_line"
+                android:textOn=""
+                android:textOff=""
+                android:textSize="10dp"
                 android:text=" Wait &amp; Return"></Switch>
 
             <Switch
                 android:id="@+id/child_seat"
                 android:layout_width="0dip"
                 android:layout_weight="0.5"
+                android:padding="10dp"
                 android:drawableLeft="@drawable/child_seat"
+                android:switchMinWidth="50dp"
+                android:background="@drawable/bottom_line"
+                android:textOn=""
+                android:textOff=""
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/total"
+                android:textSize="10dp"
                 android:text= "Child seat"></Switch>
         </LinearLayout>
 
@@ -86,6 +136,12 @@
                 android:layout_width="0dip"
                 android:layout_weight="0.5"
                 android:drawableLeft="@drawable/pet"
+                android:switchMinWidth="50dp"
+                android:textOn=""
+                android:textOff=""
+                android:textSize="10dp"
+                android:background="@drawable/bottom_right_line"
+                android:padding="10dp"
                 android:layout_height="wrap_content"
                 android:text=" Pet friendly"></Switch>
 
@@ -95,6 +151,12 @@
                 android:layout_weight="0.5"
                 android:drawableLeft="@drawable/ic_eco"
                 android:layout_height="wrap_content"
+                android:switchMinWidth="50dp"
+                android:background="@drawable/bottom_line"
+                android:padding="10dp"
+                android:textOn=""
+                android:textOff=""
+                android:textSize="10dp"
                 android:layout_toRightOf="@+id/total"
                 android:text=" Eco friendly"></Switch>
         </LinearLayout>
@@ -104,6 +166,8 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/second_line"
+            android:background="@drawable/bottom_line"
+            android:padding="10dp"
             android:orientation="horizontal"
             android:weightSum="1.0">
 
@@ -118,6 +182,7 @@
                 android:id="@+id/pay_by_edit"
                 android:layout_width="0dip"
                 android:layout_weight="0.8"
+                android:background="@android:color/transparent"
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/pay_by"
                 android:text="Cash"></EditText>
@@ -127,6 +192,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/third_line"
+            android:padding="10dp"
             android:orientation="horizontal"
             android:weightSum="1.0">
 
@@ -134,17 +200,21 @@
                 android:id="@+id/note"
                 android:layout_width="0dip"
                 android:layout_weight="0.2"
-                android:layout_height="wrap_content"
+                android:paddingTop="3dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="top"
                 android:text="Notes"></TextView>
 
             <EditText
                 android:id="@+id/content_note"
                 android:layout_width="0dip"
                 android:layout_weight="0.8"
-                android:lines="7"
-                android:layout_height="wrap_content"
+                android:lines="8"
+                android:layout_height="match_parent"
+                android:gravity="top|left"
                 android:layout_toRightOf="@+id/note"
-                android:maxLines="8"
+                android:maxLines="10"
+                android:background="@android:color/transparent"
                 android:hint="Please write any notes"></EditText>
         </LinearLayout>
     </LinearLayout>

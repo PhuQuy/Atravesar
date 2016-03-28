@@ -196,6 +196,7 @@
                 android:layout_marginTop="16dp"
                 android:text="Choose this payment method"
                 android:background="#CCCC00"
+                android:textColor="#FFFFFF"
                 android:textStyle="normal" />
 
         </LinearLayout>
