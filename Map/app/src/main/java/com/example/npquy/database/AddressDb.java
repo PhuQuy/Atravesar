@@ -31,6 +31,9 @@ public class AddressDb extends SQLiteOpenHelper {
     public static final String ADDRESS_COLUMN_LATITUDE = "latitude";
     public static final String ADDRESS_COLUMN_LONGITUDE = "longitude";
 
+
+    private static final Integer FREQUENTLY_NUMBER = 5;
+
     public AddressDb(Context context) {
         super(context, AddressDb.DATABASE_NAME, null, 1);
     }
@@ -67,6 +70,11 @@ public class AddressDb extends SQLiteOpenHelper {
             cursor.moveToFirst();
             deleteAddress(cursor.getInt(0));
         }
+        Cursor fullData = getData();
+        if(fullData.getCount() >= FREQUENTLY_NUMBER) {
+            fullData.moveToFirst();
+            deleteAddress(fullData.getInt(0));
+        }
         ContentValues values = new ContentValues();
         values.put(AddressDb.ADDRESS_COLUMN_OUT_CODE, address.getOutcode());
         values.put(AddressDb.ADDRESS_COLUMN_POST_CODE, address.getPostcode());
@@ -85,6 +93,12 @@ public class AddressDb extends SQLiteOpenHelper {
     public Cursor getData(String full_address) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.rawQuery("select * from " + AddressDb.ADDRESS_TABLE_NAME + " where " + AddressDb.ADDRESS_COLUMN_FULL_ADDRESS + " = '" + full_address + "'", null);
+        return res;
+    }
+
+    public Cursor getData() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res = db.rawQuery("select * from " + AddressDb.ADDRESS_TABLE_NAME, null);
         return res;
     }
 

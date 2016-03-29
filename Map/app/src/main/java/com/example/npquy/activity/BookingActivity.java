@@ -20,6 +20,7 @@ import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -75,6 +76,8 @@ public class BookingActivity extends AppCompatActivity implements
     private Boolean isEco;
     private UserDb userDb;
 
+    private String payType;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,7 +110,43 @@ public class BookingActivity extends AppCompatActivity implements
 
         pickUp.setText(pickUpAddress.getFulladdress());
         dropOff.setText(dropOffAddress.getFulladdress());
+        dateTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Calendar c = Calendar.getInstance();
+                mYear = c.get(Calendar.YEAR);
+                mMonth = c.get(Calendar.MONTH);
+                mDay = c.get(Calendar.DAY_OF_MONTH);
+                mHour = c.get(Calendar.HOUR_OF_DAY);
+                mMinute = c.get(Calendar.MINUTE);
+                DatePickerDialog datePickerDialog = new DatePickerDialog(BookingActivity.this,
+                        new DatePickerDialog.OnDateSetListener() {
 
+                            @Override
+                            public void onDateSet(DatePicker view, int year,
+                                                  int monthOfYear, int dayOfMonth) {
+                                dateBook = new Date(year, monthOfYear + 1, dayOfMonth, hours, minutes);
+                                dateTime.setText(dateBook.toString());
+
+                            }
+                        }, mYear, mMonth, mDay);
+                datePickerDialog.show();
+                TimePickerDialog timePickerDialog = new TimePickerDialog(BookingActivity.this,
+                        new TimePickerDialog.OnTimeSetListener() {
+
+                            @Override
+                            public void onTimeSet(TimePicker view, int hourOfDay,
+                                                  int minute) {
+
+                                hours = hourOfDay;
+                                minutes = minute;
+                            }
+                        }, mHour, mMinute, false);
+                timePickerDialog.show();
+
+
+            }
+        });
         dateTime.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -165,6 +204,12 @@ public class BookingActivity extends AppCompatActivity implements
 
         });
         confirmBooking.setOnClickListener(this);
+        pay_by.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openDialogPayment(BookingActivity.this);
+            }
+        });
         pay_by.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -377,16 +422,52 @@ public class BookingActivity extends AppCompatActivity implements
         dialog.show();
     }
 
+    private void hideImage(ImageView imageView1, ImageView imageView2) {
+        imageView1.setVisibility(View.INVISIBLE);
+        imageView2.setVisibility(View.INVISIBLE);
+    }
+
     private void openDialogPayment(Context context) {
         final Dialog dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.activity_payment);
 
-        //    dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
         dialog.setCanceledOnTouchOutside(true);
 
-        //  TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
-        //   title.setText("Payment method");
+        final LinearLayout payCashLayout = (LinearLayout) dialog.findViewById(R.id.pay_cash_layout);
+        final ImageView cash_tick = (ImageView) dialog.findViewById(R.id.cash_tick);
+
+        LinearLayout payCardLayout = (LinearLayout) dialog.findViewById(R.id.pay_card_layout);
+        final ImageView card_tick = (ImageView) dialog.findViewById(R.id.card_tick);
+
+        payCashLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideImage(cash_tick, card_tick);
+                cash_tick.setVisibility(View.VISIBLE);
+                payType = "Cash";
+            }
+        });
+
+        payCardLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideImage(cash_tick, card_tick);
+                card_tick.setVisibility(View.VISIBLE);
+                payType = "Card";
+            }
+        });
+
+        Button paymentButton = (Button) dialog.findViewById(R.id.payment_button);
+        paymentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!payType.isEmpty()) {
+                    pay_by.setText(payType);
+                }
+                dialog.dismiss();
+            }
+        });
 
         ImageView dialogButton = (ImageView) dialog.findViewById(R.id.imageView_close);
         dialogButton.setOnClickListener(new View.OnClickListener() {
