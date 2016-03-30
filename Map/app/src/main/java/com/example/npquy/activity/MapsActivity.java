@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.location.Geocoder;
 import android.provider.Settings;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentActivity;
@@ -29,6 +31,7 @@ import android.widget.Toast;
 
 import com.example.npquy.entity.Address;
 import com.example.npquy.entity.Location;
+import com.example.npquy.entity.NearestDriver;
 import com.example.npquy.entity.RetrieveQuote;
 import com.example.npquy.service.GPSTracker;
 import com.example.npquy.service.WebServiceTaskManager;
@@ -36,9 +39,18 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.List;
+import java.util.Locale;
+
+import flexjson.JSONDeserializer;
 import flexjson.JSONSerializer;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener {
@@ -54,14 +66,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private TextView people;
     private TextView luggage;
 
+    private LatLng yourLocation;
+    private LatLng lastLocation;
+    private LatLng currentLocation;
+
     private LinearLayout carLayout;
 
+    private NearestDriver yourNearestDriver;
     private NavigationView navigationView = null;
     private Toolbar toolbar = null;
 
     private ImageView swap;
 
-    private int num_people, num_luggage;
+    public int num_people, num_luggage;
 
 
     @Override
@@ -84,7 +101,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
-
+       // toggle.set("Zeta-X");
+        toolbar.setTitle("Zeta-X");
+        toolbar.setTitleTextColor(Color.WHITE);
         toggle.syncState();
 
 
@@ -149,7 +168,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
     }
 
-    private void postQuotation(double pickLat, double pickLong, double dropLat, double dropLong) {
+    private void postQuotation(Address pickUpAdd, Address dropOffAdd) {
 
         String url = WebServiceTaskManager.URL + "Quotation";
 
@@ -162,14 +181,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         };
 
         RetrieveQuote quotation = new RetrieveQuote();
-        quotation.setCustid(0);
-        quotation.setPickLat(pickLat);
-        quotation.setPickLong(pickLong);
-        quotation.setDoffLat(dropLat);
-        quotation.setDoffLong(dropLong);
-        quotation.setBookingdate("0001-01-01T00:00:00");
-        quotation.setPaq(0);
-        quotation.setBags(0);
+        quotation.setPick(pickUpAdd.getFulladdress());
+        quotation.setPickLat(pickUpAdd.getLatitude());
+        quotation.setPickLong(pickUpAdd.getLongitude());
+        quotation.setDoffLat(dropOffAdd.getLatitude());
+        quotation.setDoffLong(dropOffAdd.getLongitude());
+        quotation.setDoff(dropOffAdd.getFulladdress());
+        quotation.setBookingdate("2016-03-09T10:00:00");
+        quotation.setPaq(Integer.parseInt(people.getText().toString()));
+        quotation.setBags(Integer.parseInt(luggage.getText().toString()));
+        quotation.setPickpostcode(pickUpAdd.getPostcode());
+        quotation.setDroppostcode(dropOffAdd.getPostcode());
+        quotation.setPetfriendly(false);
+        quotation.setExecutive(false);
+        quotation.setChildseat(false);
 
         String json = new JSONSerializer().exclude("*.class").serialize(
                 quotation);
@@ -215,7 +240,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
         if (!pickUp.getText().toString().isEmpty() && !dropOff.getText().toString().isEmpty()) {
-            postQuotation(pickLat, pickLong, dropLat, dropLong);
+            postQuotation(pickUpAddress, dropOffAddress);
             book.setText("Continue \n Booking");
             total.setText("Total \n 30.00$");
             isCheck = true;
@@ -232,14 +257,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     dropOffAddress);
             bundle.putString("pickUpAddress", pickUpJson);
             bundle.putString("dropOffAddress", dropOffJson);
+            bundle.putInt("people", Integer.parseInt(people.getText().toString()));
+            bundle.putInt("luggage", Integer.parseInt(luggage.getText().toString()));
             myIntent.putExtra("data", bundle);
             startActivity(myIntent);
         }
-    }
-
-    public void showResponse(String response) {
-        //   Toast.makeText(this, response, Toast.LENGTH_SHORT).show();
-        Log.e("response", response, null);
     }
 
     private void hideImage(ImageView imageView1, ImageView imageView2, ImageView imageView3, ImageView imageView4) {
@@ -318,7 +340,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         chooseCar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(num_people != 0 && num_luggage != 0) {
+                if (num_people != 0 && num_luggage != 0) {
                     people.setText(num_people + "");
                     luggage.setText(num_luggage + "");
                 }
@@ -329,15 +351,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         dialog.show();
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         GPSTracker mGPS = new GPSTracker(this);
@@ -350,38 +363,105 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         mMap = googleMap;
 
-        double latitude, longitude;
+        final double latitude, longitude;
 
         latitude = mGPS.getLatitude();
         longitude = mGPS.getLongitude();
 
         if (latitude != 0 && longitude != 0) {
             // Add a marker in Sydney and move the camera
-            LatLng sydney = new LatLng(mGPS.getLatitude(), mGPS.getLongitude());
-            mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 12.0f));
-            findNearestDriver(sydney);
+            yourLocation = new LatLng(mGPS.getLatitude(), mGPS.getLongitude());
+            //  mMap.add
+          //  mMap.addMarker(new MarkerOptions().position(yourLocation).title("You're here"));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(yourLocation, 12.0f));
+            mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+                public void onCameraChange(CameraPosition arg0) {
+                    mMap.clear();
+                    MarkerOptions home = new MarkerOptions().position(yourLocation).title("You're here");
+                    mMap.addMarker(home).showInfoWindow();
+
+                    currentLocation = arg0.target;
+
+                    if (lastLocation != null && calculationByDistance(currentLocation, lastLocation) > 20) {
+                        findNearestDriver(currentLocation);
+                        MarkerOptions dragMark = new MarkerOptions().position(currentLocation).title((int) (yourNearestDriver.getTravelTime() / 1000) + " min");
+                        mMap.addMarker(dragMark).showInfoWindow();
+                    }
+                    lastLocation = arg0.target;
+                    pickUpAddress = getLocationByGeoCode(currentLocation);
+                    pickUp.setText(pickUpAddress.getFulladdress());
+
+
+                }
+            });
+            findNearestDriver(yourLocation);
         } else {
             Toast.makeText(this, "Can't find your location! Please check your GPS!", Toast.LENGTH_LONG).show();
         }
     }
 
+    private Address getLocationByGeoCode(LatLng location) {
+        Geocoder geocoder;
+        List<android.location.Address> addresses;
+        geocoder = new Geocoder(this, Locale.getDefault());
+        Address yourAddressPick = new Address();
+        try {
+            addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1);
+            if(!addresses.isEmpty()) {
+                android.location.Address firstAddress = addresses.get(0);
+                yourAddressPick.setPostcode(firstAddress.getPostalCode());
+                yourAddressPick.setFulladdress(firstAddress.getAddressLine(0) + "," + firstAddress.getAddressLine(1) + "," + firstAddress.getAddressLine(2));
+                if(firstAddress.hasLongitude()) {
+                    yourAddressPick.setLongitude(firstAddress.getLongitude());
+                }
+                if(firstAddress.hasLatitude()) {
+                    yourAddressPick.setLatitude(firstAddress.getLatitude());
+                }
+            }
+        } catch (IOException e) {
+            Log.e("Error", e.getLocalizedMessage());
+        }
+
+        return yourAddressPick;
+    }
+
+    public double calculationByDistance(LatLng StartP, LatLng EndP) {
+        int Radius = 6371;// radius of earth in Km
+        double lat1 = StartP.latitude;
+        double lat2 = EndP.latitude;
+        double lon1 = StartP.longitude;
+        double lon2 = EndP.longitude;
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(lat1))
+                * Math.cos(Math.toRadians(lat2)) * Math.sin(dLon / 2)
+                * Math.sin(dLon / 2);
+        double c = 2 * Math.asin(Math.sqrt(a));
+        double valueResult = Radius * c;
+        double km = valueResult / 1;
+        double meter = valueResult % 1000;
+        Log.i("Meter", km * 1000 + meter + "");
+
+        return km * 1000 + meter;
+    }
+
     private void findNearestDriver(LatLng location) {
         String url = WebServiceTaskManager.URL + "NearestDriver";
 
-        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "Retrieving the nearest driver ...") {
+        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
 
             @Override
             public void handleResponse(String response) {
-                showResponse(response);
+                Log.e("NearestDriver_response", response, null);
+                yourNearestDriver = new JSONDeserializer<NearestDriver>().use(null,
+                        NearestDriver.class).deserialize(response);
             }
         };
 
-        Location locate = new Location();
-        locate.setLat(location.latitude);
-        locate.setLgn(location.longitude);
+        Location locate = new Location(location.latitude, location.longitude);
         String json = new JSONSerializer().exclude("*.class").serialize(
-                location);
+                locate);
         Log.e("NearestDriver", json, null);
         wst.addNameValuePair("", json);
 

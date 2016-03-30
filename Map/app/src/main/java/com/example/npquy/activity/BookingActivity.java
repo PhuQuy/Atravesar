@@ -68,6 +68,9 @@ public class BookingActivity extends AppCompatActivity implements
     private Address pickUpAddress;
     private Address dropOffAddress;
 
+    private TextView people;
+    private TextView luggage;
+
     private Date dateBook;
 
     private Boolean isWaitAndReturn;
@@ -85,6 +88,8 @@ public class BookingActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_booking);
         dateTime = (EditText) findViewById(R.id.date_time);
         dateTime.setInputType(InputType.TYPE_NULL);
+        people = (TextView) findViewById(R.id.people1);
+        luggage = (TextView) findViewById(R.id.luggage1);
         pickUp = (EditText) findViewById(R.id.pick_up_booking);
         dropOff = (CustomEditText) findViewById(R.id.drop_off_booking);
         confirmBooking = (Button) findViewById(R.id.book_booking);
@@ -96,20 +101,27 @@ public class BookingActivity extends AppCompatActivity implements
         pay_by = (EditText) findViewById(R.id.pay_by_edit);
         pay_by.setInputType(InputType.TYPE_NULL);
 
+
         userDb = new UserDb(this);
 
         Intent callerIntent = getIntent();
-        Bundle packageFromCaller =
-                callerIntent.getBundleExtra("data");
-        String pickUpJson = packageFromCaller.getString("pickUpAddress");
-        pickUpAddress = new JSONDeserializer<Address>().use(null,
-                Address.class).deserialize(pickUpJson);
-        String dropOffJson = packageFromCaller.getString("dropOffAddress");
-        dropOffAddress = new JSONDeserializer<Address>().use(null,
-                Address.class).deserialize(dropOffJson);
+        if (callerIntent != null) {
+            Bundle packageFromCaller =
+                    callerIntent.getBundleExtra("data");
+            String pickUpJson = packageFromCaller.getString("pickUpAddress");
+            pickUpAddress = new JSONDeserializer<Address>().use(null,
+                    Address.class).deserialize(pickUpJson);
+            String dropOffJson = packageFromCaller.getString("dropOffAddress");
+            dropOffAddress = new JSONDeserializer<Address>().use(null,
+                    Address.class).deserialize(dropOffJson);
 
-        pickUp.setText(pickUpAddress.getFulladdress());
-        dropOff.setText(dropOffAddress.getFulladdress());
+            Integer num_people = packageFromCaller.getInt("people");
+            Integer num_luggage = packageFromCaller.getInt("luggage");
+            pickUp.setText(pickUpAddress.getFulladdress());
+            dropOff.setText(dropOffAddress.getFulladdress());
+            people.setText(num_people + "");
+            luggage.setText(num_luggage + "");
+        }
         dateTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

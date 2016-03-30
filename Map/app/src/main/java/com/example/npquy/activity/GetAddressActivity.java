@@ -18,6 +18,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.npquy.adapter.AddressAdapter;
+import com.example.npquy.adapter.FrequentAdapter;
 import com.example.npquy.database.AddressDb;
 import com.example.npquy.entity.Address;
 import com.example.npquy.service.WebServiceTaskManager;
@@ -35,9 +36,11 @@ import flexjson.JSONDeserializer;
 public class GetAddressActivity extends AppCompatActivity {
 
     // List view
-    private ListView lv;
-    ArrayList<Address> addressesData = new ArrayList<>();
-    AddressAdapter addressArrayAdapter;
+    private ListView lvGetAddress;
+    //ArrayList<Address> addressesData = new ArrayList<>();
+   // AddressAdapter addressArrayAdapter;
+    private FrequentAdapter frequentAdapter;
+    private ArrayList<Object> addressesData = new ArrayList<>();
 
     private AddressDb addressDb ;
 
@@ -49,18 +52,24 @@ public class GetAddressActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_get_address);
         getSupportActionBar().setHomeButtonEnabled(true);
-        lv = (ListView) findViewById(R.id.live_search_view);
+        lvGetAddress = (ListView) findViewById(R.id.frequent_view);
        // getDatabase();
         addressDb = new AddressDb(this);
 
         inputSearch = (EditText) findViewById(R.id.inputSearch);
-        addressesData.addAll(addressDb.getAddressFromDb());
-        addressArrayAdapter = new AddressAdapter(this,
+       // addressesData.addAll(addressDb.getAddressFromDb());
+        /*addressArrayAdapter = new AddressAdapter(this,
                 R.layout.list_item,
-                addressesData);
+                addressesData);*/
 
-        lv.setAdapter(addressArrayAdapter);
-
+        Address homeAddress = new Address("Home Address ,,Tap to select","");
+        addressesData.add("HOME");
+        addressesData.add(homeAddress);
+        addressesData.add("FREQUENT");
+        addressesData.addAll(addressDb.getAddressFromDb());
+       // lv.setAdapter(addressArrayAdapter);
+        frequentAdapter = new FrequentAdapter(this, addressesData);
+        lvGetAddress.setAdapter(frequentAdapter);
         inputSearch.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -79,19 +88,26 @@ public class GetAddressActivity extends AppCompatActivity {
                 // TODO Auto-generated method stub
             }
         });
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        lvGetAddress.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View viewClicked, int position,
                                     long id) {
-                Address address = addressArrayAdapter.getItem(position);
+                Address address = null;
+                try {
+                    address = (Address) frequentAdapter.getItem(position);
+                }catch (ClassCastException ex) {
+                    Log.e("Cast Exception",ex.toString());
+                }
                // doInsertRecord(address);
-                addressDb.insertAddress(address);
-                Intent data = new Intent();
-                data.putExtra("pickUp", address);
-                data.putExtra("dropOff", address);
+                if(address != null) {
+                    addressDb.insertAddress(address);
+                    Intent data = new Intent();
+                    data.putExtra("pickUp", address);
+                    data.putExtra("dropOff", address);
 
-                setResult(RESULT_OK, data);
-                finish();
+                    setResult(RESULT_OK, data);
+                    finish();
+                }
             }
         });
     }
@@ -115,7 +131,7 @@ public class GetAddressActivity extends AppCompatActivity {
 
             @Override
             public void handleResponse(String response) {
-                Log.e("respone", response, null);
+                Log.e("response", response, null);
       /*         */
                 try {
                     JSONObject root = new JSONObject(response);
@@ -128,8 +144,8 @@ public class GetAddressActivity extends AppCompatActivity {
                     Log.e("code", code.toString(), null);
                     addressesData.clear();
                     addressesData.addAll(addresses);
-                    addressArrayAdapter.notifyDataSetChanged();
-                    lv.setAdapter(addressArrayAdapter);
+                    frequentAdapter.notifyDataSetChanged();
+                    lvGetAddress.setAdapter(frequentAdapter);
                 } catch (JSONException e) {
                     Log.e("Error", e.getLocalizedMessage(), e);
                 }

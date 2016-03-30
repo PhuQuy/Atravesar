@@ -19,6 +19,10 @@ public class Address implements Serializable{
 
     public Address() {
     }
+    public Address(String name, String address){
+        this.Fulladdress = name;
+        this.Postcode = address;
+    }
 
     public String getOutcode() {
         return Outcode;

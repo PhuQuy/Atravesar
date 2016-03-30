@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -92,6 +93,18 @@ public class BookingSaved extends AppCompatActivity implements  OnMapReadyCallba
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 12.0f));
         }else {
             Toast.makeText(this, "Can't find your location! Please check your GPS!", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // app icon in action bar clicked; goto parent activity.
+                this.finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 }

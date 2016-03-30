@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.npquy.activity.GetAddressActivity;
 import com.example.npquy.activity.R;
 import com.example.npquy.entity.Address;
 
@@ -32,6 +33,8 @@ public class AddressAdapter extends ArrayAdapter<Address> {
         this.layoutId = layoutId;
         this.myArray = arr;
     }
+
+
 
     public View getView(int position, View convertView,
                         ViewGroup parent) {

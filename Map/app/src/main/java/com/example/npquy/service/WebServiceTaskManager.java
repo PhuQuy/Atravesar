@@ -20,6 +20,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.apache.http.util.EntityUtils;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -90,6 +91,7 @@ public abstract class WebServiceTaskManager extends
             System.out.println(result + " null");
             return result;
         } else {
+
             try {
                 result = inputStreamToString(response.getEntity().getContent());
 
@@ -150,11 +152,12 @@ public abstract class WebServiceTaskManager extends
             switch (taskType) {
 
                 case POST_TASK:
-                    HttpPost httppost = new HttpPost(url);
+                    HttpPost httpPost = new HttpPost(url);
                     // Add parameters
-                    httppost.setEntity(new UrlEncodedFormEntity(params));
-
-                    response = httpclient.execute(httppost);
+    /*                httpPost.setHeader("Accept", "application/json");
+                    httpPost.setHeader("Content-type", "application/json");*/
+                    httpPost.setEntity(new UrlEncodedFormEntity(params));
+                    response = httpclient.execute(httpPost);
                     break;
                 case GET_TASK:
                     if (!params.isEmpty()) {

@@ -122,8 +122,8 @@ public class AddressDb extends SQLiteOpenHelper {
         if (db != null) {
             try {
                 cursor = db.query(ADDRESS_TABLE_NAME, null, null, null, null, null, null);
-                cursor.moveToFirst();
-                while (cursor.isAfterLast() == false) {
+                cursor.moveToLast();
+                while (cursor.isFirst() == false) {
                     Address address = new Address();
                     address.setOutcode(cursor.getString(1));
                     address.setPostcode(cursor.getString(2));
@@ -133,7 +133,7 @@ public class AddressDb extends SQLiteOpenHelper {
                     address.setLatitude(cursor.getDouble(6));
                     address.setLongitude(cursor.getDouble(7));
                     addresses.add(address);
-                    cursor.moveToNext();
+                    cursor.moveToPrevious();
                 }
             } catch (Exception ex) {
                 Log.e("Error", ex.getLocalizedMessage(), ex);
