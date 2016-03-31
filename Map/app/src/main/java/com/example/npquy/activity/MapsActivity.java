@@ -33,6 +33,8 @@ import com.example.npquy.entity.Address;
 import com.example.npquy.entity.Location;
 import com.example.npquy.entity.NearestDriver;
 import com.example.npquy.entity.RetrieveQuote;
+import com.example.npquy.entity.RetrieveQuoteResult;
+import com.example.npquy.entity.SaveBooking;
 import com.example.npquy.service.GPSTracker;
 import com.example.npquy.service.WebServiceTaskManager;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -45,8 +47,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -78,7 +85,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private ImageView swap;
 
-    public int num_people, num_luggage;
+    private Double totalFare;
+    private int num_people, num_luggage;
+    private RetrieveQuote retrieveQuote;
 
 
     @Override
@@ -161,6 +170,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 openCarBox(MapsActivity.this);
             }
         });
+        retrieveQuote = new RetrieveQuote();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -177,27 +187,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void handleResponse(String response) {
                 Log.e("response_quotation", response, null);
+                RetrieveQuoteResult bookingSaved = new JSONDeserializer<RetrieveQuoteResult>().use(null,
+                        RetrieveQuoteResult.class).deserialize(response);
+                Log.e("Booking save", bookingSaved.toString());
+                if(bookingSaved != null) {
+                    totalFare = Double.parseDouble(bookingSaved.getTotalfare());
+                    total.setText("Total \n £" + totalFare);
+                    book.setText("Continue \n Booking");
+                    book.setClickable(bookingSaved.getInServiceArea());
+                }
             }
         };
 
-        RetrieveQuote quotation = new RetrieveQuote();
-        quotation.setPick(pickUpAdd.getFulladdress());
-        quotation.setPickLat(pickUpAdd.getLatitude());
-        quotation.setPickLong(pickUpAdd.getLongitude());
-        quotation.setDoffLat(dropOffAdd.getLatitude());
-        quotation.setDoffLong(dropOffAdd.getLongitude());
-        quotation.setDoff(dropOffAdd.getFulladdress());
-        quotation.setBookingdate("2016-03-09T10:00:00");
-        quotation.setPaq(Integer.parseInt(people.getText().toString()));
-        quotation.setBags(Integer.parseInt(luggage.getText().toString()));
-        quotation.setPickpostcode(pickUpAdd.getPostcode());
-        quotation.setDroppostcode(dropOffAdd.getPostcode());
-        quotation.setPetfriendly(false);
-        quotation.setExecutive(false);
-        quotation.setChildseat(false);
-
+        retrieveQuote.setCustid(0);
+        retrieveQuote.setPick(pickUpAdd.getFulladdress());
+        retrieveQuote.setPickLat(pickUpAdd.getLatitude());
+        retrieveQuote.setPickLong(pickUpAdd.getLongitude());
+        retrieveQuote.setDoffLat(dropOffAdd.getLatitude());
+        retrieveQuote.setDoffLong(dropOffAdd.getLongitude());
+        retrieveQuote.setDoff(dropOffAdd.getFulladdress());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        Date today = new Date();
+        String date=sdf.format(today);
+        retrieveQuote.setBookingdate(date);
+        retrieveQuote.setPaq(Integer.parseInt(people.getText().toString()));
+        retrieveQuote.setBags(Integer.parseInt(luggage.getText().toString()));
+        retrieveQuote.setPickpostcode(pickUpAdd.getPostcode());
+        retrieveQuote.setDroppostcode(dropOffAdd.getPostcode());
+        retrieveQuote.setPetfriendly(false);
+        retrieveQuote.setExecutive(false);
+        retrieveQuote.setChildseat(false);
         String json = new JSONSerializer().exclude("*.class").serialize(
-                quotation);
+                retrieveQuote);
         Log.e("Quotation", json, null);
         wst.addNameValuePair("", json);
 
@@ -218,31 +239,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        double pickLat = 0.0;
-        double pickLong = 0.0;
-        double dropLat = 0.0;
-        double dropLong = 0.0;
         if (requestCode == 1 && resultCode == RESULT_OK) {
             if (data.hasExtra("pickUp")) {
                 Address address = (Address) data.getExtras().get("pickUp");
                 pickUpAddress = address;
                 pickUp.setText(address.getFulladdress());
-                pickLat = address.getLatitude();
-                pickLong = address.getLongitude();
             }
         } else if (requestCode == 2 && resultCode == RESULT_OK) {
             if (data.hasExtra("dropOff")) {
                 Address address = (Address) data.getExtras().get("dropOff");
                 dropOffAddress = address;
                 dropOff.setText(address.getFulladdress());
-                dropLat = address.getLatitude();
-                dropLong = address.getLongitude();
             }
         }
         if (!pickUp.getText().toString().isEmpty() && !dropOff.getText().toString().isEmpty()) {
             postQuotation(pickUpAddress, dropOffAddress);
-            book.setText("Continue \n Booking");
-            total.setText("Total \n 30.00$");
             isCheck = true;
         }
     }
@@ -255,10 +266,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     pickUpAddress);
             String dropOffJson = new JSONSerializer().exclude("*.class").serialize(
                     dropOffAddress);
+            String retrieveQuoteJson = new JSONSerializer().exclude("*.class").serialize(retrieveQuote);
+
+            Log.e("retrieveQuoteJson", retrieveQuoteJson);
             bundle.putString("pickUpAddress", pickUpJson);
             bundle.putString("dropOffAddress", dropOffJson);
             bundle.putInt("people", Integer.parseInt(people.getText().toString()));
             bundle.putInt("luggage", Integer.parseInt(luggage.getText().toString()));
+            bundle.putString("retrieveQuote", retrieveQuoteJson);
+            bundle.putDouble("totalFare", totalFare);
             myIntent.putExtra("data", bundle);
             startActivity(myIntent);
         }

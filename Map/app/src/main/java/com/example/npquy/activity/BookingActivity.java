@@ -30,12 +30,14 @@ import com.example.npquy.database.UserDb;
 import com.example.npquy.entity.Address;
 import com.example.npquy.entity.ElectronicPayment;
 import com.example.npquy.entity.RetrieveQuote;
+import com.example.npquy.entity.RetrieveQuoteResult;
 import com.example.npquy.entity.SaveBooking;
 import com.example.npquy.entity.User;
 import com.example.npquy.service.CustomEditText;
 import com.example.npquy.service.DrawableClickListener;
 import com.example.npquy.service.WebServiceTaskManager;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -50,6 +52,7 @@ public class BookingActivity extends AppCompatActivity implements
     private EditText pickUp;
     private CustomEditText dropOff;
     private Button confirmBooking;
+    private Button totalBooking;
     private Switch waitAndReturn;
     private Switch childSeat;
     private Switch pet;
@@ -73,13 +76,16 @@ public class BookingActivity extends AppCompatActivity implements
 
     private Date dateBook;
 
-    private Boolean isWaitAndReturn;
-    private Boolean isChildSeat;
-    private Boolean isPet;
-    private Boolean isEco;
+    private Boolean isWaitAndReturn = false;
+    private Boolean isChildSeat = false;
+    private Boolean isPet = false;
+    private Boolean isEco = false;
     private UserDb userDb;
 
     private String payType;
+    private RetrieveQuote retrieveQuote;
+
+    private Double totalFare;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,11 +94,12 @@ public class BookingActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_booking);
         dateTime = (EditText) findViewById(R.id.date_time);
         dateTime.setInputType(InputType.TYPE_NULL);
-        people = (TextView) findViewById(R.id.people1);
-        luggage = (TextView) findViewById(R.id.luggage1);
+        people = (TextView) findViewById(R.id.people_booking);
+        luggage = (TextView) findViewById(R.id.luggage_booking);
         pickUp = (EditText) findViewById(R.id.pick_up_booking);
         dropOff = (CustomEditText) findViewById(R.id.drop_off_booking);
         confirmBooking = (Button) findViewById(R.id.book_booking);
+        totalBooking = (Button) findViewById(R.id.total_booking);
         waitAndReturn = (Switch) findViewById(R.id.w8);
         childSeat = (Switch) findViewById(R.id.child_seat);
         pet = (Switch) findViewById(R.id.pet);
@@ -100,7 +107,6 @@ public class BookingActivity extends AppCompatActivity implements
         note = (EditText) findViewById(R.id.content_note);
         pay_by = (EditText) findViewById(R.id.pay_by_edit);
         pay_by.setInputType(InputType.TYPE_NULL);
-
 
         userDb = new UserDb(this);
 
@@ -114,9 +120,14 @@ public class BookingActivity extends AppCompatActivity implements
             String dropOffJson = packageFromCaller.getString("dropOffAddress");
             dropOffAddress = new JSONDeserializer<Address>().use(null,
                     Address.class).deserialize(dropOffJson);
-
+            String retrieveQuoteJson = packageFromCaller.getString("retrieveQuote");
+            retrieveQuote = new JSONDeserializer<RetrieveQuote>().use(null,
+                    RetrieveQuote.class).deserialize(retrieveQuoteJson);
+            Log.e("retrieveQuote", retrieveQuote.toString());
             Integer num_people = packageFromCaller.getInt("people");
             Integer num_luggage = packageFromCaller.getInt("luggage");
+            totalFare = packageFromCaller.getDouble("totalFare");
+            totalBooking.setText("Total\n£" + totalFare);
             pickUp.setText(pickUpAddress.getFulladdress());
             dropOff.setText(dropOffAddress.getFulladdress());
             people.setText(num_people + "");
@@ -139,7 +150,10 @@ public class BookingActivity extends AppCompatActivity implements
                                                   int monthOfYear, int dayOfMonth) {
                                 dateBook = new Date(year, monthOfYear + 1, dayOfMonth, hours, minutes);
                                 dateTime.setText(dateBook.toString());
-
+                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                                String date = sdf.format(dateBook);
+                                retrieveQuote.setBookingdate(date);
+                                doChange();
                             }
                         }, mYear, mMonth, mDay);
                 datePickerDialog.show();
@@ -155,8 +169,6 @@ public class BookingActivity extends AppCompatActivity implements
                             }
                         }, mHour, mMinute, false);
                 timePickerDialog.show();
-
-
             }
         });
         dateTime.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -177,7 +189,10 @@ public class BookingActivity extends AppCompatActivity implements
                                                       int monthOfYear, int dayOfMonth) {
                                     dateBook = new Date(year, monthOfYear + 1, dayOfMonth, hours, minutes);
                                     dateTime.setText(dateBook.toString());
-
+                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                                    String date = sdf.format(dateBook);
+                                    retrieveQuote.setBookingdate(date);
+                                    doChange();
                                 }
                             }, mYear, mMonth, mDay);
                     datePickerDialog.show();
@@ -239,11 +254,15 @@ public class BookingActivity extends AppCompatActivity implements
         childSeat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 isChildSeat = isChecked;
+                retrieveQuote.setChildseat(isChecked);
+                doChange();
             }
         });
         pet.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 isPet = isChecked;
+                retrieveQuote.setPetfriendly(isChecked);
+                doChange();
             }
         });
         eco.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -274,7 +293,7 @@ public class BookingActivity extends AppCompatActivity implements
             Intent myIntent = new Intent(BookingActivity.this, GetAddressActivity.class);
             startActivityForResult(myIntent, 2);
         } else if (v == confirmBooking) {
-            postQuotation(pickUpAddress, dropOffAddress);
+            postQuotation(retrieveQuote);
             User user = userDb.getCurrentUser();
             if (user == null) {
                 openDialogSignIn(this);
@@ -381,6 +400,11 @@ public class BookingActivity extends AppCompatActivity implements
         wst.addNameValuePair("", json);
 
         wst.execute(new String[]{url});
+
+    }
+
+    private void doChange() {
+        postQuotation(retrieveQuote);
 
     }
 
@@ -537,7 +561,7 @@ public class BookingActivity extends AppCompatActivity implements
     }
 
 
-    private void postQuotation(Address pickUpAddress, Address dropOffAddress) {
+    private void postQuotation(RetrieveQuote retrieveQuote) {
 
         String url = WebServiceTaskManager.URL + "Quotation";
 
@@ -545,11 +569,17 @@ public class BookingActivity extends AppCompatActivity implements
 
             @Override
             public void handleResponse(String response) {
-                Log.e("response", response, null);
+                RetrieveQuoteResult bookingSaved = new JSONDeserializer<RetrieveQuoteResult>().use(null,
+                        RetrieveQuoteResult.class).deserialize(response);
+                Log.e("Booking save", bookingSaved.toString());
+                if (bookingSaved != null) {
+                    totalFare = Double.parseDouble(bookingSaved.getTotalfare().trim());
+                    totalBooking.setText("Total\n£" + totalFare);
+                }
             }
         };
 
-        RetrieveQuote quotation = new RetrieveQuote();
+/*        RetrieveQuote quotation = new RetrieveQuote();
         quotation.setCustid(0);
         quotation.setPickLat(pickUpAddress.getLatitude());
         quotation.setPickLong(pickUpAddress.getLongitude());
@@ -564,10 +594,10 @@ public class BookingActivity extends AppCompatActivity implements
         quotation.setBags(0);
         quotation.setNote(note.getText().toString());
         quotation.setChildseat(isChildSeat);
-        quotation.setPetfriendly(isPet);
+        quotation.setPetfriendly(isPet);*/
 
         String json = new JSONSerializer().exclude("*.class").serialize(
-                quotation);
+                retrieveQuote);
         Log.e("json", json, null);
         wst.addNameValuePair("", json);
 
@@ -603,6 +633,10 @@ public class BookingActivity extends AppCompatActivity implements
                 pickUp.setText(address.getFulladdress());
                 pickUpAddress.setLatitude(address.getLatitude());
                 pickUpAddress.setLongitude(address.getLongitude());
+                retrieveQuote.setPick(pickUpAddress.getFulladdress());
+                retrieveQuote.setPickLat(pickUpAddress.getLatitude());
+                retrieveQuote.setPickLong(pickUpAddress.getLongitude());
+                retrieveQuote.setPickpostcode(pickUpAddress.getPostcode());
             }
         } else if (requestCode == 2 && resultCode == RESULT_OK) {
             if (data.hasExtra("dropOff")) {
@@ -610,7 +644,12 @@ public class BookingActivity extends AppCompatActivity implements
                 dropOff.setText(address.getFulladdress());
                 dropOffAddress.setLatitude(address.getLatitude());
                 dropOffAddress.setLongitude(address.getLongitude());
+                retrieveQuote.setDoff(dropOffAddress.getFulladdress());
+                retrieveQuote.setDoffLat(dropOffAddress.getLatitude());
+                retrieveQuote.setDoffLong(dropOffAddress.getLongitude());
+                retrieveQuote.setDroppostcode(dropOffAddress.getPostcode());
             }
         }
+        doChange();
     }
 }

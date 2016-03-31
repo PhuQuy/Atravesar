@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.logging.Handler;
 
@@ -15,11 +16,14 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.conn.HttpHostConnectException;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
 import android.app.Activity;
@@ -47,6 +51,9 @@ public abstract class WebServiceTaskManager extends
 
     private int taskType = GET_TASK;
     private Activity mContext = null;
+
+    private StringEntity paramsNoName;
+
     private String processMessage = "Processing...";
 
     private ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
@@ -76,7 +83,14 @@ public abstract class WebServiceTaskManager extends
     }
 
     public void addNameValuePair(String name, String value) {
-
+        if(name.isEmpty()) {
+            try {
+                paramsNoName = new StringEntity(value);
+                paramsNoName.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
         params.add(new BasicNameValuePair(name, value));
     }
 
@@ -156,7 +170,11 @@ public abstract class WebServiceTaskManager extends
                     // Add parameters
     /*                httpPost.setHeader("Accept", "application/json");
                     httpPost.setHeader("Content-type", "application/json");*/
-                    httpPost.setEntity(new UrlEncodedFormEntity(params));
+                    if(params.isEmpty()) {
+                        httpPost.setEntity(new UrlEncodedFormEntity(params));
+                    }else {
+                        httpPost.setEntity(paramsNoName);
+                    }
                     response = httpclient.execute(httpPost);
                     break;
                 case GET_TASK:

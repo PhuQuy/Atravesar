@@ -194,6 +194,7 @@
                     android:text="Booking"
                     android:background="#000000"
                     android:textColor="#00CCCC"
+                    android:clickable="false"
                     android:textAlignment="center"></Button>
             </LinearLayout>
         </RelativeLayout>
