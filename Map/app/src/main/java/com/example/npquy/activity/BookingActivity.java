@@ -245,10 +245,10 @@ public class BookingActivity extends AppCompatActivity implements
                     case RIGHT:
                         viaAdd.setVisibility(View.GONE);
                         viaAddress = null;
-                        retrieveQuote.setVia(viaAddress.getFulladdress());
-                        retrieveQuote.setViaLat(viaAddress.getLatitude());
-                        retrieveQuote.setViaLong(viaAddress.getLongitude());
-                        retrieveQuote.setViapostcode(viaAddress.getPostcode());
+                        retrieveQuote.setVia(null);
+                        retrieveQuote.setViaLat(null);
+                        retrieveQuote.setViaLong(null);
+                        retrieveQuote.setViapostcode(null);
                         doChange();
                         break;
 
@@ -363,9 +363,11 @@ public class BookingActivity extends AppCompatActivity implements
                 saveBooking.setFare(Double.parseDouble(retrieveQuoteResult.getFare()));
                 saveBooking.setPick(pickUpAddress.getFulladdress());
                 saveBooking.setDoff(dropOffAddress.getFulladdress());
-                saveBooking.setVia(viaAddress.getFulladdress());
-                saveBooking.setViaLat(viaAddress.getLatitude());
-                saveBooking.setViaLong(viaAddress.getLongitude());
+                if(viaAddress != null) {
+                    saveBooking.setVia(viaAddress.getFulladdress());
+                    saveBooking.setViaLat(viaAddress.getLatitude());
+                    saveBooking.setViaLong(viaAddress.getLongitude());
+                }
                 saveBooking.setPkLat(pickUpAddress.getLatitude());
                 saveBooking.setPkLong(pickUpAddress.getLongitude());
                 saveBooking.setPaq(Integer.parseInt(people.getText().toString()));
