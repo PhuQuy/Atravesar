@@ -327,10 +327,10 @@ public class BookingActivity extends AppCompatActivity implements
         } else if (v == confirmBooking) {
             postQuotation(retrieveQuote);
             User userDbCurrentUser = userDb.getCurrentUser();
-            int currentUserId = Integer.parseInt(userDbCurrentUser.getCusID());
-            if (user == null) {
+            if (userDbCurrentUser == null || userDbCurrentUser.getCusID() == null) {
                 openDialogSignIn(this);
             } else {
+                int currentUserId = Integer.parseInt(userDbCurrentUser.getCusID());
                 ElectronicPayment electronicPayment = new ElectronicPayment();
                 electronicPayment.setAmount(totalFare);
                 electronicPayment.setCustID(currentUserId);
