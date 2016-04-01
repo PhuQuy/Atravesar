@@ -184,9 +184,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         user.setMobile(phoneNumber.getText().toString());
         String android_id =Secure.getString(this.getContentResolver(),
                 Secure.ANDROID_ID);
-        user.setDeviceId(android_id);
+        user.setDeviceID(android_id);
         login(user);
-        user.setCusId(cusId);
+        user.setCusID(cusId);
         userDb.login(user);
     }
 

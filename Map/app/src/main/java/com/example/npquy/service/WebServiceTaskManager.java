@@ -175,6 +175,7 @@ public abstract class WebServiceTaskManager extends
                     }else {
                         httpPost.setEntity(paramsNoName);
                     }
+                    Log.i(TAG,"HTTP Entiry : " + convertStreamToString(httpPost.getEntity().getContent()));
                     response = httpclient.execute(httpPost);
                     break;
                 case GET_TASK:
@@ -197,6 +198,17 @@ public abstract class WebServiceTaskManager extends
         }
 
         return response;
+    }
+
+    private String convertStreamToString(InputStream is) throws Exception {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        StringBuilder sb = new StringBuilder();
+        String line = null;
+        while ((line = reader.readLine()) != null) {
+            sb.append(line);
+        }
+        is.close();
+        return sb.toString();
     }
 
     private String inputStreamToString(InputStream is) {

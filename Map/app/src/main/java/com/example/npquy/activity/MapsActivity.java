@@ -491,8 +491,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void handleResponse(String response) {
                 Log.e("NearestDriver_response", response, null);
-                yourNearestDriver = new JSONDeserializer<NearestDriver>().use(null,
-                        NearestDriver.class).deserialize(response);
+                try {
+                    yourNearestDriver = new JSONDeserializer<NearestDriver>().use(null,
+                            NearestDriver.class).deserialize(response);
+                }catch (Exception e) {
+                    Log.e("Error Parse Json",e.getLocalizedMessage());
+                }
             }
         };
 
