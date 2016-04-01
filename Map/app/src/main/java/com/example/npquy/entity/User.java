@@ -4,59 +4,63 @@ package com.example.npquy.entity;
  * Created by npquy on 3/22/2016.
  */
 public class User {
-    private String cusId;
-    private String name;
-    private String mobile;
-    private String email;
-    private String deviceId;
+    private String CusID;
+    private String Name;
+    private String Mobile;
+    private String Email;
+    private String DeviceID;
 
     public User() {
     }
 
-    public User(String name, String mobile, String email, String deviceId) {
-        this.name = name;
-        this.mobile = mobile;
-        this.email = email;
-        this.deviceId = deviceId;
+    public String getCusID() {
+        return CusID;
     }
 
-    public String getCusId() {
-        return cusId;
-    }
-
-    public void setCusId(String cusId) {
-        this.cusId = cusId;
+    public void setCusID(String cusID) {
+        CusID = cusID;
     }
 
     public String getName() {
-        return name;
+        return Name;
     }
 
     public void setName(String name) {
-        this.name = name;
+        Name = name;
     }
 
     public String getMobile() {
-        return mobile;
+        return Mobile;
     }
 
     public void setMobile(String mobile) {
-        this.mobile = mobile;
+        Mobile = mobile;
     }
 
     public String getEmail() {
-        return email;
+        return Email;
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        Email = email;
     }
 
-    public String getDeviceId() {
-        return deviceId;
+    public String getDeviceID() {
+        return DeviceID;
     }
 
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
+    public void setDeviceID(String deviceID) {
+        DeviceID = deviceID;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "CusID='" + CusID + '\'' +
+                ", Name='" + Name + '\'' +
+                ", Mobile='" + Mobile + '\'' +
+                ", Email='" + Email + '\'' +
+                ", DeviceID='" + DeviceID + '\'' +
+                '}';
     }
 }

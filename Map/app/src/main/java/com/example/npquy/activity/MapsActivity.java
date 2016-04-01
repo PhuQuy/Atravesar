@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.location.Geocoder;
 import android.provider.Settings;
@@ -15,10 +17,13 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
@@ -41,6 +46,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -105,7 +111,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         swap = (ImageView) findViewById(R.id.swap_location);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         carLayout = (LinearLayout) findViewById(R.id.car);
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -113,8 +118,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
        // toggle.set("Zeta-X");
         toolbar.setTitle("Zeta-X");
         toolbar.setTitleTextColor(Color.WHITE);
+        toolbar.setDrawingCacheBackgroundColor(Color.WHITE);
+        toolbar.setSubtitleTextColor(Color.WHITE);
         toggle.syncState();
-
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         View headerView = navigationView.getHeaderView(0);
@@ -226,13 +232,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    public static void hideSoftKeyboard(Activity activity) {
-        InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
-    }
-
     public void pickLocation(int type) {
-        //   hideSoftKeyboard(MapsActivity.this);
         Intent myIntent = new Intent(MapsActivity.this, GetAddressActivity.class);
         startActivityForResult(myIntent, type);
     }
@@ -379,10 +379,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         mMap = googleMap;
 
-        final double latitude, longitude;
+        double latitude, longitude;
 
         latitude = mGPS.getLatitude();
         longitude = mGPS.getLongitude();
+        final View marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_maker_layout, null);
+        final TextView numTxt = (TextView) marker.findViewById(R.id.num_txt);
 
         if (latitude != 0 && longitude != 0) {
             // Add a marker in Sydney and move the camera
@@ -400,7 +402,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     if (lastLocation != null && calculationByDistance(currentLocation, lastLocation) > 20) {
                         findNearestDriver(currentLocation);
-                        MarkerOptions dragMark = new MarkerOptions().position(currentLocation).title((int) (yourNearestDriver.getTravelTime() / 1000) + " min");
+                        numTxt.setText((int) (yourNearestDriver.getTravelTime() / 1000) + " mins");
+                        MarkerOptions dragMark = new MarkerOptions().position(currentLocation)
+                                .title("")
+                                .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, marker)));
                         mMap.addMarker(dragMark).showInfoWindow();
                     }
                     lastLocation = arg0.target;
@@ -462,6 +467,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return km * 1000 + meter;
     }
 
+    public static Bitmap createDrawableFromView(Context context, View view) {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.buildDrawingCache();
+        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(bitmap);
+        view.draw(canvas);
+
+        return bitmap;
+    }
+
     private void findNearestDriver(LatLng location) {
         String url = WebServiceTaskManager.URL + "NearestDriver";
 
@@ -470,8 +490,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void handleResponse(String response) {
                 Log.e("NearestDriver_response", response, null);
-                yourNearestDriver = new JSONDeserializer<NearestDriver>().use(null,
-                        NearestDriver.class).deserialize(response);
+                try {
+                    yourNearestDriver = new JSONDeserializer<NearestDriver>().use(null,
+                            NearestDriver.class).deserialize(response);
+                }catch (Exception e) {
+                    Log.e("Error Parse Json",e.getLocalizedMessage());
+                }
             }
         };
 

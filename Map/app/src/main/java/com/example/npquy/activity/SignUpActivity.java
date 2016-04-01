@@ -171,7 +171,7 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
         user.setMobile(phoneNumber);
         String android_id = Settings.Secure.getString(this.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
-        user.setDeviceId(android_id);
+        user.setDeviceID(android_id);
         signUp(user);
     }
 

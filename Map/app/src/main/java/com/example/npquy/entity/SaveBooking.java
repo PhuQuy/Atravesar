@@ -6,13 +6,13 @@ package com.example.npquy.entity;
 public class SaveBooking {
     private String Outcode;
     private String RtnOutcode;
-    private Integer cusid;
-    private Address pick;
-    private Address doff;
+    private Integer cusID;
+    private String pick;
+    private String doff;
     private String via;
     private Double routedistance;
     private Double rtnroutedistance;
-    private Object vehType;
+    private String vehType;
     private Integer vehTypeID;
     private Double travelTime;
     private Double rtntraveltime;
@@ -22,7 +22,7 @@ public class SaveBooking {
     private String note;
     private Double pkLat;
     private Double pkLong;
-    private Object rjType;
+    private String rjType;
     private String bookingdate;
     private Integer paq;
     private Integer bags;
@@ -33,7 +33,7 @@ public class SaveBooking {
     private Boolean childseat;
     private Boolean petfriendly;
     private Boolean executive;
-    private Object returndate;
+    private String returndate;
     private Boolean InServiceArea;
 
     public SaveBooking() {
@@ -55,27 +55,27 @@ public class SaveBooking {
         RtnOutcode = rtnOutcode;
     }
 
-    public Integer getCusid() {
-        return cusid;
+    public Integer getCusID() {
+        return cusID;
     }
 
-    public void setCusid(Integer cusid) {
-        this.cusid = cusid;
+    public void setCusID(Integer cusID) {
+        this.cusID = cusID;
     }
 
-    public Address getPick() {
+    public String getPick() {
         return pick;
     }
 
-    public void setPick(Address pick) {
+    public void setPick(String pick) {
         this.pick = pick;
     }
 
-    public Address getDoff() {
+    public String getDoff() {
         return doff;
     }
 
-    public void setDoff(Address doff) {
+    public void setDoff(String doff) {
         this.doff = doff;
     }
 
@@ -103,11 +103,11 @@ public class SaveBooking {
         this.rtnroutedistance = rtnroutedistance;
     }
 
-    public Object getVehType() {
+    public String getVehType() {
         return vehType;
     }
 
-    public void setVehType(Object vehType) {
+    public void setVehType(String vehType) {
         this.vehType = vehType;
     }
 
@@ -183,11 +183,11 @@ public class SaveBooking {
         this.pkLong = pkLong;
     }
 
-    public Object getRjType() {
+    public String getRjType() {
         return rjType;
     }
 
-    public void setRjType(Object rjType) {
+    public void setRjType(String rjType) {
         this.rjType = rjType;
     }
 
@@ -271,11 +271,11 @@ public class SaveBooking {
         this.executive = executive;
     }
 
-    public Object getReturndate() {
+    public String getReturndate() {
         return returndate;
     }
 
-    public void setReturndate(Object returndate) {
+    public void setReturndate(String returndate) {
         this.returndate = returndate;
     }
 
@@ -292,7 +292,7 @@ public class SaveBooking {
         return "SaveBooking{" +
                 "Outcode='" + Outcode + '\'' +
                 ", RtnOutcode='" + RtnOutcode + '\'' +
-                ", cusid=" + cusid +
+                ", cusid=" + cusID +
                 ", pick=" + pick +
                 ", doff=" + doff +
                 ", via='" + via + '\'' +
