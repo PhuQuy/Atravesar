@@ -106,6 +106,7 @@ public class GetAddressActivity extends AppCompatActivity {
                     data.putExtra("dropOff", address);
 
                     setResult(RESULT_OK, data);
+                    addressDb.close();
                     finish();
                 }
             }

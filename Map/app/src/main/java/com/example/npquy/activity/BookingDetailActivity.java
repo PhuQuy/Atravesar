@@ -53,7 +53,7 @@ public class BookingDetailActivity extends AppCompatActivity {
         }*/
 
         User user = userDb.getCurrentUser();
-        getBookingHistory(user.getCusId(), user.getDeviceId());
+        getBookingHistory(user.getCusID(), user.getDeviceID());
     }
 
     @Override

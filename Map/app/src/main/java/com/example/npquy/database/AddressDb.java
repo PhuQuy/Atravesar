@@ -66,12 +66,12 @@ public class AddressDb extends SQLiteOpenHelper {
     public boolean insertAddress(Address address) {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = getData(address.getFulladdress());
-        if(cursor.getCount() != 0 ){
+        if (cursor.getCount() != 0) {
             cursor.moveToFirst();
             deleteAddress(cursor.getInt(0));
         }
         Cursor fullData = getData();
-        if(fullData.getCount() >= FREQUENTLY_NUMBER) {
+        if (fullData.getCount() >= FREQUENTLY_NUMBER) {
             fullData.moveToFirst();
             deleteAddress(fullData.getInt(0));
         }
@@ -86,6 +86,12 @@ public class AddressDb extends SQLiteOpenHelper {
 
         if (db.insert(AddressDb.ADDRESS_TABLE_NAME, null, values) == -1) {
             return false;
+        }
+        if (cursor != null && !cursor.isClosed()) {
+            cursor.close();
+        }
+        if (fullData != null && !fullData.isClosed()) {
+            fullData.close();
         }
         return true;
     }
@@ -123,7 +129,7 @@ public class AddressDb extends SQLiteOpenHelper {
             try {
                 cursor = db.query(ADDRESS_TABLE_NAME, null, null, null, null, null, null);
                 cursor.moveToLast();
-                while (cursor.isFirst() == false) {
+                while (cursor.isBeforeFirst() == false) {
                     Address address = new Address();
                     address.setOutcode(cursor.getString(1));
                     address.setPostcode(cursor.getString(2));
@@ -137,7 +143,7 @@ public class AddressDb extends SQLiteOpenHelper {
                 }
             } catch (Exception ex) {
                 Log.e("Error", ex.getLocalizedMessage(), ex);
-            }finally {
+            } finally {
                 if (cursor != null && !cursor.isClosed()) {
                     cursor.close();
                 }

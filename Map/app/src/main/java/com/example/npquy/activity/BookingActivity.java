@@ -37,6 +37,8 @@ import com.example.npquy.service.CustomEditText;
 import com.example.npquy.service.DrawableClickListener;
 import com.example.npquy.service.WebServiceTaskManager;
 
+import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -84,8 +86,11 @@ public class BookingActivity extends AppCompatActivity implements
 
     private String payType;
     private RetrieveQuote retrieveQuote;
+    private RetrieveQuoteResult retrieveQuoteResult;
 
     private Double totalFare;
+
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,6 +114,12 @@ public class BookingActivity extends AppCompatActivity implements
         pay_by.setInputType(InputType.TYPE_NULL);
 
         userDb = new UserDb(this);
+        User userCurrent = userDb.getCurrentUser();
+        if(userCurrent != null) {
+            user = userCurrent;
+        }else {
+            user = new User();
+        }
 
         Intent callerIntent = getIntent();
         if (callerIntent != null) {
@@ -294,30 +305,37 @@ public class BookingActivity extends AppCompatActivity implements
             startActivityForResult(myIntent, 2);
         } else if (v == confirmBooking) {
             postQuotation(retrieveQuote);
-            User user = userDb.getCurrentUser();
+            User userDbCurrentUser = userDb.getCurrentUser();
+            int currentUserId = Integer.parseInt(userDbCurrentUser.getCusID());
             if (user == null) {
                 openDialogSignIn(this);
             } else {
-                postElectronicPayment(new ElectronicPayment());
+                ElectronicPayment electronicPayment = new ElectronicPayment();
+                electronicPayment.setAmount(totalFare);
+                electronicPayment.setCustID(currentUserId);
+                postElectronicPayment(electronicPayment);
                 SaveBooking saveBooking = new SaveBooking();
-                saveBooking.setCusid(0);
-                saveBooking.setRoutedistance(0.0);
-                saveBooking.setVehTypeID(0);
-                saveBooking.setTravelTime(0.0);
-                saveBooking.setTotalfare(0.0);
-                saveBooking.setFare(0.0);
-                saveBooking.setPick(pickUpAddress);
-                saveBooking.setDoff(dropOffAddress);
+                saveBooking.setCusID(currentUserId);
+                saveBooking.setRoutedistance(retrieveQuoteResult.getRoutedistance());
+                saveBooking.setVehTypeID(retrieveQuoteResult.getVehTypeID());
+                saveBooking.setTravelTime(retrieveQuoteResult.getTraveltime());
+                saveBooking.setTotalfare(totalFare);
+                saveBooking.setFare(Double.parseDouble(retrieveQuoteResult.getFare()));
+                saveBooking.setPick(pickUpAddress.getFulladdress());
+                saveBooking.setDoff(dropOffAddress.getFulladdress());
                 saveBooking.setPkLat(pickUpAddress.getLatitude());
                 saveBooking.setPkLong(pickUpAddress.getLongitude());
-                saveBooking.setPaq(0);
-                saveBooking.setBags(0);
+                saveBooking.setPaq(Integer.parseInt(people.getText().toString()));
+                saveBooking.setBags(Integer.parseInt(luggage.getText().toString()));
                 saveBooking.setPetfriendly(isPet);
                 saveBooking.setChildseat(isChildSeat);
                 saveBooking.setExecutive(false);
                 saveBooking.setDoLat(dropOffAddress.getLatitude());
                 saveBooking.setDoLong(dropOffAddress.getLongitude());
-                saveBooking.setBookingdate(dateBook.toString());
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                String date = sdf.format(dateBook);
+                saveBooking.setBookingdate(date);
+                saveBooking.setInServiceArea(true);
                 getSaveBooking(saveBooking);
 
                 Intent myIntent = new Intent(BookingActivity.this, BookingSaved.class);
@@ -360,20 +378,18 @@ public class BookingActivity extends AppCompatActivity implements
         });
 
         Button mEmailSignInButton = (Button) dialog.findViewById(R.id.email_sign_in_button);
-        mEmailView = (AutoCompleteTextView) dialog.findViewById(R.id.email);
+        mEmailView = (AutoCompleteTextView) dialog.findViewById(R.id.email_sign_up_string);
 
         phoneNumber = (EditText) dialog.findViewById(R.id.phone_number);
         mEmailSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                User user = new User();
                 user.setEmail(mEmailView.getText().toString());
                 user.setMobile(phoneNumber.getText().toString());
                 String android_id = Settings.Secure.getString(BookingActivity.this.getContentResolver(),
                         Settings.Secure.ANDROID_ID);
-                user.setDeviceId(android_id);
-                login(user);
-                userDb.login(user);
+                user.setDeviceID(android_id);
+                login();
 
                 dialog.dismiss();
             }
@@ -382,7 +398,7 @@ public class BookingActivity extends AppCompatActivity implements
         dialog.show();
     }
 
-    private void login(User user) {
+    private void login() {
 
         String url = WebServiceTaskManager.URL + "SignIn";
 
@@ -391,6 +407,17 @@ public class BookingActivity extends AppCompatActivity implements
             @Override
             public void handleResponse(String response) {
                 Log.e("response", response, null);
+                try {
+                    JSONObject root = new JSONObject(response);
+                    String cusId = root.getString("CustID");
+                    if(cusId != null) {
+                        Log.e("CusId", cusId, null);
+                        user.setCusID(cusId);
+                        userDb.login(user);
+                    }
+                }catch (Exception e) {
+                    Log.e("Exception Sign Up", e.getLocalizedMessage());
+                }
             }
         };
 
@@ -405,7 +432,6 @@ public class BookingActivity extends AppCompatActivity implements
 
     private void doChange() {
         postQuotation(retrieveQuote);
-
     }
 
     private void openDialogSignUp(Context context) {
@@ -447,7 +473,7 @@ public class BookingActivity extends AppCompatActivity implements
                 user.setMobile(mPhoneNumber.getText().toString());
                 String android_id = Settings.Secure.getString(BookingActivity.this.getContentResolver(),
                         Settings.Secure.ANDROID_ID);
-                user.setDeviceId(android_id);
+                user.setDeviceID(android_id);
                 signUp(user);
 
                 dialog.dismiss();
@@ -532,7 +558,7 @@ public class BookingActivity extends AppCompatActivity implements
             }
         };
 
-        String json = new JSONSerializer().exclude("cusId", "*.class").serialize(
+        String json = new JSONSerializer().exclude("cusID", "*.class").serialize(
                 user);
         Log.e("json", json, null);
         wst.addNameValuePair("", json);
@@ -548,13 +574,12 @@ public class BookingActivity extends AppCompatActivity implements
 
             @Override
             public void handleResponse(String response) {
-                Log.e("response", response, null);
+                Log.e("response_postElectronic", response, null);
             }
         };
 
         String json = new JSONSerializer().exclude("*.class").serialize(
                 electronicPayment);
-        Log.e("json", json, null);
         wst.addNameValuePair("", json);
 
         wst.execute(new String[]{url});
@@ -569,36 +594,22 @@ public class BookingActivity extends AppCompatActivity implements
 
             @Override
             public void handleResponse(String response) {
-                RetrieveQuoteResult bookingSaved = new JSONDeserializer<RetrieveQuoteResult>().use(null,
-                        RetrieveQuoteResult.class).deserialize(response);
-                Log.e("Booking save", bookingSaved.toString());
-                if (bookingSaved != null) {
-                    totalFare = Double.parseDouble(bookingSaved.getTotalfare().trim());
-                    totalBooking.setText("Total\n£" + totalFare);
+                try {
+                    retrieveQuoteResult = new JSONDeserializer<RetrieveQuoteResult>().use(null,
+                            RetrieveQuoteResult.class).deserialize(response);
+                    Log.e("RetrieveQuoteResult", retrieveQuoteResult.toString());
+                    if (retrieveQuoteResult != null) {
+                        totalFare = Double.parseDouble(retrieveQuoteResult.getTotalfare().trim());
+                        totalBooking.setText("Total\n£" + totalFare);
+                    }
+                }catch (Exception e) {
+                    Log.e("post Quotation",e.getLocalizedMessage());
                 }
             }
         };
 
-/*        RetrieveQuote quotation = new RetrieveQuote();
-        quotation.setCustid(0);
-        quotation.setPickLat(pickUpAddress.getLatitude());
-        quotation.setPickLong(pickUpAddress.getLongitude());
-        quotation.setDoffLat(dropOffAddress.getLatitude());
-        quotation.setDoffLong(dropOffAddress.getLongitude());
-        if (dateBook != null) {
-            quotation.setBookingdate(dateBook.toLocaleString());
-        } else {
-            quotation.setBookingdate("0001-01-01T00:00:00");
-        }
-        quotation.setPaq(0);
-        quotation.setBags(0);
-        quotation.setNote(note.getText().toString());
-        quotation.setChildseat(isChildSeat);
-        quotation.setPetfriendly(isPet);*/
-
         String json = new JSONSerializer().exclude("*.class").serialize(
                 retrieveQuote);
-        Log.e("json", json, null);
         wst.addNameValuePair("", json);
 
         wst.execute(new String[]{url});
@@ -612,13 +623,13 @@ public class BookingActivity extends AppCompatActivity implements
 
             @Override
             public void handleResponse(String response) {
-                Log.e("response", response, null);
+                Log.e("response_SaveBooking", response, null);
             }
         };
 
         String json = new JSONSerializer().exclude("*.class").serialize(
                 saveBooking);
-        Log.e("json", json, null);
+        Log.e("SaveBookingJson", json, null);
         wst.addNameValuePair("", json);
 
         wst.execute(new String[]{url});

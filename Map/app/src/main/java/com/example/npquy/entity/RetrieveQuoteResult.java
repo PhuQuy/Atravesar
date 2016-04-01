@@ -8,7 +8,7 @@ public class RetrieveQuoteResult {
     Integer rtn_routedistance;
     Double routedistance;
     Integer rtn_traveltime;
-    Integer traveltime;
+    Double traveltime;
     String vehType;
     String totalfare;
     String fare;
@@ -57,11 +57,11 @@ public class RetrieveQuoteResult {
         this.rtn_traveltime = rtn_traveltime;
     }
 
-    public Integer getTraveltime() {
+    public Double getTraveltime() {
         return traveltime;
     }
 
-    public void setTraveltime(Integer traveltime) {
+    public void setTraveltime(Double traveltime) {
         this.traveltime = traveltime;
     }
 
