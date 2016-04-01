@@ -94,7 +94,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Double totalFare;
     private int num_people, num_luggage;
     private RetrieveQuote retrieveQuote;
-
+    private View marker;
+    private TextView numTxt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,6 +112,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         swap = (ImageView) findViewById(R.id.swap_location);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         carLayout = (LinearLayout) findViewById(R.id.car);
+        marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_maker_layout, null);
+        numTxt = (TextView) marker.findViewById(R.id.num_txt);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -196,7 +199,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 RetrieveQuoteResult bookingSaved = new JSONDeserializer<RetrieveQuoteResult>().use(null,
                         RetrieveQuoteResult.class).deserialize(response);
                 Log.e("Booking save", bookingSaved.toString());
-                if(bookingSaved != null) {
+                if(bookingSaved != null && bookingSaved.getTotalfare() != null) {
                     totalFare = Double.parseDouble(bookingSaved.getTotalfare());
                     total.setText("Total \n £" + totalFare);
                     book.setText("Continue \n Booking");
@@ -260,23 +263,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void booking(View v) {
         if (isCheck) {
-            Intent myIntent = new Intent(MapsActivity.this, BookingActivity.class);
-            Bundle bundle = new Bundle();
-            String pickUpJson = new JSONSerializer().exclude("*.class").serialize(
-                    pickUpAddress);
-            String dropOffJson = new JSONSerializer().exclude("*.class").serialize(
-                    dropOffAddress);
-            String retrieveQuoteJson = new JSONSerializer().exclude("*.class").serialize(retrieveQuote);
+            if(!book.isClickable()) {
+                Toast.makeText(MapsActivity.this, "This app does not operate in that area", Toast.LENGTH_LONG).show();
+            }else {
+                Intent myIntent = new Intent(MapsActivity.this, BookingActivity.class);
+                Bundle bundle = new Bundle();
+                String pickUpJson = new JSONSerializer().exclude("*.class").serialize(
+                        pickUpAddress);
+                String dropOffJson = new JSONSerializer().exclude("*.class").serialize(
+                        dropOffAddress);
+                String retrieveQuoteJson = new JSONSerializer().exclude("*.class").serialize(retrieveQuote);
 
-            Log.e("retrieveQuoteJson", retrieveQuoteJson);
-            bundle.putString("pickUpAddress", pickUpJson);
-            bundle.putString("dropOffAddress", dropOffJson);
-            bundle.putInt("people", Integer.parseInt(people.getText().toString()));
-            bundle.putInt("luggage", Integer.parseInt(luggage.getText().toString()));
-            bundle.putString("retrieveQuote", retrieveQuoteJson);
-            bundle.putDouble("totalFare", totalFare);
-            myIntent.putExtra("data", bundle);
-            startActivity(myIntent);
+                Log.e("retrieveQuoteJson", retrieveQuoteJson);
+                bundle.putString("pickUpAddress", pickUpJson);
+                bundle.putString("dropOffAddress", dropOffJson);
+                bundle.putInt("people", Integer.parseInt(people.getText().toString()));
+                bundle.putInt("luggage", Integer.parseInt(luggage.getText().toString()));
+                bundle.putString("retrieveQuote", retrieveQuoteJson);
+                bundle.putDouble("totalFare", totalFare);
+                myIntent.putExtra("data", bundle);
+                startActivity(myIntent);
+            }
         }
     }
 
@@ -383,8 +390,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         latitude = mGPS.getLatitude();
         longitude = mGPS.getLongitude();
-        final View marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_maker_layout, null);
-        final TextView numTxt = (TextView) marker.findViewById(R.id.num_txt);
 
         if (latitude != 0 && longitude != 0) {
             // Add a marker in Sydney and move the camera
@@ -402,7 +407,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     if (lastLocation != null && calculationByDistance(currentLocation, lastLocation) > 20) {
                         findNearestDriver(currentLocation);
-                        numTxt.setText((int) (yourNearestDriver.getTravelTime() / 1000) + " mins");
+
                         MarkerOptions dragMark = new MarkerOptions().position(currentLocation)
                                 .title("")
                                 .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, marker)));
@@ -493,6 +498,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 try {
                     yourNearestDriver = new JSONDeserializer<NearestDriver>().use(null,
                             NearestDriver.class).deserialize(response);
+                    numTxt.setText((int) (yourNearestDriver.getTravelTime() / 1) + " mins");
                 }catch (Exception e) {
                     Log.e("Error Parse Json",e.getLocalizedMessage());
                 }
