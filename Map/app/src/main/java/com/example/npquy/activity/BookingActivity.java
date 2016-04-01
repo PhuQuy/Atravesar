@@ -50,6 +50,7 @@ public class BookingActivity extends AppCompatActivity implements
     private int mYear, mMonth, mDay, mHour, mMinute;
     private int hours, minutes;
     private EditText pickUp;
+    private CustomEditText viaAdd;
     private CustomEditText dropOff;
     private Button confirmBooking;
     private Button totalBooking;
@@ -98,6 +99,7 @@ public class BookingActivity extends AppCompatActivity implements
         luggage = (TextView) findViewById(R.id.luggage_booking);
         pickUp = (EditText) findViewById(R.id.pick_up_booking);
         dropOff = (CustomEditText) findViewById(R.id.drop_off_booking);
+        viaAdd = (CustomEditText)findViewById(R.id.via_address_booking);
         confirmBooking = (Button) findViewById(R.id.book_booking);
         totalBooking = (Button) findViewById(R.id.total_booking);
         waitAndReturn = (Switch) findViewById(R.id.w8);
@@ -214,14 +216,26 @@ public class BookingActivity extends AppCompatActivity implements
         });
         pickUp.setOnClickListener(this);
         dropOff.setOnClickListener(this);
+        viaAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickLocation(3);
+            }
+        });
+        viaAdd.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    pickLocation(3);
+                }
+            }
+        });
         dropOff.setDrawableClickListener(new DrawableClickListener() {
-
-
             public void onClick(DrawablePosition target) {
                 isClickOnImage = true;
                 switch (target) {
                     case RIGHT:
-                        Toast.makeText(BookingActivity.this, "aaa", Toast.LENGTH_LONG).show();
+                        viaAdd.setVisibility(View.VISIBLE);
                         break;
 
                     default:
@@ -230,6 +244,7 @@ public class BookingActivity extends AppCompatActivity implements
             }
 
         });
+
         confirmBooking.setOnClickListener(this);
         pay_by.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -282,6 +297,12 @@ public class BookingActivity extends AppCompatActivity implements
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public void pickLocation(int type) {
+        //   hideSoftKeyboard(MapsActivity.this);
+        Intent myIntent = new Intent(BookingActivity.this, GetAddressActivity.class);
+        startActivityForResult(myIntent, type);
     }
 
     @Override
@@ -648,6 +669,13 @@ public class BookingActivity extends AppCompatActivity implements
                 retrieveQuote.setDoffLat(dropOffAddress.getLatitude());
                 retrieveQuote.setDoffLong(dropOffAddress.getLongitude());
                 retrieveQuote.setDroppostcode(dropOffAddress.getPostcode());
+            }
+        }else if (requestCode == 3 && resultCode == RESULT_OK) {
+            if (data.hasExtra("viaAdd")) {
+                Address address = (Address) data.getExtras().get("viaAdd");
+                viaAdd.setText(address.getFulladdress());
+                //  viaAddress.setLatitude(address.getLatitude());
+                // viaAddress.setLongitude(address.getLongitude());
             }
         }
         doChange();

@@ -104,7 +104,7 @@ public class GetAddressActivity extends AppCompatActivity {
                     Intent data = new Intent();
                     data.putExtra("pickUp", address);
                     data.putExtra("dropOff", address);
-
+                    data.putExtra("viaAdd", address);
                     setResult(RESULT_OK, data);
                     finish();
                 }

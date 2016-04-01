@@ -7,20 +7,24 @@
             android:title="NewBooking" />
         <item android:id="@+id/nav_currentbooking"
             android:icon="@drawable/ic_current_booking"
+            android:visible="false"
             android:title="Current Booking" />
         <item android:id="@+id/nav_booking_history"
             android:icon="@drawable/ic_booking_history"
+            android:visible="false"
             android:title="Booking History" />
-
     </group>
 
     <item android:title="My Zeta-X">
         <menu>
+
             <item android:id="@+id/nav_profile"
                 android:icon="@drawable/ic_profile"
+                android:visible="false"
                 android:title="Profile" />
             <item android:id="@+id/nav_logout"
                 android:icon="@drawable/ic_logout"
+                android:visible="false"
                 android:title="Log out" />
         </menu>
     </item>
