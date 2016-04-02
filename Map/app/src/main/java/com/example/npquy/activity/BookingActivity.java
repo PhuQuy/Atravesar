@@ -3,13 +3,18 @@ package com.example.npquy.activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.view.menu.MenuView;
 import android.text.InputType;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -64,6 +69,8 @@ public class BookingActivity extends AppCompatActivity implements
     private AutoCompleteTextView mEmailView;
     private EditText phoneNumber;
     private EditText mPhoneNumber;
+    private Menu menu;
+
 
     private Boolean isClickOnAddImage = false;
     private Boolean isClickOnRemoveImage = false;
@@ -93,6 +100,7 @@ public class BookingActivity extends AppCompatActivity implements
 
     private User user;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,6 +120,7 @@ public class BookingActivity extends AppCompatActivity implements
         pet = (Switch) findViewById(R.id.pet);
         eco = (Switch) findViewById(R.id.eco);
         note = (EditText) findViewById(R.id.content_note);
+
         pay_by = (EditText) findViewById(R.id.pay_by_edit);
         pay_by.setInputType(InputType.TYPE_NULL);
 
@@ -248,6 +257,7 @@ public class BookingActivity extends AppCompatActivity implements
                 switch (target) {
                     case RIGHT:
                         viaAdd.setVisibility(View.GONE);
+
                         break;
 
                     default:
@@ -385,6 +395,7 @@ public class BookingActivity extends AppCompatActivity implements
         }
     }
 
+
     private void openDialogSignIn(Context context) {
         final Dialog dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -462,6 +473,9 @@ public class BookingActivity extends AppCompatActivity implements
         wst.addNameValuePair("", json);
 
         wst.execute(new String[]{url});
+        SharedPreferences.Editor editor = MapsActivity.prefs.edit();
+        editor.putBoolean("isLogin", true);
+        editor.commit();
 
     }
 

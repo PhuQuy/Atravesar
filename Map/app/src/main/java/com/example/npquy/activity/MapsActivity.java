@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.location.Geocoder;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentActivity;
@@ -90,7 +92,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Toolbar toolbar = null;
 
     private ImageView swap;
-
+    public static SharedPreferences prefs;
     private Double totalFare;
     private int num_people, num_luggage;
     private RetrieveQuote retrieveQuote;
@@ -100,6 +102,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
         pickUp = (EditText) findViewById(R.id.pick_up);
         people = (TextView) findViewById(R.id.people);
         luggage = (TextView) findViewById(R.id.luggage);
@@ -125,6 +128,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         View headerView = navigationView.getHeaderView(0);
         TextView emailText = (TextView) headerView.findViewById(R.id.email);
+        setVisibleItem();
 
 
         navigationView.setNavigationItemSelectedListener(MapsActivity.this);
@@ -174,6 +178,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 openCarBox(MapsActivity.this);
+                SharedPreferences.Editor editor = MapsActivity.prefs.edit();
+                editor.putBoolean("isLogin", true);
+                editor.commit();
             }
         });
         retrieveQuote = new RetrieveQuote();
@@ -508,12 +515,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         wst.execute(new String[]{url});
     }
 
+    public void setVisibleItem(){
+        if(!prefs.getBoolean("isLogin",false)){
+            navigationView.getMenu().findItem(R.id.nav_booking_history).setVisible(false);
+            navigationView.getMenu().findItem(R.id.nav_currentbooking).setVisible(false);
+            navigationView.getMenu().findItem(R.id.nav_logout).setVisible(false);
+            navigationView.getMenu().findItem(R.id.nav_profile).setVisible(false);
+        }
+    }
+
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
+
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
-        setTitle("ZETA-X");
+
+       setTitle("ZETA-X");
+
         int id = item.getItemId();
+
 
         if (id == R.id.nav_newbooking) {
             Intent intent = new Intent(MapsActivity.this, MapsActivity.class);
