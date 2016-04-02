@@ -80,6 +80,7 @@ public class BookingActivity extends AppCompatActivity implements
 
     private Address pickUpAddress;
     private Address dropOffAddress;
+    private Address viaAddress;
 
     private TextView people;
     private TextView luggage;
@@ -236,20 +237,15 @@ public class BookingActivity extends AppCompatActivity implements
         });
         pickUp.setOnClickListener(this);
         dropOff.setOnClickListener(this);
-        viaAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pickLocation(3);
-            }
-        });
-        viaAdd.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        viaAdd.setOnClickListener(this);
+/*        viaAdd.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     pickLocation(3);
                 }
             }
-        });
+        });*/
         viaAdd.setDrawableClickListener(new DrawableClickListener() {
 
             public void onClick(DrawablePosition target) {
@@ -257,7 +253,12 @@ public class BookingActivity extends AppCompatActivity implements
                 switch (target) {
                     case RIGHT:
                         viaAdd.setVisibility(View.GONE);
-
+                        viaAddress = null;
+                        retrieveQuote.setVia(null);
+                        retrieveQuote.setViaLat(null);
+                        retrieveQuote.setViaLong(null);
+                        retrieveQuote.setViapostcode(null);
+                        doChange();
                         break;
 
                     default:
@@ -348,6 +349,9 @@ public class BookingActivity extends AppCompatActivity implements
         } else if (v == dropOff) {
             Intent myIntent = new Intent(BookingActivity.this, GetAddressActivity.class);
             startActivityForResult(myIntent, 2);
+        } else if (v == viaAdd) {
+            Intent myIntent = new Intent(BookingActivity.this, GetAddressActivity.class);
+            startActivityForResult(myIntent, 3);
         } else if (v == confirmBooking) {
             postQuotation(retrieveQuote);
             User userDbCurrentUser = userDb.getCurrentUser();
@@ -368,6 +372,11 @@ public class BookingActivity extends AppCompatActivity implements
                 saveBooking.setFare(Double.parseDouble(retrieveQuoteResult.getFare()));
                 saveBooking.setPick(pickUpAddress.getFulladdress());
                 saveBooking.setDoff(dropOffAddress.getFulladdress());
+                if(viaAddress != null) {
+                    saveBooking.setVia(viaAddress.getFulladdress());
+                    saveBooking.setViaLat(viaAddress.getLatitude());
+                    saveBooking.setViaLong(viaAddress.getLongitude());
+                }
                 saveBooking.setPkLat(pickUpAddress.getLatitude());
                 saveBooking.setPkLong(pickUpAddress.getLongitude());
                 saveBooking.setPaq(Integer.parseInt(people.getText().toString()));
@@ -691,8 +700,7 @@ public class BookingActivity extends AppCompatActivity implements
             if (data.hasExtra("pickUp")) {
                 Address address = (Address) data.getExtras().get("pickUp");
                 pickUp.setText(address.getFulladdress());
-                pickUpAddress.setLatitude(address.getLatitude());
-                pickUpAddress.setLongitude(address.getLongitude());
+                pickUpAddress = address;
                 retrieveQuote.setPick(pickUpAddress.getFulladdress());
                 retrieveQuote.setPickLat(pickUpAddress.getLatitude());
                 retrieveQuote.setPickLong(pickUpAddress.getLongitude());
@@ -702,8 +710,7 @@ public class BookingActivity extends AppCompatActivity implements
             if (data.hasExtra("dropOff")) {
                 Address address = (Address) data.getExtras().get("dropOff");
                 dropOff.setText(address.getFulladdress());
-                dropOffAddress.setLatitude(address.getLatitude());
-                dropOffAddress.setLongitude(address.getLongitude());
+                dropOffAddress = address;
                 retrieveQuote.setDoff(dropOffAddress.getFulladdress());
                 retrieveQuote.setDoffLat(dropOffAddress.getLatitude());
                 retrieveQuote.setDoffLong(dropOffAddress.getLongitude());
@@ -712,9 +719,15 @@ public class BookingActivity extends AppCompatActivity implements
         }else if (requestCode == 3 && resultCode == RESULT_OK) {
             if (data.hasExtra("viaAdd")) {
                 Address address = (Address) data.getExtras().get("viaAdd");
-                viaAdd.setText(address.getFulladdress());
-                //  viaAddress.setLatitude(address.getLatitude());
-                // viaAddress.setLongitude(address.getLongitude());
+                if(address != null) {
+                    Log.e("address", address.toString());
+                    viaAdd.setText(address.getFulladdress());
+                    viaAddress = address;
+                    retrieveQuote.setVia(viaAddress.getFulladdress());
+                    retrieveQuote.setViaLat(viaAddress.getLatitude());
+                    retrieveQuote.setViaLong(viaAddress.getLongitude());
+                    retrieveQuote.setViapostcode(viaAddress.getPostcode());
+                }
             }
         }
         doChange();
