@@ -244,6 +244,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void pickLocation(int type) {
         Intent myIntent = new Intent(MapsActivity.this, GetAddressActivity.class);
+        Bundle bundle = new Bundle();
+        if(pickUpAddress != null) {
+            bundle.putString("postCode", pickUpAddress.getPostcode());
+        }else {
+            bundle.putString("postCode", "");
+        }
+        myIntent.putExtra("data", bundle);
         startActivityForResult(myIntent, type);
     }
 
