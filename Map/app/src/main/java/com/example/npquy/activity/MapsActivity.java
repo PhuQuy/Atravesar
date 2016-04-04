@@ -452,7 +452,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if(!addresses.isEmpty()) {
                 android.location.Address firstAddress = addresses.get(0);
                 yourAddressPick.setPostcode(firstAddress.getPostalCode());
-                yourAddressPick.setFulladdress(firstAddress.getAddressLine(0) + "," + firstAddress.getAddressLine(1) + "," + firstAddress.getAddressLine(2));
+                String fullAddress = "";
+                for (int i = 0; i < firstAddress.getMaxAddressLineIndex(); i++) {
+                    fullAddress += firstAddress.getAddressLine(i) + ",";
+                }
+
+                yourAddressPick.setFulladdress(fullAddress);
                 if(firstAddress.hasLongitude()) {
                     yourAddressPick.setLongitude(firstAddress.getLongitude());
                 }
