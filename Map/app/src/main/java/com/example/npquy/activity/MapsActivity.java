@@ -36,12 +36,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.npquy.database.UserDb;
 import com.example.npquy.entity.Address;
 import com.example.npquy.entity.Location;
 import com.example.npquy.entity.NearestDriver;
 import com.example.npquy.entity.RetrieveQuote;
 import com.example.npquy.entity.RetrieveQuoteResult;
 import com.example.npquy.entity.SaveBooking;
+import com.example.npquy.entity.User;
 import com.example.npquy.service.GPSTracker;
 import com.example.npquy.service.WebServiceTaskManager;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -98,6 +100,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private RetrieveQuote retrieveQuote;
     private View marker;
     private TextView numTxt;
+    private User user;
+    private AutoCompleteTextView mEmailView;
+    private EditText phoneNumber;
+    private EditText mPhoneNumber;
+    private AutoCompleteTextView signUpEmail;
+    private EditText name;
+    private UserDb userDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -244,6 +253,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void pickLocation(int type) {
         Intent myIntent = new Intent(MapsActivity.this, GetAddressActivity.class);
+        Bundle bundle = new Bundle();
+        if(pickUpAddress != null) {
+            bundle.putString("postCode", pickUpAddress.getPostcode());
+        }else {
+            bundle.putString("postCode", "");
+        }
+        myIntent.putExtra("data", bundle);
         startActivityForResult(myIntent, type);
     }
 
@@ -407,8 +423,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
                 public void onCameraChange(CameraPosition arg0) {
                     mMap.clear();
-                    MarkerOptions home = new MarkerOptions().position(yourLocation).title("You're here");
+                    MarkerOptions home = new MarkerOptions().position(yourLocation)
+                            .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, marker)));
                     mMap.addMarker(home).showInfoWindow();
+
 
                     currentLocation = arg0.target;
 
@@ -556,14 +574,169 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } else if (id == R.id.nav_currentbooking) {
             Intent intent = new Intent(MapsActivity.this, BookingDetailActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_logout) {
+        } else if (id == R.id.nav_login) {
+                openDialogSignIn(this);
 
         } else if (id == R.id.nav_profile) {
+
+        }else if (id == R.id.nav_profile) {
 
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+    private void openDialogSignIn(Context context) {
+        final Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.activity_login);
+
+        //   dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
+        //   TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
+        //   title.setText("Sign In");
+
+        ImageView dialogButton = (ImageView) dialog.findViewById(R.id.imageView_close);
+        dialogButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        dialog.setCanceledOnTouchOutside(true);
+
+        TextView createAccount = (TextView) dialog.findViewById(R.id.create_account);
+        createAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                openDialogSignUp(MapsActivity.this);
+            }
+        });
+
+        Button mEmailSignInButton = (Button) dialog.findViewById(R.id.email_sign_in_button);
+        mEmailView = (AutoCompleteTextView) dialog.findViewById(R.id.email_sign_up_string);
+
+        phoneNumber = (EditText) dialog.findViewById(R.id.phone_number);
+        mEmailSignInButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                user.setEmail(mEmailView.getText().toString());
+                user.setMobile(phoneNumber.getText().toString());
+                String android_id = Settings.Secure.getString(MapsActivity.this.getContentResolver(),
+                        Settings.Secure.ANDROID_ID);
+                user.setDeviceID(android_id);
+                login();
+                navigationView.getMenu().findItem(R.id.nav_login).setVisible(true);
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+    }
+
+    private void login() {
+
+        String url = WebServiceTaskManager.URL + "SignIn";
+
+        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
+
+            @Override
+            public void handleResponse(String response) {
+                Log.e("response", response, null);
+                try {
+                    JSONObject root = new JSONObject(response);
+                    String cusId = root.getString("CustID");
+                    if(cusId != null) {
+                        Log.e("CusId", cusId, null);
+                        user.setCusID(cusId);
+                        userDb.login(user);
+                    }
+                }catch (Exception e) {
+                    Log.e("Exception Sign Up", e.getLocalizedMessage());
+                }
+            }
+        };
+
+        String json = new JSONSerializer().exclude("name", "*.class").serialize(
+                user);
+        Log.e("json", json, null);
+        wst.addNameValuePair("", json);
+
+        wst.execute(new String[]{url});
+        SharedPreferences.Editor editor = MapsActivity.prefs.edit();
+        editor.putBoolean("isLogin", true);
+        editor.commit();
+
+    }
+
+    private void openDialogSignUp(Context context) {
+        final Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.activity_sign_up);
+
+        // dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
+        //  TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
+        //  title.setText("Sign Up");
+
+        ImageView dialogButton = (ImageView) dialog.findViewById(R.id.imageView_close);
+        dialogButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        TextView signIn = (TextView) dialog.findViewById(R.id.login_from_sign_in);
+        signIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                openDialogSignIn(MapsActivity.this);
+            }
+        });
+
+        Button signUpButton = (Button) dialog.findViewById(R.id.sign_up_button);
+        signUpEmail = (AutoCompleteTextView) dialog.findViewById(R.id.email_sign_up);
+        name = (EditText) dialog.findViewById(R.id.name);
+        mPhoneNumber = (EditText) dialog.findViewById(R.id.phone_number_sign_up);
+        signUpButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                User user = new User();
+                user.setEmail(signUpEmail.getText().toString());
+                user.setName(name.getText().toString());
+                user.setMobile(mPhoneNumber.getText().toString());
+                String android_id = Settings.Secure.getString(MapsActivity.this.getContentResolver(),
+                        Settings.Secure.ANDROID_ID);
+                user.setDeviceID(android_id);
+                signUp(user);
+
+                dialog.dismiss();
+                openDialogSignIn(MapsActivity.this);
+            }
+        });
+
+        dialog.show();
+    }
+    private void signUp(User user) {
+
+        String url = WebServiceTaskManager.URL + "SignUp";
+
+        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
+
+            @Override
+            public void handleResponse(String response) {
+                Log.e("response", response, null);
+            }
+        };
+
+        String json = new JSONSerializer().exclude("cusID", "*.class").serialize(
+                user);
+        Log.e("json", json, null);
+        wst.addNameValuePair("", json);
+
+        wst.execute(new String[]{url});
+
     }
 }

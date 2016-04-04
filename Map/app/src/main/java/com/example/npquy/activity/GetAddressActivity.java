@@ -47,6 +47,8 @@ public class GetAddressActivity extends AppCompatActivity {
     // Search EditText
     EditText inputSearch;
 
+    private List<Address> nearlyAddress = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,16 +59,23 @@ public class GetAddressActivity extends AppCompatActivity {
         addressDb = new AddressDb(this);
 
         inputSearch = (EditText) findViewById(R.id.inputSearch);
-       // addressesData.addAll(addressDb.getAddressFromDb());
-        /*addressArrayAdapter = new AddressAdapter(this,
-                R.layout.list_item,
-                addressesData);*/
+        Intent callerIntent = getIntent();
+
 
         Address homeAddress = new Address("Home Address ,,Tap to select","");
         addressesData.add("HOME");
         addressesData.add(homeAddress);
         addressesData.add("FREQUENT");
         addressesData.addAll(addressDb.getAddressFromDb());
+        if (callerIntent != null) {
+            Bundle packageFromCaller =
+                    callerIntent.getBundleExtra("data");
+            String postCode = packageFromCaller.getString("postCode");
+            getNearlyAddress(postCode);
+            addressesData.add("NEAREST");
+            addressesData.addAll(nearlyAddress);
+        }
+
        // lv.setAdapter(addressArrayAdapter);
         frequentAdapter = new FrequentAdapter(this, addressesData);
         lvGetAddress.setAdapter(frequentAdapter);
@@ -156,6 +165,36 @@ public class GetAddressActivity extends AppCompatActivity {
 
         wst.addNameValuePair("prefix", text);
 
+        wst.execute(new String[]{url});
+    }
+
+    private void getNearlyAddress(String postCode) {
+        String url = WebServiceTaskManager.URL + "NearbyPlaces";
+
+        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.GET_TASK, this, "") {
+
+            @Override
+            public void handleResponse(String response) {
+                Log.e("response_nearly", response, null);
+      /*         */
+                try {
+                    JSONObject root = new JSONObject(response);
+                    JSONArray addressArray = root.getJSONArray("addresses");
+                    String message = root.getString("message");
+                    String code = root.getString("code");
+                    List<Address> addresses = new JSONDeserializer<List<Address>>()
+                            .use(null, ArrayList.class).use("values", Address.class).deserialize(addressArray.toString());
+                    Log.e("message", message.toString(), null);
+                    Log.e("code", code.toString(), null);
+                    nearlyAddress.addAll(addresses);
+                } catch (JSONException e) {
+                    Log.e("Error", e.getLocalizedMessage(), e);
+                }
+
+            }
+        };
+
+        wst.addNameValuePair("prefix", postCode);
         wst.execute(new String[]{url});
     }
 }
