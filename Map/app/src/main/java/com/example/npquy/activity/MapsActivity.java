@@ -99,6 +99,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private int num_people, num_luggage;
     private RetrieveQuote retrieveQuote;
     private View marker;
+    private View homeMarker;
     private TextView numTxt;
     private User user;
     private AutoCompleteTextView mEmailView;
@@ -124,7 +125,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         swap = (ImageView) findViewById(R.id.swap_location);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         carLayout = (LinearLayout) findViewById(R.id.car);
-        marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_maker_layout, null);
+        marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker_layout, null);
+        homeMarker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_home_marker, null);
         numTxt = (TextView) marker.findViewById(R.id.num_txt);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -417,7 +419,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 public void onCameraChange(CameraPosition arg0) {
                     mMap.clear();
                     MarkerOptions home = new MarkerOptions().position(yourLocation)
-                            .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, marker)));
+                            .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, homeMarker)));
                     mMap.addMarker(home).showInfoWindow();
 
 
