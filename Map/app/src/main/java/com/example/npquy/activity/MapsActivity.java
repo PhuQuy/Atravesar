@@ -416,8 +416,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
                 public void onCameraChange(CameraPosition arg0) {
                     mMap.clear();
-                    MarkerOptions home = new MarkerOptions().position(yourLocation).title("You're here");
+                    MarkerOptions home = new MarkerOptions().position(yourLocation)
+                            .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, marker)));
                     mMap.addMarker(home).showInfoWindow();
+
 
                     currentLocation = arg0.target;
 
@@ -567,6 +569,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             startActivity(intent);
         } else if (id == R.id.nav_login) {
                 openDialogSignIn(this);
+
         } else if (id == R.id.nav_profile) {
 
         }else if (id == R.id.nav_profile) {
@@ -617,7 +620,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         Settings.Secure.ANDROID_ID);
                 user.setDeviceID(android_id);
                 login();
-
+                navigationView.getMenu().findItem(R.id.nav_login).setVisible(true);
                 dialog.dismiss();
             }
         });
