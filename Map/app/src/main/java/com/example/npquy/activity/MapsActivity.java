@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -112,6 +113,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        String languageToLoad = "en"; // your language
+        Locale locale = new Locale(languageToLoad);
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.locale = locale;
+        getBaseContext().getResources().updateConfiguration(config,
+                getBaseContext().getResources().getDisplayMetrics());
         setContentView(R.layout.activity_maps);
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         pickUp = (EditText) findViewById(R.id.pick_up);
@@ -132,11 +140,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
-       // toggle.set("Zeta-X");
         toolbar.setTitle("Zeta-X");
         toolbar.setTitleTextColor(Color.WHITE);
-        toolbar.setDrawingCacheBackgroundColor(Color.WHITE);
-        toolbar.setSubtitleTextColor(Color.WHITE);
+        toolbar.setNavigationIcon(R.drawable.logo);
         toggle.syncState();
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -205,52 +211,56 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
     }
 
-    private void postQuotation(Address pickUpAdd, Address dropOffAdd) {
+    private void postQuotation() {
+        if(pickUpAddress != null && dropOffAddress != null) {
+            String url = WebServiceTaskManager.URL + "Quotation";
 
-        String url = WebServiceTaskManager.URL + "Quotation";
+            WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
 
-        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
-
-            @Override
-            public void handleResponse(String response) {
-                Log.e("response_quotation", response, null);
-                RetrieveQuoteResult bookingSaved = new JSONDeserializer<RetrieveQuoteResult>().use(null,
-                        RetrieveQuoteResult.class).deserialize(response);
-                Log.e("Booking save", bookingSaved.toString());
-                if(bookingSaved != null && bookingSaved.getTotalfare() != null) {
-                    totalFare = Double.parseDouble(bookingSaved.getTotalfare());
-                    total.setText("Total \n £" + totalFare);
-                    book.setText("Continue \n Booking");
-                    book.setClickable(bookingSaved.getInServiceArea());
+                @Override
+                public void handleResponse(String response) {
+                    Log.e("response_quotation", response, null);
+                    try {
+                        RetrieveQuoteResult bookingSaved = new JSONDeserializer<RetrieveQuoteResult>().use(null,
+                                RetrieveQuoteResult.class).deserialize(response);
+                        Log.e("Booking save", bookingSaved.toString());
+                        if (bookingSaved != null && bookingSaved.getTotalfare() != null) {
+                            totalFare = Double.parseDouble(bookingSaved.getTotalfare());
+                            total.setText("Total \n £" + totalFare);
+                            book.setText("Continue \n Booking");
+                            book.setClickable(bookingSaved.getInServiceArea());
+                        }
+                    }catch (Exception jsonEx) {
+                        Log.e("Json Exception", jsonEx.getLocalizedMessage());
+                    }
                 }
-            }
-        };
+            };
 
-        retrieveQuote.setCustid(0);
-        retrieveQuote.setPick(pickUpAdd.getFulladdress());
-        retrieveQuote.setPickLat(pickUpAdd.getLatitude());
-        retrieveQuote.setPickLong(pickUpAdd.getLongitude());
-        retrieveQuote.setDoffLat(dropOffAdd.getLatitude());
-        retrieveQuote.setDoffLong(dropOffAdd.getLongitude());
-        retrieveQuote.setDoff(dropOffAdd.getFulladdress());
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        Date today = new Date();
-        String date=sdf.format(today);
-        retrieveQuote.setBookingdate(date);
-        retrieveQuote.setPaq(Integer.parseInt(people.getText().toString()));
-        retrieveQuote.setBags(Integer.parseInt(luggage.getText().toString()));
-        retrieveQuote.setPickpostcode(pickUpAdd.getPostcode());
-        retrieveQuote.setDroppostcode(dropOffAdd.getPostcode());
-        retrieveQuote.setPetfriendly(false);
-        retrieveQuote.setExecutive(false);
-        retrieveQuote.setChildseat(false);
-        String json = new JSONSerializer().exclude("*.class").serialize(
-                retrieveQuote);
-        Log.e("Quotation", json, null);
-        wst.addNameValuePair("", json);
+            retrieveQuote.setCustid(0);
+            retrieveQuote.setPick(pickUpAddress.getFulladdress());
+            retrieveQuote.setPickLat(pickUpAddress.getLatitude());
+            retrieveQuote.setPickLong(pickUpAddress.getLongitude());
+            retrieveQuote.setDoffLat(dropOffAddress.getLatitude());
+            retrieveQuote.setDoffLong(dropOffAddress.getLongitude());
+            retrieveQuote.setDoff(dropOffAddress.getFulladdress());
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Date today = new Date();
+            String date = sdf.format(today);
+            retrieveQuote.setBookingdate(date);
+            retrieveQuote.setPaq(Integer.parseInt(people.getText().toString()));
+            retrieveQuote.setBags(Integer.parseInt(luggage.getText().toString()));
+            retrieveQuote.setPickpostcode(pickUpAddress.getPostcode());
+            retrieveQuote.setDroppostcode(dropOffAddress.getPostcode());
+            retrieveQuote.setPetfriendly(false);
+            retrieveQuote.setExecutive(false);
+            retrieveQuote.setChildseat(false);
+            String json = new JSONSerializer().exclude("*.class").serialize(
+                    retrieveQuote);
+            Log.e("Quotation", json, null);
+            wst.addNameValuePair("", json);
 
-        wst.execute(new String[]{url});
-
+            wst.execute(new String[]{url});
+        }
     }
 
     public void pickLocation(int type) {
@@ -281,7 +291,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
         if (!pickUp.getText().toString().isEmpty() && !dropOff.getText().toString().isEmpty()) {
-            postQuotation(pickUpAddress, dropOffAddress);
+            postQuotation();
             isCheck = true;
         }
     }
@@ -530,6 +540,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 try {
                     yourNearestDriver = new JSONDeserializer<NearestDriver>().use(null,
                             NearestDriver.class).deserialize(response);
+                    postQuotation();
                     numTxt.setText((int) (yourNearestDriver.getTravelTime() / 1) + " mins");
                 }catch (Exception e) {
                     Log.e("Error Parse Json",e.getLocalizedMessage());

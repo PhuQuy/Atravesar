@@ -338,20 +338,24 @@ public class BookingActivity extends AppCompatActivity implements
     public void pickLocation(int type) {
         //   hideSoftKeyboard(MapsActivity.this);
         Intent myIntent = new Intent(BookingActivity.this, GetAddressActivity.class);
+        Bundle bundle = new Bundle();
+        if(pickUpAddress != null) {
+            bundle.putString("postCode", pickUpAddress.getPostcode());
+        }else {
+            bundle.putString("postCode", "");
+        }
+        myIntent.putExtra("data", bundle);
         startActivityForResult(myIntent, type);
     }
 
     @Override
     public void onClick(View v) {
         if (v == pickUp) {
-            Intent myIntent = new Intent(BookingActivity.this, GetAddressActivity.class);
-            startActivityForResult(myIntent, 1);
+            pickLocation(1);
         } else if (v == dropOff) {
-            Intent myIntent = new Intent(BookingActivity.this, GetAddressActivity.class);
-            startActivityForResult(myIntent, 2);
+            pickLocation(2);
         } else if (v == viaAdd) {
-            Intent myIntent = new Intent(BookingActivity.this, GetAddressActivity.class);
-            startActivityForResult(myIntent, 3);
+            pickLocation(3);
         } else if (v == confirmBooking) {
             postQuotation(retrieveQuote);
             User userDbCurrentUser = userDb.getCurrentUser();

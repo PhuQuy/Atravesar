@@ -87,7 +87,7 @@ public class GetAddressActivity extends AppCompatActivity {
             String postCode = packageFromCaller.getString("postCode");
             getNearlyAddress(postCode);
             addressesData.add("NEAREST");
-            addressesData.addAll(nearlyAddress);
+
         }
 
        // lv.setAdapter(addressArrayAdapter);
@@ -201,6 +201,9 @@ public class GetAddressActivity extends AppCompatActivity {
                     Log.e("message", message.toString(), null);
                     Log.e("code", code.toString(), null);
                     nearlyAddress.addAll(addresses);
+                    addressesData.addAll(nearlyAddress);
+                    frequentAdapter.notifyDataSetChanged();
+                    lvGetAddress.setAdapter(frequentAdapter);
                 } catch (JSONException e) {
                     Log.e("Error", e.getLocalizedMessage(), e);
                 }
