@@ -87,6 +87,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LatLng yourLocation;
     private LatLng lastLocation;
     private LatLng currentLocation;
+    private LatLng pickUpLocation;
 
     private LinearLayout carLayout;
 
@@ -101,7 +102,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private RetrieveQuote retrieveQuote;
     private View marker;
     private View homeMarker;
+    private View pickUpMarker;
     private TextView numTxt;
+    private TextView pickUpMarkerTxt;
     private User user;
     private AutoCompleteTextView mEmailView;
     private EditText phoneNumber;
@@ -134,8 +137,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         carLayout = (LinearLayout) findViewById(R.id.car);
         marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker_layout, null);
+        pickUpMarker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker_layout, null);
         homeMarker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_home_marker, null);
         numTxt = (TextView) marker.findViewById(R.id.num_txt);
+        pickUpMarkerTxt = (TextView) pickUpMarker.findViewById(R.id.num_txt);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -282,6 +287,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Address address = (Address) data.getExtras().get("pickUp");
                 pickUpAddress = address;
                 pickUp.setText(address.getFulladdress());
+                pickUpLocation = new LatLng(address.getLatitude(),address.getLongitude()) ;
+                pickUpMarkerTxt.setText("Pick Up");
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pickUpLocation, 12.0f));
+                mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+                    public void onCameraChange(CameraPosition arg0) {
+
+                MarkerOptions pickUpMark = new MarkerOptions().position(pickUpLocation)
+                        .title("")
+                        .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, pickUpMarker)));
+                mMap.addMarker(pickUpMark).showInfoWindow();
+
+                    }
+
+            });
             }
         } else if (requestCode == 2 && resultCode == RESULT_OK) {
             if (data.hasExtra("dropOff")) {
@@ -640,7 +659,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         Settings.Secure.ANDROID_ID);
                 user.setDeviceID(android_id);
                 login();
-                navigationView.getMenu().findItem(R.id.nav_login).setVisible(true);
+
                 dialog.dismiss();
             }
         });
@@ -668,6 +687,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }catch (Exception e) {
                     Log.e("Exception Sign Up", e.getLocalizedMessage());
                 }
+                navigationView.getMenu().findItem(R.id.nav_login).setVisible(false);
             }
         };
 
