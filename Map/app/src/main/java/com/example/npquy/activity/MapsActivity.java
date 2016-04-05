@@ -272,10 +272,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Intent myIntent = new Intent(MapsActivity.this, GetAddressActivity.class);
         Bundle bundle = new Bundle();
         if(pickUpAddress != null) {
-            bundle.putString("postCode", pickUpAddress.getPostcode());
+            String pickUpJson = new JSONSerializer().exclude("*.class").serialize(
+                    pickUpAddress);
+            bundle.putString("pickUpAddress", pickUpJson);
         }else {
-            bundle.putString("postCode", "");
+            bundle.putString("pickUpAddress", null);
         }
+        String homeAddressJson = new JSONSerializer().exclude("*.class").serialize(
+                getLocationByGeoCode(yourLocation));
+        bundle.putString("homeAddress", homeAddressJson);
         myIntent.putExtra("data", bundle);
         startActivityForResult(myIntent, type);
     }

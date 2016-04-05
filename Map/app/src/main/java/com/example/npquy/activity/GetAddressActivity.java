@@ -51,6 +51,8 @@ public class GetAddressActivity extends AppCompatActivity {
     EditText inputSearch;
 
     private List<Address> nearlyAddress = new ArrayList<>();
+    private Address pickUpAddress;
+    private Address homeAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,20 +77,26 @@ public class GetAddressActivity extends AppCompatActivity {
         inputSearch = (EditText) findViewById(R.id.inputSearch);
         Intent callerIntent = getIntent();
 
-
-        Address homeAddress = new Address("Home Address ,,Tap to select","");
+        if (callerIntent != null) {
+            Bundle packageFromCaller =
+                    callerIntent.getBundleExtra("data");
+            String pickUpJson = packageFromCaller.getString("pickUpAddress");
+            String homeAddressJson = packageFromCaller.getString("homeAddress");
+            pickUpAddress = new JSONDeserializer<Address>().use(null,
+                    Address.class).deserialize(pickUpJson);
+            homeAddress = new JSONDeserializer<Address>().use(null,
+                    Address.class).deserialize(homeAddressJson);
+        }
         addressesData.add("HOME");
         addressesData.add(homeAddress);
         addressesData.add("FREQUENT");
         addressesData.addAll(addressDb.getAddressFromDb());
-        if (callerIntent != null) {
-            Bundle packageFromCaller =
-                    callerIntent.getBundleExtra("data");
-            String postCode = packageFromCaller.getString("postCode");
-            getNearlyAddress(postCode);
-            addressesData.add("NEAREST");
 
+        if(pickUpAddress != null) {
+            String postCode = pickUpAddress.getPostcode();
+            getNearlyAddress(postCode);
         }
+        addressesData.add("NEAREST");
 
        // lv.setAdapter(addressArrayAdapter);
         frequentAdapter = new FrequentAdapter(this, addressesData);
@@ -200,7 +208,9 @@ public class GetAddressActivity extends AppCompatActivity {
                             .use(null, ArrayList.class).use("values", Address.class).deserialize(addressArray.toString());
                     Log.e("message", message.toString(), null);
                     Log.e("code", code.toString(), null);
-                    nearlyAddress.addAll(addresses);
+                    for(int i =0 ; i < 5; i++) {
+                        nearlyAddress.add(addresses.get(i));
+                    }
                     addressesData.addAll(nearlyAddress);
                     frequentAdapter.notifyDataSetChanged();
                     lvGetAddress.setAdapter(frequentAdapter);
