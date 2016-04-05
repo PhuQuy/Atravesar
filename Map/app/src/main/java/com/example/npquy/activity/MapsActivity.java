@@ -71,6 +71,9 @@ import java.util.Locale;
 import flexjson.JSONDeserializer;
 import flexjson.JSONSerializer;
 
+/**
+ *
+ */
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener {
 
     private GoogleMap mMap;
@@ -96,7 +99,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Toolbar toolbar = null;
 
     private ImageView swap;
-    public static SharedPreferences prefs;
     private Double totalFare;
     private int num_people, num_luggage;
     private RetrieveQuote retrieveQuote;
@@ -124,7 +126,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         getBaseContext().getResources().updateConfiguration(config,
                 getBaseContext().getResources().getDisplayMetrics());
         setContentView(R.layout.activity_maps);
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
         pickUp = (EditText) findViewById(R.id.pick_up);
         people = (TextView) findViewById(R.id.people);
         luggage = (TextView) findViewById(R.id.luggage);
@@ -136,6 +137,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         swap = (ImageView) findViewById(R.id.swap_location);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         carLayout = (LinearLayout) findViewById(R.id.car);
+        userDb = new UserDb(this);
         marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker_layout, null);
         pickUpMarker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker_layout, null);
         homeMarker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_home_marker, null);
@@ -203,9 +205,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 openCarBox(MapsActivity.this);
-                SharedPreferences.Editor editor = MapsActivity.prefs.edit();
-                editor.putBoolean("isLogin", true);
-                editor.commit();
             }
         });
         retrieveQuote = new RetrieveQuote();
@@ -217,7 +216,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void postQuotation() {
-        if(pickUpAddress != null && dropOffAddress != null) {
+        if (pickUpAddress != null && dropOffAddress != null) {
             String url = WebServiceTaskManager.URL + "Quotation";
 
             WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
@@ -235,7 +234,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             book.setText("Continue \n Booking");
                             book.setClickable(bookingSaved.getInServiceArea());
                         }
-                    }catch (Exception jsonEx) {
+                    } catch (Exception jsonEx) {
                         Log.e("Json Exception", jsonEx.getLocalizedMessage());
                     }
                 }
@@ -271,11 +270,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void pickLocation(int type) {
         Intent myIntent = new Intent(MapsActivity.this, GetAddressActivity.class);
         Bundle bundle = new Bundle();
-        if(pickUpAddress != null) {
+        if (pickUpAddress != null) {
             String pickUpJson = new JSONSerializer().exclude("*.class").serialize(
                     pickUpAddress);
             bundle.putString("pickUpAddress", pickUpJson);
-        }else {
+        } else {
             bundle.putString("pickUpAddress", null);
         }
         String homeAddressJson = new JSONSerializer().exclude("*.class").serialize(
@@ -289,23 +288,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK) {
             if (data.hasExtra("pickUp")) {
+                mMap.clear();
+                MarkerOptions home = new MarkerOptions().position(yourLocation)
+                        .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, homeMarker)));
+                mMap.addMarker(home).showInfoWindow();
                 Address address = (Address) data.getExtras().get("pickUp");
                 pickUpAddress = address;
                 pickUp.setText(address.getFulladdress());
-                pickUpLocation = new LatLng(address.getLatitude(),address.getLongitude()) ;
-                pickUpMarkerTxt.setText("Pick Up");
+                pickUpLocation = new LatLng(address.getLatitude(), address.getLongitude());
+                findNearestDriver(pickUpLocation);
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pickUpLocation, 12.0f));
-                mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
-                    public void onCameraChange(CameraPosition arg0) {
-
-                MarkerOptions pickUpMark = new MarkerOptions().position(pickUpLocation)
-                        .title("")
-                        .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, pickUpMarker)));
-                mMap.addMarker(pickUpMark).showInfoWindow();
-
-                    }
-
-            });
             }
         } else if (requestCode == 2 && resultCode == RESULT_OK) {
             if (data.hasExtra("dropOff")) {
@@ -322,9 +314,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void booking(View v) {
         if (isCheck) {
-            if(!book.isClickable()) {
+            if (!book.isClickable()) {
                 Toast.makeText(MapsActivity.this, "This app does not operate in that area", Toast.LENGTH_LONG).show();
-            }else {
+            } else {
                 Intent myIntent = new Intent(MapsActivity.this, BookingActivity.class);
                 Bundle bundle = new Bundle();
                 String pickUpJson = new JSONSerializer().exclude("*.class").serialize(
@@ -454,7 +446,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // Add a marker in Sydney and move the camera
             yourLocation = new LatLng(mGPS.getLatitude(), mGPS.getLongitude());
             //  mMap.add
-          //  mMap.addMarker(new MarkerOptions().position(yourLocation).title("You're here"));
+            //  mMap.addMarker(new MarkerOptions().position(yourLocation).title("You're here"));
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(yourLocation, 12.0f));
             mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
                 public void onCameraChange(CameraPosition arg0) {
@@ -494,7 +486,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Address yourAddressPick = new Address();
         try {
             addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1);
-            if(!addresses.isEmpty()) {
+            if (!addresses.isEmpty()) {
                 android.location.Address firstAddress = addresses.get(0);
                 yourAddressPick.setPostcode(firstAddress.getPostalCode());
                 String fullAddress = "";
@@ -503,10 +495,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
 
                 yourAddressPick.setFulladdress(fullAddress);
-                if(firstAddress.hasLongitude()) {
+                if (firstAddress.hasLongitude()) {
                     yourAddressPick.setLongitude(firstAddress.getLongitude());
                 }
-                if(firstAddress.hasLatitude()) {
+                if (firstAddress.hasLatitude()) {
                     yourAddressPick.setLatitude(firstAddress.getLatitude());
                 }
             }
@@ -566,8 +558,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             NearestDriver.class).deserialize(response);
                     postQuotation();
                     numTxt.setText((int) (yourNearestDriver.getTravelTime() / 1) + " mins");
-                }catch (Exception e) {
-                    Log.e("Error Parse Json",e.getLocalizedMessage());
+                } catch (Exception e) {
+                    Log.e("Error Parse Json", e.getLocalizedMessage());
                 }
             }
         };
@@ -581,12 +573,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         wst.execute(new String[]{url});
     }
 
-    public void setVisibleItem(){
-        if(!prefs.getBoolean("isLogin",false)){
+    /**
+     *
+     */
+    public void setVisibleItem() {
+        if (userDb.getCurrentUser() == null) {
             navigationView.getMenu().findItem(R.id.nav_booking_history).setVisible(false);
             navigationView.getMenu().findItem(R.id.nav_currentbooking).setVisible(false);
             navigationView.getMenu().findItem(R.id.nav_logout).setVisible(false);
             navigationView.getMenu().findItem(R.id.nav_profile).setVisible(false);
+            navigationView.getMenu().findItem(R.id.nav_login).setVisible(true);
+        }else {
+            navigationView.getMenu().findItem(R.id.nav_login).setVisible(false);
+            navigationView.getMenu().findItem(R.id.nav_booking_history).setVisible(true);
+            navigationView.getMenu().findItem(R.id.nav_currentbooking).setVisible(true);
+            navigationView.getMenu().findItem(R.id.nav_logout).setVisible(true);
+            navigationView.getMenu().findItem(R.id.nav_profile).setVisible(true);
         }
     }
 
@@ -596,7 +598,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
 
-       setTitle("ZETA-X");
+        setTitle("ZETA-X");
 
         int id = item.getItemId();
 
@@ -612,11 +614,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Intent intent = new Intent(MapsActivity.this, BookingDetailActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_login) {
-                openDialogSignIn(this);
+            openDialogSignIn(this);
 
+        } else if (id == R.id.nav_logout) {
+            userDb.clearDataUserDb();
         } else if (id == R.id.nav_profile) {
-
-        }else if (id == R.id.nav_profile) {
 
         }
 
@@ -624,15 +626,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
     private void openDialogSignIn(Context context) {
         final Dialog dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.activity_login);
-
-        //   dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
-        //   TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
-        //   title.setText("Sign In");
-
         ImageView dialogButton = (ImageView) dialog.findViewById(R.id.imageView_close);
         dialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -684,12 +682,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 try {
                     JSONObject root = new JSONObject(response);
                     String cusId = root.getString("CustID");
-                    if(cusId != null) {
+                    if (cusId != null) {
                         Log.e("CusId", cusId, null);
                         user.setCusID(cusId);
                         userDb.login(user);
                     }
-                }catch (Exception e) {
+                } catch (Exception e) {
                     Log.e("Exception Sign Up", e.getLocalizedMessage());
                 }
                 navigationView.getMenu().findItem(R.id.nav_login).setVisible(false);
@@ -702,10 +700,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         wst.addNameValuePair("", json);
 
         wst.execute(new String[]{url});
-        SharedPreferences.Editor editor = MapsActivity.prefs.edit();
-        editor.putBoolean("isLogin", true);
-        editor.commit();
-
     }
 
     private void openDialogSignUp(Context context) {
@@ -757,6 +751,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         dialog.show();
     }
+
     private void signUp(User user) {
 
         String url = WebServiceTaskManager.URL + "SignUp";

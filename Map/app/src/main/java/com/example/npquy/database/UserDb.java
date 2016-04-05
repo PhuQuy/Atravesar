@@ -70,6 +70,7 @@ public class UserDb extends SQLiteOpenHelper {
         if (db.insert(UserDb.USER_TABLE_NAME, null, values) == -1) {
             return false;
         }
+        db.notify();
         return true;
     }
 
@@ -89,7 +90,7 @@ public class UserDb extends SQLiteOpenHelper {
 
     public void clearDataUserDb() {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("delete from "+ UserDb.USER_TABLE_NAME );
+        db.execSQL("delete from "+ UserDb.USER_TABLE_NAME);
     }
 
     public User getCurrentUser() {

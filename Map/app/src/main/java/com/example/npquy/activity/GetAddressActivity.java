@@ -208,8 +208,12 @@ public class GetAddressActivity extends AppCompatActivity {
                             .use(null, ArrayList.class).use("values", Address.class).deserialize(addressArray.toString());
                     Log.e("message", message.toString(), null);
                     Log.e("code", code.toString(), null);
-                    for(int i =0 ; i < 5; i++) {
-                        nearlyAddress.add(addresses.get(i));
+                    if(addresses.size() <=5 ) {
+                        nearlyAddress.addAll(addresses);
+                    }else {
+                        for (int i = 0; i < 5; i++) {
+                            nearlyAddress.add(addresses.get(i));
+                        }
                     }
                     addressesData.addAll(nearlyAddress);
                     frequentAdapter.notifyDataSetChanged();

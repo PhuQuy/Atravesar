@@ -486,9 +486,6 @@ public class BookingActivity extends AppCompatActivity implements
         wst.addNameValuePair("", json);
 
         wst.execute(new String[]{url});
-        SharedPreferences.Editor editor = MapsActivity.prefs.edit();
-        editor.putBoolean("isLogin", true);
-        editor.commit();
 
     }
 
