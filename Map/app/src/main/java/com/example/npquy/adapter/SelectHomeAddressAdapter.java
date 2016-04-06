@@ -18,14 +18,13 @@ import java.util.Objects;
 /**
  * Created by ITACHI on 3/30/2016.
  */
-public class FrequentAdapter extends BaseAdapter {
+public class SelectHomeAddressAdapter extends BaseAdapter {
     private ArrayList<Object> addressArrayList;
     private LayoutInflater inflater;
     private static final int TYPE_ADDRESS = 0;
     private static final int TYPE_DIVIDER = 1;
-    private static final int TYPE_HOMEADDRESS = 2;
 
-    public FrequentAdapter(Context context, ArrayList<Object> addressArrayList) {
+    public SelectHomeAddressAdapter(Context context, ArrayList<Object> addressArrayList) {
         this.addressArrayList = addressArrayList;
         this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
@@ -48,9 +47,7 @@ public class FrequentAdapter extends BaseAdapter {
     @Override
     public int getItemViewType(int position) {
         Object target = getItem(position);
-        if (position == 1) {
-            return TYPE_HOMEADDRESS;
-        }
+
         if (target instanceof Address) {
             return TYPE_ADDRESS;
         }
@@ -59,7 +56,7 @@ public class FrequentAdapter extends BaseAdapter {
 
     @Override
     public int getViewTypeCount() {
-        return 3;
+        return 2;
     }
 
     @Override
@@ -75,22 +72,14 @@ public class FrequentAdapter extends BaseAdapter {
                 case TYPE_ADDRESS:
                     convertView = inflater.inflate(R.layout.row_item, parent, false);
                     break;
-                case TYPE_HOMEADDRESS:
-                    convertView = inflater.inflate(R.layout.row_item_home, parent, false);
-                    break;
+
                 case TYPE_DIVIDER:
                     convertView = inflater.inflate(R.layout.row_header, parent, false);
                     break;
             }
         }
         switch (type) {
-            case TYPE_HOMEADDRESS:
-                Address homeAddress = (Address) getItem(position);
-                TextView homeRoadName = (TextView)convertView.findViewById(R.id.home_road_name);
-                TextView homeAddressName = (TextView)convertView.findViewById(R.id.home_address_name);
-                    homeAddressName.setText("Tap to select");
-                    homeRoadName.setText("Home address");
-                break;
+
             case TYPE_ADDRESS:
                 Address address = (Address) getItem(position);
                 TextView roadName = (TextView) convertView.findViewById(R.id.road_name);

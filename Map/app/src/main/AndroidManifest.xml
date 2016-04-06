@@ -71,6 +71,9 @@
         <activity
             android:name=".BookingHistoryActivity"
             android:parentActivityName=".MapsActivity"></activity>
+        <activity
+            android:name=".GetHomeAddressActivity"
+            android:parentActivityName=".GetAddressActivity"></activity>
     </application>
 
 </manifest>

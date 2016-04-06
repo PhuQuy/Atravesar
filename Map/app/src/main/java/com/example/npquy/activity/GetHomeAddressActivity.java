@@ -19,11 +19,11 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.npquy.adapter.AddressAdapter;
 import com.example.npquy.adapter.FrequentAdapter;
+import com.example.npquy.adapter.SelectHomeAddressAdapter;
 import com.example.npquy.database.AddressDb;
 import com.example.npquy.entity.Address;
 import com.example.npquy.service.WebServiceTaskManager;
@@ -38,18 +38,16 @@ import java.util.Locale;
 
 import flexjson.JSONDeserializer;
 
-public class GetAddressActivity extends AppCompatActivity {
+public class GetHomeAddressActivity extends AppCompatActivity {
 
     private ListView lvGetAddress;
-    private FrequentAdapter frequentAdapter;
+    private SelectHomeAddressAdapter selectHomeAddressAdapter;
     private ArrayList<Object> addressesData = new ArrayList<>();
 
     private AddressDb addressDb ;
-    private TextView homeRoadName, homeAddressName;
+
     private EditText inputSearch;
 
-    private List<Address> nearlyAddress = new ArrayList<>();
-    private Address pickUpAddress, homeAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,31 +65,19 @@ public class GetAddressActivity extends AppCompatActivity {
 
         actionBar.setCustomView(v);
 
-        homeAddressName = (TextView)findViewById(R.id.home_address_name);
-        homeRoadName = (TextView)findViewById(R.id.home_road_name);
         lvGetAddress = (ListView) findViewById(R.id.frequent_view);
-       // getDatabase();
+        // getDatabase();
         addressDb = new AddressDb(this);
 
         inputSearch = (EditText) findViewById(R.id.inputSearch);
         addDataForAddressListView();
 
-       // lv.setAdapter(addressArrayAdapter);
-        frequentAdapter = new FrequentAdapter(this, addressesData);
-        lvGetAddress.setAdapter(frequentAdapter);
+        // lv.setAdapter(addressArrayAdapter);
+        selectHomeAddressAdapter = new SelectHomeAddressAdapter(this, addressesData);
+        lvGetAddress.setAdapter(selectHomeAddressAdapter);
         handleListener();
     }
-    public void selectHome(View v) {
 
-        //Toast.makeText(this,"Select Home Address",Toast.LENGTH_LONG).show();
-        Intent myIntent = new Intent(GetAddressActivity.this, GetHomeAddressActivity.class);
-        startActivity(myIntent);
-    }
-    public void editHomeAddress(View v) {
-        //Toast.makeText(this,"Edit Home Address",Toast.LENGTH_LONG).show();
-        Intent myIntent = new Intent(GetAddressActivity.this, GetHomeAddressActivity.class);
-        startActivity(myIntent);
-    }
 
     /**
      * Handle change listener for some items
@@ -121,18 +107,16 @@ public class GetAddressActivity extends AppCompatActivity {
                                     long id) {
                 Address address = null;
                 try {
-                    address = (Address) frequentAdapter.getItem(position);
+                    address = (Address) selectHomeAddressAdapter.getItem(position);
                 } catch (ClassCastException ex) {
                     Log.e("Cast Exception", ex.toString());
                 }
                 // doInsertRecord(address);
                 if (address != null) {
                     addressDb.insertAddress(address);
-                    Intent data = new Intent();
-                    data.putExtra("pickUp", address);
-                    data.putExtra("dropOff", address);
-                    data.putExtra("viaAdd", address);
-                    setResult(RESULT_OK, data);
+                    Intent homeAddressData = new Intent();
+                    homeAddressData.putExtra("HomeAddress", address);
+                    setResult(RESULT_OK, homeAddressData);
                     addressDb.close();
                     finish();
                 }
@@ -145,30 +129,23 @@ public class GetAddressActivity extends AppCompatActivity {
      */
 
     private void addDataForAddressListView() {
-        Intent callerIntent = getIntent();
-
-        if (callerIntent != null) {
-            Bundle packageFromCaller =
-                    callerIntent.getBundleExtra("data");
-            String pickUpJson = packageFromCaller.getString("pickUpAddress");
-            String homeAddressJson = packageFromCaller.getString("homeAddress");
-            pickUpAddress = new JSONDeserializer<Address>().use(null,
-                    Address.class).deserialize(pickUpJson);
-            homeAddress = new JSONDeserializer<Address>().use(null,
-                    Address.class).deserialize(homeAddressJson);
-        }
-        addressesData.add("HOME");
-        addressesData.add(homeAddress);
-        addressesData.add("FREQUENT");
+//        Intent callerIntent = getIntent();
+//
+//        if (callerIntent != null) {
+//            Bundle packageFromCaller =
+//                    callerIntent.getBundleExtra("data");
+//            String pickUpJson = packageFromCaller.getString("pickUpAddress");
+//            String homeAddressJson = packageFromCaller.getString("homeAddress");
+//            pickUpAddress = new JSONDeserializer<Address>().use(null,
+//                    Address.class).deserialize(pickUpJson);
+//            homeAddress = new JSONDeserializer<Address>().use(null,
+//                    Address.class).deserialize(homeAddressJson);
+//        }
+        addressesData.add("SELECT HOME ADDRESS");
         addressesData.addAll(addressDb.getAddressFromDb());
 
-        if(pickUpAddress != null) {
-            String postCode = pickUpAddress.getPostcode();
-            getNearlyAddress(postCode);
-        }
-        addressesData.add("NEAREST");
-    }
 
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -206,8 +183,8 @@ public class GetAddressActivity extends AppCompatActivity {
                     Log.e("code", code.toString(), null);
                     addressesData.clear();
                     addressesData.addAll(addresses);
-                    frequentAdapter.notifyDataSetChanged();
-                    lvGetAddress.setAdapter(frequentAdapter);
+                    selectHomeAddressAdapter.notifyDataSetChanged();
+                    lvGetAddress.setAdapter(selectHomeAddressAdapter);
                 } catch (JSONException e) {
                     Log.e("Error", e.getLocalizedMessage(), e);
                 }
@@ -220,46 +197,5 @@ public class GetAddressActivity extends AppCompatActivity {
         wst.execute(new String[]{url});
     }
 
-    /**
-     * GET /NearByPlaces -> get Address around pickup address from mapActivity
-     * @param postCode
-     */
-    private void getNearlyAddress(String postCode) {
-        String url = WebServiceTaskManager.URL + "NearbyPlaces";
 
-        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.GET_TASK, this, "") {
-
-            @Override
-            public void handleResponse(String response) {
-                Log.e("response_nearly", response, null);
-      /*         */
-                try {
-                    JSONObject root = new JSONObject(response);
-                    JSONArray addressArray = root.getJSONArray("addresses");
-                    String message = root.getString("message");
-                    String code = root.getString("code");
-                    List<Address> addresses = new JSONDeserializer<List<Address>>()
-                            .use(null, ArrayList.class).use("values", Address.class).deserialize(addressArray.toString());
-                    Log.e("message", message.toString(), null);
-                    Log.e("code", code.toString(), null);
-                    if(addresses.size() <=5 ) {
-                        nearlyAddress.addAll(addresses);
-                    }else {
-                        for (int i = 0; i < 5; i++) {
-                            nearlyAddress.add(addresses.get(i));
-                        }
-                    }
-                    addressesData.addAll(nearlyAddress);
-                    frequentAdapter.notifyDataSetChanged();
-                    lvGetAddress.setAdapter(frequentAdapter);
-                } catch (JSONException e) {
-                    Log.e("Error", e.getLocalizedMessage(), e);
-                }
-
-            }
-        };
-
-        wst.addNameValuePair("prefix", postCode);
-        wst.execute(new String[]{url});
-    }
 }
