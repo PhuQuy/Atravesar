@@ -4,13 +4,11 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.location.Geocoder;
-import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentActivity;
@@ -24,11 +22,9 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -43,7 +39,6 @@ import com.example.npquy.entity.Location;
 import com.example.npquy.entity.NearestDriver;
 import com.example.npquy.entity.RetrieveQuote;
 import com.example.npquy.entity.RetrieveQuoteResult;
-import com.example.npquy.entity.SaveBooking;
 import com.example.npquy.entity.User;
 import com.example.npquy.service.GPSTracker;
 import com.example.npquy.service.WebServiceTaskManager;
@@ -53,16 +48,12 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -72,25 +63,23 @@ import flexjson.JSONDeserializer;
 import flexjson.JSONSerializer;
 
 /**
- *
+ * @author npquy
  */
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener {
 
     private GoogleMap mMap;
-    private EditText pickUp;
-    private EditText dropOff;
-    private Button book;
-    private Button total;
-    private Boolean isCheck = false;
-    private Address pickUpAddress;
-    private Address dropOffAddress;
-    private TextView people;
-    private TextView luggage;
 
-    private LatLng yourLocation;
-    private LatLng lastLocation;
-    private LatLng currentLocation;
-    private LatLng pickUpLocation;
+    private EditText pickUp, dropOff, phoneNumber, mPhoneNumber, name;
+
+    private Button book, total;
+
+    private Boolean isCheck = false;
+
+    private Address pickUpAddress, dropOffAddress;
+
+    private TextView people, luggage, numMinuteDisplayOnMarker;
+
+    private LatLng yourLocation, lastLocation, currentLocation, pickUpLocation;
 
     private LinearLayout carLayout;
 
@@ -102,81 +91,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Double totalFare;
     private int num_people, num_luggage;
     private RetrieveQuote retrieveQuote;
-    private View marker;
-    private View homeMarker;
-    private View pickUpMarker;
-    private TextView numTxt;
-    private TextView pickUpMarkerTxt;
-    private User user;
-    private AutoCompleteTextView mEmailView;
-    private EditText phoneNumber;
-    private EditText mPhoneNumber;
-    private AutoCompleteTextView signUpEmail;
-    private EditText name;
+    private View marker, pickUpMarker, homeMarker;
+    private AutoCompleteTextView mEmailView, signUpEmail;
+
     private UserDb userDb;
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String languageToLoad = "en"; // your language
-        Locale locale = new Locale(languageToLoad);
-        Locale.setDefault(locale);
-        Configuration config = new Configuration();
-        config.locale = locale;
-        getBaseContext().getResources().updateConfiguration(config,
-                getBaseContext().getResources().getDisplayMetrics());
-        setContentView(R.layout.activity_maps);
-        pickUp = (EditText) findViewById(R.id.pick_up);
-        people = (TextView) findViewById(R.id.people);
-        luggage = (TextView) findViewById(R.id.luggage);
-        dropOff = (EditText) findViewById(R.id.drop_off);
-        pickUp.setInputType(InputType.TYPE_NULL);
-        dropOff.setInputType(InputType.TYPE_NULL);
-        book = (Button) findViewById(R.id.book);
-        total = (Button) findViewById(R.id.total);
-        swap = (ImageView) findViewById(R.id.swap_location);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        carLayout = (LinearLayout) findViewById(R.id.car);
-        userDb = new UserDb(this);
-        marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker_layout, null);
-        pickUpMarker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker_layout, null);
-        homeMarker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_home_marker, null);
-        numTxt = (TextView) marker.findViewById(R.id.num_txt);
-        pickUpMarkerTxt = (TextView) pickUpMarker.findViewById(R.id.num_txt);
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close){
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                setVisibleItem();
-
-            }
-
-            @Override
-            public void onDrawerClosed(View drawerView) {
-                super.onDrawerClosed(drawerView);
-
-            }
-
-            @Override
-            public void onDrawerSlide(View drawerView, float slideOffset) {
-                super.onDrawerSlide(drawerView, slideOffset);
-                setVisibleItem();
-            }
-    };
-        drawer.setDrawerListener(toggle);
-        toolbar.setTitle("Zeta-X");
-        toolbar.setTitleTextColor(Color.WHITE);
-        toolbar.setNavigationIcon(R.drawable.logo);
-        toggle.syncState();
-
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
-        View headerView = navigationView.getHeaderView(0);
-        TextView emailText = (TextView) headerView.findViewById(R.id.email);
+        // Config before running
+        config();
+        configListener();
 
 
+        retrieveQuote = new RetrieveQuote();
 
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+    }
+
+    /**
+     * Config some listeners
+     */
+    private void configListener() {
         navigationView.setNavigationItemSelectedListener(MapsActivity.this);
         pickUp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -226,14 +166,52 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 openCarBox(MapsActivity.this);
             }
         });
-        retrieveQuote = new RetrieveQuote();
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
     }
 
+    /**
+     * Config all field before we use
+     */
+    private void config() {
+        String languageToLoad = "en"; // your language
+        Locale locale = new Locale(languageToLoad);
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.locale = locale;
+        getBaseContext().getResources().updateConfiguration(config,
+                getBaseContext().getResources().getDisplayMetrics());
+        setContentView(R.layout.activity_maps);
+        pickUp = (EditText) findViewById(R.id.pick_up);
+        people = (TextView) findViewById(R.id.people);
+        luggage = (TextView) findViewById(R.id.luggage);
+        dropOff = (EditText) findViewById(R.id.drop_off);
+        pickUp.setInputType(InputType.TYPE_NULL);
+        dropOff.setInputType(InputType.TYPE_NULL);
+        book = (Button) findViewById(R.id.book);
+        total = (Button) findViewById(R.id.total);
+        swap = (ImageView) findViewById(R.id.swap_location);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        carLayout = (LinearLayout) findViewById(R.id.car);
+        userDb = new UserDb(this);
+        marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker_layout, null);
+        pickUpMarker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker_layout, null);
+        homeMarker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_home_marker, null);
+        numMinuteDisplayOnMarker = (TextView) marker.findViewById(R.id.num_txt);
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toolbar.setTitle("Zeta-X");
+        toolbar.setTitleTextColor(Color.WHITE);
+        toolbar.setNavigationIcon(R.drawable.logo);
+        toggle.syncState();
+
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        setVisibleItem();
+    }
+
+    /**
+     * POST /Quotation -> When you have both the pickup and dropoff addresses you will need to call another web service method at the following endpoint and display the returned quote
+     */
     private void postQuotation() {
         if (pickUpAddress != null && dropOffAddress != null) {
             String url = WebServiceTaskManager.URL + "Quotation";
@@ -286,6 +264,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    /**
+     * Call GetAddressActivity to get address
+     * @param type
+     */
     public void pickLocation(int type) {
         Intent myIntent = new Intent(MapsActivity.this, GetAddressActivity.class);
         Bundle bundle = new Bundle();
@@ -303,6 +285,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         startActivityForResult(myIntent, type);
     }
 
+    /**
+     * Handle data return from GetAddressActivity
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK) {
@@ -331,6 +319,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    /**
+     * Call BookingActivity to make more detail for booking function
+     * @param v
+     */
     public void booking(View v) {
         if (isCheck) {
             if (!book.isClickable()) {
@@ -357,6 +349,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    /**
+     * Hide all ImageView from  carlayout
+     * @param imageView1
+     * @param imageView2
+     * @param imageView3
+     * @param imageView4
+     */
     private void hideImage(ImageView imageView1, ImageView imageView2, ImageView imageView3, ImageView imageView4) {
         imageView1.setVisibility(View.INVISIBLE);
         imageView2.setVisibility(View.INVISIBLE);
@@ -364,6 +363,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         imageView4.setVisibility(View.INVISIBLE);
     }
 
+    /**
+     * show dialog for picking car
+     * @param context
+     */
     private void openCarBox(Context context) {
         final Dialog dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -444,6 +447,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         dialog.show();
     }
 
+    /**
+     * Handle all functions involve to map
+     * @param googleMap
+     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         GPSTracker mGPS = new GPSTracker(this);
@@ -498,6 +505,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    /**
+     * get real Address from google map by using geocode
+     * @param location
+     * @return
+     */
     private Address getLocationByGeoCode(LatLng location) {
         Geocoder geocoder;
         List<android.location.Address> addresses;
@@ -528,6 +540,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return yourAddressPick;
     }
 
+    /**
+     * Calculation distance between two locations
+     * @param StartP
+     * @param EndP
+     * @return
+     */
     public double calculationByDistance(LatLng StartP, LatLng EndP) {
         int Radius = 6371;// radius of earth in Km
         double lat1 = StartP.latitude;
@@ -564,6 +582,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return bitmap;
     }
 
+    /**
+     * POST /NearestDriver ->Find nearest driver
+     * @param location
+     */
     private void findNearestDriver(LatLng location) {
         String url = WebServiceTaskManager.URL + "NearestDriver";
 
@@ -576,7 +598,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     yourNearestDriver = new JSONDeserializer<NearestDriver>().use(null,
                             NearestDriver.class).deserialize(response);
                     postQuotation();
-                    numTxt.setText((int) (yourNearestDriver.getTravelTime() / 1) + " mins");
+                    numMinuteDisplayOnMarker.setText((int) (yourNearestDriver.getTravelTime() / 1) + " mins");
                 } catch (Exception e) {
                     Log.e("Error Parse Json", e.getLocalizedMessage());
                 }
@@ -593,7 +615,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /**
-     *
+     *  set visible/invisible some items when login/logout was called
      */
     public void setVisibleItem() {
         if (userDb.getCurrentUser() == null) {
@@ -602,7 +624,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             navigationView.getMenu().findItem(R.id.nav_logout).setVisible(false);
             navigationView.getMenu().findItem(R.id.nav_profile).setVisible(false);
             navigationView.getMenu().findItem(R.id.nav_login).setVisible(true);
-        }else {
+        } else {
             navigationView.getMenu().findItem(R.id.nav_login).setVisible(false);
             navigationView.getMenu().findItem(R.id.nav_booking_history).setVisible(true);
             navigationView.getMenu().findItem(R.id.nav_currentbooking).setVisible(true);
@@ -613,7 +635,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
 
@@ -646,6 +667,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return true;
     }
 
+    /**
+     * Show dialog for login function
+     * @param context
+     */
     private void openDialogSignIn(Context context) {
         final Dialog dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -689,6 +714,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         dialog.show();
     }
 
+    /**
+     * POST /SignIn -> login
+     */
     private void login() {
 
         String url = WebServiceTaskManager.URL + "SignIn";
@@ -721,14 +749,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         wst.execute(new String[]{url});
     }
 
+    /**
+     * Show dialog for sign up
+     * @param context
+     */
     private void openDialogSignUp(Context context) {
         final Dialog dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.activity_sign_up);
-
-        // dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
-        //  TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
-        //  title.setText("Sign Up");
 
         ImageView dialogButton = (ImageView) dialog.findViewById(R.id.imageView_close);
         dialogButton.setOnClickListener(new View.OnClickListener() {
@@ -771,6 +799,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         dialog.show();
     }
 
+    /**
+     * POST /SignUp -> sign up funtion
+     * @param user
+     */
     private void signUp(User user) {
 
         String url = WebServiceTaskManager.URL + "SignUp";
