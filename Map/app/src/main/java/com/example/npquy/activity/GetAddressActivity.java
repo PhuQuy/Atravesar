@@ -38,21 +38,16 @@ import flexjson.JSONDeserializer;
 
 public class GetAddressActivity extends AppCompatActivity {
 
-    // List view
     private ListView lvGetAddress;
-    //ArrayList<Address> addressesData = new ArrayList<>();
-   // AddressAdapter addressArrayAdapter;
     private FrequentAdapter frequentAdapter;
     private ArrayList<Object> addressesData = new ArrayList<>();
 
     private AddressDb addressDb ;
 
-    // Search EditText
-    EditText inputSearch;
+    private EditText inputSearch;
 
     private List<Address> nearlyAddress = new ArrayList<>();
-    private Address pickUpAddress;
-    private Address homeAddress;
+    private Address pickUpAddress, homeAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,32 +70,18 @@ public class GetAddressActivity extends AppCompatActivity {
         addressDb = new AddressDb(this);
 
         inputSearch = (EditText) findViewById(R.id.inputSearch);
-        Intent callerIntent = getIntent();
-
-        if (callerIntent != null) {
-            Bundle packageFromCaller =
-                    callerIntent.getBundleExtra("data");
-            String pickUpJson = packageFromCaller.getString("pickUpAddress");
-            String homeAddressJson = packageFromCaller.getString("homeAddress");
-            pickUpAddress = new JSONDeserializer<Address>().use(null,
-                    Address.class).deserialize(pickUpJson);
-            homeAddress = new JSONDeserializer<Address>().use(null,
-                    Address.class).deserialize(homeAddressJson);
-        }
-        addressesData.add("HOME");
-        addressesData.add(homeAddress);
-        addressesData.add("FREQUENT");
-        addressesData.addAll(addressDb.getAddressFromDb());
-
-        if(pickUpAddress != null) {
-            String postCode = pickUpAddress.getPostcode();
-            getNearlyAddress(postCode);
-        }
-        addressesData.add("NEAREST");
+        addDataForAddressListView();
 
        // lv.setAdapter(addressArrayAdapter);
         frequentAdapter = new FrequentAdapter(this, addressesData);
         lvGetAddress.setAdapter(frequentAdapter);
+        handleListener();
+    }
+
+    /**
+     * Handle change listener for some items
+     */
+    private void handleListener() {
         inputSearch.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -127,7 +108,7 @@ public class GetAddressActivity extends AppCompatActivity {
                 try {
                     address = (Address) frequentAdapter.getItem(position);
                 }catch (ClassCastException ex) {
-                    Log.e("Cast Exception",ex.toString());
+                    Log.e("Cast Exception", ex.toString());
                 }
                // doInsertRecord(address);
                 if(address != null) {
@@ -144,6 +125,34 @@ public class GetAddressActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * add data for address adapter
+     */
+    private void addDataForAddressListView() {
+        Intent callerIntent = getIntent();
+
+        if (callerIntent != null) {
+            Bundle packageFromCaller =
+                    callerIntent.getBundleExtra("data");
+            String pickUpJson = packageFromCaller.getString("pickUpAddress");
+            String homeAddressJson = packageFromCaller.getString("homeAddress");
+            pickUpAddress = new JSONDeserializer<Address>().use(null,
+                    Address.class).deserialize(pickUpJson);
+            homeAddress = new JSONDeserializer<Address>().use(null,
+                    Address.class).deserialize(homeAddressJson);
+        }
+        addressesData.add("HOME");
+        addressesData.add(homeAddress);
+        addressesData.add("FREQUENT");
+        addressesData.addAll(addressDb.getAddressFromDb());
+
+        if(pickUpAddress != null) {
+            String postCode = pickUpAddress.getPostcode();
+            getNearlyAddress(postCode);
+        }
+        addressesData.add("NEAREST");
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -156,6 +165,10 @@ public class GetAddressActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * GET /SearchAddress -> find Address by using key word
+     * @param text
+     */
     private void findSearchAddress(String text) {
         String url = WebServiceTaskManager.URL + "SearchAddress";
 
@@ -190,6 +203,10 @@ public class GetAddressActivity extends AppCompatActivity {
         wst.execute(new String[]{url});
     }
 
+    /**
+     * GET /NearByPlaces -> get Address around pickup address from mapActivity
+     * @param postCode
+     */
     private void getNearlyAddress(String postCode) {
         String url = WebServiceTaskManager.URL + "NearbyPlaces";
 
