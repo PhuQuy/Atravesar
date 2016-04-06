@@ -192,13 +192,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         carLayout = (LinearLayout) findViewById(R.id.car);
         userDb = new UserDb(this);
+        user = new User();
         marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker_layout, null);
         pickUpMarker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker_layout, null);
         homeMarker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_home_marker, null);
         numMinuteDisplayOnMarker = (TextView) marker.findViewById(R.id.num_txt);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                setVisibleItem();
+
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+
+            }
+
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+                super.onDrawerSlide(drawerView, slideOffset);
+                setVisibleItem();
+            }
+        };
         drawer.setDrawerListener(toggle);
         toolbar.setTitle("Zeta-X");
         toolbar.setTitleTextColor(Color.WHITE);
@@ -266,6 +286,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     /**
      * Call GetAddressActivity to get address
+     *
      * @param type
      */
     public void pickLocation(int type) {
@@ -287,6 +308,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     /**
      * Handle data return from GetAddressActivity
+     *
      * @param requestCode
      * @param resultCode
      * @param data
@@ -303,8 +325,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 pickUpAddress = address;
                 pickUp.setText(address.getFulladdress());
                 pickUpLocation = new LatLng(address.getLatitude(), address.getLongitude());
-                findNearestDriver(pickUpLocation);
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pickUpLocation, 12.0f));
+                findNearestDriverWithoutPostQuotation(pickUpLocation);
+                MarkerOptions dragMark = new MarkerOptions().position(pickUpLocation)
+                        .title("")
+                        .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, marker)));
+                mMap.addMarker(dragMark).showInfoWindow();
+                //    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pickUpLocation, 12.0f));
             }
         } else if (requestCode == 2 && resultCode == RESULT_OK) {
             if (data.hasExtra("dropOff")) {
@@ -315,16 +341,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         if (!pickUp.getText().toString().isEmpty() && !dropOff.getText().toString().isEmpty()) {
             postQuotation();
-            isCheck = true;
         }
     }
 
     /**
      * Call BookingActivity to make more detail for booking function
+     *
      * @param v
      */
     public void booking(View v) {
-        if (isCheck) {
+        if (pickUpAddress != null && dropOffAddress != null) {
             if (!book.isClickable()) {
                 Toast.makeText(MapsActivity.this, "This app does not operate in that area", Toast.LENGTH_LONG).show();
             } else {
@@ -351,6 +377,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     /**
      * Hide all ImageView from  carlayout
+     *
      * @param imageView1
      * @param imageView2
      * @param imageView3
@@ -365,6 +392,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     /**
      * show dialog for picking car
+     *
      * @param context
      */
     private void openCarBox(Context context) {
@@ -449,6 +477,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     /**
      * Handle all functions involve to map
+     *
      * @param googleMap
      */
     @Override
@@ -507,6 +536,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     /**
      * get real Address from google map by using geocode
+     *
      * @param location
      * @return
      */
@@ -542,6 +572,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     /**
      * Calculation distance between two locations
+     *
      * @param StartP
      * @param EndP
      * @return
@@ -584,6 +615,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     /**
      * POST /NearestDriver ->Find nearest driver
+     *
      * @param location
      */
     private void findNearestDriver(LatLng location) {
@@ -615,7 +647,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /**
-     *  set visible/invisible some items when login/logout was called
+     * POST /NearestDriver ->Find nearest driver
+     *
+     * @param location
+     */
+    private void findNearestDriverWithoutPostQuotation(LatLng location) {
+        String url = WebServiceTaskManager.URL + "NearestDriver";
+
+        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
+
+            @Override
+            public void handleResponse(String response) {
+                Log.e("NearestDriver_response", response, null);
+                try {
+                    yourNearestDriver = new JSONDeserializer<NearestDriver>().use(null,
+                            NearestDriver.class).deserialize(response);
+                    //  postQuotation();
+                    numMinuteDisplayOnMarker.setText((int) (yourNearestDriver.getTravelTime() / 1) + " mins");
+                } catch (Exception e) {
+                    Log.e("Error Parse Json", e.getLocalizedMessage());
+                }
+            }
+        };
+
+        Location locate = new Location(location.latitude, location.longitude);
+        String json = new JSONSerializer().exclude("*.class").serialize(
+                locate);
+        Log.e("NearestDriver", json, null);
+        wst.addNameValuePair("", json);
+
+        wst.execute(new String[]{url});
+    }
+
+    /**
+     * set visible/invisible some items when login/logout was called
      */
     public void setVisibleItem() {
         if (userDb.getCurrentUser() == null) {
@@ -647,7 +712,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Intent intent = new Intent(MapsActivity.this, MapsActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_booking_history) {
-
             Intent intent = new Intent(MapsActivity.this, BookingHistoryActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_currentbooking) {
@@ -659,7 +723,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } else if (id == R.id.nav_logout) {
             userDb.clearDataUserDb();
         } else if (id == R.id.nav_profile) {
-
+            Intent intent = new Intent(MapsActivity.this, ProfileActivity.class);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -669,6 +734,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     /**
      * Show dialog for login function
+     *
      * @param context
      */
     private void openDialogSignIn(Context context) {
@@ -751,6 +817,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     /**
      * Show dialog for sign up
+     *
      * @param context
      */
     private void openDialogSignUp(Context context) {
@@ -801,6 +868,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     /**
      * POST /SignUp -> sign up funtion
+     *
      * @param user
      */
     private void signUp(User user) {

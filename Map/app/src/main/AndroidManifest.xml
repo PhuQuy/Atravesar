@@ -67,9 +67,13 @@
             android:parentActivityName=".BookingActivity" />
         <activity
             android:name=".BookingDetailActivity"
+            android:label="Booking Detail"
             android:parentActivityName=".BookingSaved" />
         <activity
             android:name=".BookingHistoryActivity"
+            android:parentActivityName=".MapsActivity" />
+        <activity android:name=".ProfileActivity"
+            android:label="Profile"
             android:parentActivityName=".MapsActivity"></activity>
         <activity
             android:name=".GetHomeAddressActivity"
