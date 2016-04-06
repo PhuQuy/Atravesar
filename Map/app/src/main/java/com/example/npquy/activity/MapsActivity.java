@@ -145,7 +145,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         pickUpMarkerTxt = (TextView) pickUpMarker.findViewById(R.id.num_txt);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close){
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                setVisibleItem();
+
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+
+            }
+
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+                super.onDrawerSlide(drawerView, slideOffset);
+                setVisibleItem();
+            }
+    };
         drawer.setDrawerListener(toggle);
         toolbar.setTitle("Zeta-X");
         toolbar.setTitleTextColor(Color.WHITE);
@@ -155,7 +174,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         View headerView = navigationView.getHeaderView(0);
         TextView emailText = (TextView) headerView.findViewById(R.id.email);
-        setVisibleItem();
+
 
 
         navigationView.setNavigationItemSelectedListener(MapsActivity.this);
