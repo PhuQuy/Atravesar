@@ -75,8 +75,12 @@ public class BookingActivity extends AppCompatActivity implements
     private Boolean isClickOnAddImage = false;
     private Boolean isClickOnRemoveImage = false;
     private AutoCompleteTextView signUpEmail;
+    private AutoCompleteTextView cardNumberTv;
     private EditText name;
     private EditText pay_by;
+    private EditText billingPostcodeTv;
+    private EditText expiryTv;
+    private EditText cvvTv;
 
     private Address pickUpAddress;
     private Address dropOffAddress;
@@ -554,7 +558,10 @@ public class BookingActivity extends AppCompatActivity implements
         dialog.setContentView(R.layout.activity_payment);
 
         dialog.setCanceledOnTouchOutside(true);
-
+        cardNumberTv = (AutoCompleteTextView) dialog.findViewById(R.id.card_number);
+        expiryTv = (EditText) dialog.findViewById(R.id.expiry);
+        billingPostcodeTv = (EditText) dialog.findViewById(R.id.billing);
+        cvvTv = (EditText) dialog.findViewById(R.id.cvv);
         final LinearLayout payCashLayout = (LinearLayout) dialog.findViewById(R.id.pay_cash_layout);
         final ImageView cash_tick = (ImageView) dialog.findViewById(R.id.cash_tick);
 
@@ -586,6 +593,11 @@ public class BookingActivity extends AppCompatActivity implements
                 if (!payType.isEmpty()) {
                     pay_by.setText(payType);
                 }
+                String cardNumber =  cardNumberTv.getText().toString();
+                String billingPostcode = billingPostcodeTv.getText().toString();
+                String cvv = cvvTv.getText().toString();
+                String expiry = expiryTv.getText().toString();
+
                 dialog.dismiss();
             }
         });
