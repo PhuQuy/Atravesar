@@ -19,10 +19,10 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_profile);
         config();
         userDb = new UserDb(this);
         setData();
-        setContentView(R.layout.activity_profile);
     }
 
     /**
@@ -45,7 +45,7 @@ public class ProfileActivity extends AppCompatActivity {
         User currentUser = userDb.getCurrentUser();
         if(currentUser != null) {
             Log.e("user", currentUser.toString());
-//            fullNameTextView.setText(currentUser.getName());
+            fullNameTextView.setText(currentUser.getName());
             mobileTextView.setText(currentUser.getMobile());
             emailTextView.setText(currentUser.getEmail());
         }
