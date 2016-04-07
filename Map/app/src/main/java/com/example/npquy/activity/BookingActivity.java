@@ -44,6 +44,8 @@ import com.example.npquy.service.WebServiceTaskManager;
 
 import org.json.JSONObject;
 
+import java.lang.Override;
+import java.lang.String;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -53,38 +55,18 @@ import flexjson.JSONSerializer;
 
 public class BookingActivity extends AppCompatActivity implements
         View.OnClickListener {
-    private EditText dateTime;
-    private int mYear, mMonth, mDay, mHour, mMinute;
-    private int hours, minutes;
-    private EditText pickUp;
-    private CustomEditText viaAdd;
-    private CustomEditText dropOff;
-    private Button confirmBooking;
-    private Button totalBooking;
-    private Switch waitAndReturn;
-    private Switch childSeat;
-    private Switch pet;
-    private Switch eco;
-    private EditText note;
-    private AutoCompleteTextView mEmailView;
-    private EditText phoneNumber;
-    private EditText mPhoneNumber;
+    private EditText dateTime, pickUp, phoneNumber, mPhoneNumber, note, name, pay_by, billingPostcodeTv, expiryTv, cvvTv;
+    private int mYear, mMonth, mDay, mHour, mMinute, hours, minutes;
+    private CustomEditText viaAdd, dropOff;
+    private Button confirmBooking, totalBooking;
+    private Switch waitAndReturn, childSeat, pet, eco;
+    private AutoCompleteTextView mEmailView, signUpEmail, cardNumberTv;
     private Menu menu;
-
 
     private Boolean isClickOnAddImage = false;
     private Boolean isClickOnRemoveImage = false;
-    private AutoCompleteTextView signUpEmail;
-    private AutoCompleteTextView cardNumberTv;
-    private EditText name;
-    private EditText pay_by;
-    private EditText billingPostcodeTv;
-    private EditText expiryTv;
-    private EditText cvvTv;
 
-    private Address pickUpAddress;
-    private Address dropOffAddress;
-    private Address viaAddress;
+    private Address pickUpAddress, dropOffAddress, viaAddress;
 
     private TextView people;
     private TextView luggage;
@@ -111,23 +93,8 @@ public class BookingActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         //  requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         setContentView(R.layout.activity_booking);
-        dateTime = (EditText) findViewById(R.id.date_time);
-        dateTime.setInputType(InputType.TYPE_NULL);
-        people = (TextView) findViewById(R.id.people_booking);
-        luggage = (TextView) findViewById(R.id.luggage_booking);
-        pickUp = (EditText) findViewById(R.id.pick_up_booking);
-        dropOff = (CustomEditText) findViewById(R.id.drop_off_booking);
-        viaAdd = (CustomEditText)findViewById(R.id.via_address_booking);
-        confirmBooking = (Button) findViewById(R.id.book_booking);
-        totalBooking = (Button) findViewById(R.id.total_booking);
-        waitAndReturn = (Switch) findViewById(R.id.w8);
-        childSeat = (Switch) findViewById(R.id.child_seat);
-        pet = (Switch) findViewById(R.id.pet);
-        eco = (Switch) findViewById(R.id.eco);
-        note = (EditText) findViewById(R.id.content_note);
 
-        pay_by = (EditText) findViewById(R.id.pay_by_edit);
-        pay_by.setInputType(InputType.TYPE_NULL);
+        config();
 
         userDb = new UserDb(this);
         User userCurrent = userDb.getCurrentUser();
@@ -160,6 +127,10 @@ public class BookingActivity extends AppCompatActivity implements
             people.setText(num_people + "");
             luggage.setText(num_luggage + "");
         }
+        handleListener();
+    }
+
+    private void handleListener() {
         dateTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -327,6 +298,26 @@ public class BookingActivity extends AppCompatActivity implements
         });
     }
 
+    private void config() {
+        dateTime = (EditText) findViewById(R.id.date_time);
+        dateTime.setInputType(InputType.TYPE_NULL);
+        people = (TextView) findViewById(R.id.people_booking);
+        luggage = (TextView) findViewById(R.id.luggage_booking);
+        pickUp = (EditText) findViewById(R.id.pick_up_booking);
+        dropOff = (CustomEditText) findViewById(R.id.drop_off_booking);
+        viaAdd = (CustomEditText)findViewById(R.id.via_address_booking);
+        confirmBooking = (Button) findViewById(R.id.book_booking);
+        totalBooking = (Button) findViewById(R.id.total_booking);
+        waitAndReturn = (Switch) findViewById(R.id.w8);
+        childSeat = (Switch) findViewById(R.id.child_seat);
+        pet = (Switch) findViewById(R.id.pet);
+        eco = (Switch) findViewById(R.id.eco);
+        note = (EditText) findViewById(R.id.content_note);
+
+        pay_by = (EditText) findViewById(R.id.pay_by_edit);
+        pay_by.setInputType(InputType.TYPE_NULL);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -340,7 +331,6 @@ public class BookingActivity extends AppCompatActivity implements
     }
 
     public void pickLocation(int type) {
-        //   hideSoftKeyboard(MapsActivity.this);
         Intent myIntent = new Intent(BookingActivity.this, GetAddressActivity.class);
         Bundle bundle = new Bundle();
         if(pickUpAddress != null) {
@@ -419,10 +409,6 @@ public class BookingActivity extends AppCompatActivity implements
         final Dialog dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.activity_login);
-
-        //   dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
-        //   TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
-        //   title.setText("Sign In");
 
         ImageView dialogButton = (ImageView) dialog.findViewById(R.id.imageView_close);
         dialogButton.setOnClickListener(new View.OnClickListener() {
@@ -503,10 +489,6 @@ public class BookingActivity extends AppCompatActivity implements
         final Dialog dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.activity_sign_up);
-
-        // dialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_dialog_box);
-        //  TextView title = (TextView) dialog.findViewById(R.id.title_dialog);
-        //  title.setText("Sign Up");
 
         ImageView dialogButton = (ImageView) dialog.findViewById(R.id.imageView_close);
         dialogButton.setOnClickListener(new View.OnClickListener() {

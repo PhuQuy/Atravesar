@@ -2,9 +2,6 @@
 <menu
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/edit_journey"
-        android:title="Edit journey"/>
-    <item
         android:id="@+id/repeat_journey"
         android:title="Repeat journey"/>
     <item

@@ -59,7 +59,7 @@
                 android:layout_height="25dp"
                 android:layout_gravity="center"
                 android:layout_weight="0.1"
-                android:src="@drawable/ic_current_booking" />
+                android:src="@drawable/phone" />
 
             <TextView
                 android:paddingLeft="7dp"
@@ -97,7 +97,7 @@
                 android:layout_height="25dp"
                 android:layout_gravity="center"
                 android:layout_weight="0.1"
-                android:src="@drawable/ic_current_booking" />
+                android:src="@drawable/email" />
 
             <TextView
                 android:paddingLeft="7dp"
@@ -135,7 +135,7 @@
                 android:layout_height="25dp"
                 android:layout_gravity="center"
                 android:layout_weight="0.1"
-                android:src="@drawable/ic_current_booking" />
+                android:src="@drawable/ic_action_name" />
 
             <TextView
                 android:paddingLeft="7dp"
@@ -156,7 +156,7 @@
                 android:textSize="18dp" />
         </LinearLayout>
     </LinearLayout>
-    <LinearLayout
+    <!--<LinearLayout
         android:id="@+id/change_password"
         android:layout_below="@+id/home"
         android:layout_width="match_parent"
@@ -193,11 +193,11 @@
                 android:inputType="textPassword"
                 android:textSize="18dp" />
         </LinearLayout>
-    </LinearLayout>
+    </LinearLayout>-->
     <RelativeLayout
         android:id="@+id/preference"
         android:layout_width="match_parent"
-        android:layout_below="@id/change_password"
+        android:layout_below="@id/home"
         android:layout_height="wrap_content"
         android:background="#E0E0E0">
 
