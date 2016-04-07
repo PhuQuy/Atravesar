@@ -19,10 +19,11 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_profile);
         config();
         userDb = new UserDb(this);
         setData();
-        setContentView(R.layout.activity_profile);
+
     }
 
     /**
@@ -33,7 +34,7 @@ public class ProfileActivity extends AppCompatActivity {
         mobileTextView = (TextView) findViewById(R.id.mobile_text_view);
         emailTextView = (TextView) findViewById(R.id.email_profile_text_view);
         homeTextView = (TextView) findViewById(R.id.home_profile_text_view);
-        passwordTextView = (TextView) findViewById(R.id.change_password_text_view);
+        //passwordTextView = (TextView) findViewById(R.id.change_password_text_view);
 
         enableSnoozeSwitch = (Switch) findViewById(R.id.enable_snooze_switch);
     }
