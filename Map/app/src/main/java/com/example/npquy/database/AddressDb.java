@@ -30,7 +30,7 @@ public class AddressDb extends SQLiteOpenHelper {
     public static final String ADDRESS_COLUMN_ICON_PATH = "icon_path";
     public static final String ADDRESS_COLUMN_LATITUDE = "latitude";
     public static final String ADDRESS_COLUMN_LONGITUDE = "longitude";
-
+    public static final String ADDRESS_COLUMN_USER_ID = "user_id";
 
     private static final Integer FREQUENTLY_NUMBER = 5;
 
@@ -53,7 +53,8 @@ public class AddressDb extends SQLiteOpenHelper {
                         + AddressDb.ADDRESS_COLUMN_CATEGORY + " VARCHAR(255), "
                         + AddressDb.ADDRESS_COLUMN_ICON_PATH + " VARCHAR(255), "
                         + AddressDb.ADDRESS_COLUMN_LATITUDE + " DOUBLE, "
-                        + AddressDb.ADDRESS_COLUMN_LONGITUDE + " DOUBLE)"
+                        + AddressDb.ADDRESS_COLUMN_LONGITUDE + " DOUBLE),"
+                        + AddressDb.ADDRESS_COLUMN_USER_ID + " VARCHAR(255))"
         );
     }
 
@@ -96,9 +97,34 @@ public class AddressDb extends SQLiteOpenHelper {
         return true;
     }
 
+    public boolean insertHomeAddress(Address address, String cusId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(AddressDb.ADDRESS_COLUMN_OUT_CODE, address.getOutcode());
+        values.put(AddressDb.ADDRESS_COLUMN_POST_CODE, address.getPostcode());
+        values.put(AddressDb.ADDRESS_COLUMN_FULL_ADDRESS, address.getFulladdress());
+        values.put(AddressDb.ADDRESS_COLUMN_CATEGORY, address.getCategory());
+        values.put(AddressDb.ADDRESS_COLUMN_ICON_PATH, address.getIcon_Path());
+        values.put(AddressDb.ADDRESS_COLUMN_LATITUDE, address.getLatitude());
+        values.put(AddressDb.ADDRESS_COLUMN_LONGITUDE, address.getLongitude());
+        values.put(AddressDb.ADDRESS_COLUMN_USER_ID, cusId);
+
+        if (db.insert(AddressDb.ADDRESS_TABLE_NAME, null, values) == -1) {
+            return false;
+        }
+        return true;
+    }
+
     public Cursor getData(String full_address) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.rawQuery("select * from " + AddressDb.ADDRESS_TABLE_NAME + " where " + AddressDb.ADDRESS_COLUMN_FULL_ADDRESS + " = '" + full_address + "'", null);
+        return res;
+    }
+
+    public Cursor queryHomeAddress(String cusId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res = db.rawQuery("select * from " + AddressDb.ADDRESS_TABLE_NAME + " where " + AddressDb.ADDRESS_COLUMN_USER_ID + " = '" + cusId + "'", null);
         return res;
     }
 
@@ -149,6 +175,35 @@ public class AddressDb extends SQLiteOpenHelper {
                 if (cursor != null && !cursor.isClosed()) {
                     cursor.close();
                 }
+            }
+        }
+        return addresses;
+    }
+
+    public List<Address> getHomeAddressFromDb(String cusId) {
+        List<Address> addresses = new ArrayList<>();
+        Cursor cursor = queryHomeAddress(cusId);
+        try {
+            cursor.moveToLast();
+            if(cursor != null) {
+                while (cursor.isBeforeFirst() == false) {
+                    Address address = new Address();
+                    address.setOutcode(cursor.getString(1));
+                    address.setPostcode(cursor.getString(2));
+                    address.setFulladdress(cursor.getString(3));
+                    address.setCategory(cursor.getString(4));
+                    address.setIcon_Path(cursor.getString(5));
+                    address.setLatitude(cursor.getDouble(6));
+                    address.setLongitude(cursor.getDouble(7));
+                    addresses.add(address);
+                    cursor.moveToPrevious();
+                }
+            }
+        } catch (Exception ex) {
+            Log.e("Error", ex.getLocalizedMessage(), ex);
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
             }
         }
         return addresses;

@@ -391,6 +391,8 @@ public class BookingActivity extends AppCompatActivity implements
                 saveBooking.setBags(Integer.parseInt(luggage.getText().toString()));
                 saveBooking.setPetfriendly(isPet);
                 saveBooking.setChildseat(isChildSeat);
+                saveBooking.setOutcode(pickUpAddress.getOutcode());
+                saveBooking.setVehType(retrieveQuoteResult.getVehType());
                 saveBooking.setExecutive(false);
                 saveBooking.setDoLat(dropOffAddress.getLatitude());
                 saveBooking.setDoLong(dropOffAddress.getLongitude());
