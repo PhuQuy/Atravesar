@@ -79,7 +79,7 @@ public class BookingActivity extends AppCompatActivity implements
     private Boolean isEco = false;
     private UserDb userDb;
 
-    private String payType;
+    private String payType, message;
     private RetrieveQuote retrieveQuote;
     private RetrieveQuoteResult retrieveQuoteResult;
 
@@ -361,8 +361,9 @@ public class BookingActivity extends AppCompatActivity implements
                 electronicPayment.setAmount(totalFare);
                 electronicPayment.setCustID(currentUserId);
                 postElectronicPayment(electronicPayment);
+                Log.e("RetrieveQuoteResult", retrieveQuoteResult.toString());
                 SaveBooking saveBooking = new SaveBooking();
-                saveBooking.setCusID(currentUserId);
+                saveBooking.setCusid(currentUserId);
                 saveBooking.setRoutedistance(retrieveQuoteResult.getRoutedistance());
                 saveBooking.setVehTypeID(retrieveQuoteResult.getVehTypeID());
                 saveBooking.setTravelTime(retrieveQuoteResult.getTraveltime());
@@ -457,14 +458,24 @@ public class BookingActivity extends AppCompatActivity implements
 
             @Override
             public void handleResponse(String response) {
-                Log.e("response", response, null);
+                Log.e("response_login", response, null);
                 try {
                     JSONObject root = new JSONObject(response);
-                    String cusId = root.getString("CustID");
-                    if(cusId != null) {
-                        Log.e("CusId", cusId, null);
-                        user.setCusID(cusId);
-                        userDb.login(user);
+                    int code = root.getInt("code");
+                    message = root.getString("message");
+                    if(code == 1) {
+                        String cusId = root.getString("CustID");
+                        if (cusId != null) {
+                            Log.e("CusId", cusId, null);
+                            user.setCusID(cusId);
+                            userDb.login(user);
+                        }
+                    }else {
+                        BookingActivity.this.runOnUiThread(new Runnable() {
+                            public void run() {
+                                Toast.makeText(BookingActivity.this, message, Toast.LENGTH_SHORT).show();
+
+                            }});
                     }
                 }catch (Exception e) {
                     Log.e("Exception Sign Up", e.getLocalizedMessage());

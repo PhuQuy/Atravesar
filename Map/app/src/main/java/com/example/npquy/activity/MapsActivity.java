@@ -791,14 +791,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             @Override
             public void handleResponse(String response) {
-                Log.e("response", response, null);
+                Log.e("response_login", response, null);
                 try {
                     JSONObject root = new JSONObject(response);
-                    String cusId = root.getString("CustID");
-                    if (cusId != null) {
-                        Log.e("CusId", cusId, null);
-                        user.setCusID(cusId);
-                        userDb.login(user);
+                    int code = root.getInt("code");
+                    String message = root.getString("message");
+                    if(code == 1) {
+                        String cusId = root.getString("CustID");
+                        if (cusId != null) {
+                            Log.e("CusId", cusId, null);
+                            user.setCusID(cusId);
+                            userDb.login(user);
+                        }
+                    }else {
+                        Toast.makeText(MapsActivity.this, message, Toast.LENGTH_SHORT);
                     }
                 } catch (Exception e) {
                     Log.e("Exception Sign Up", e.getLocalizedMessage());

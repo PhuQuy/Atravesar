@@ -25,7 +25,9 @@ import com.example.npquy.adapter.AddressAdapter;
 import com.example.npquy.adapter.FrequentAdapter;
 import com.example.npquy.adapter.SelectHomeAddressAdapter;
 import com.example.npquy.database.AddressDb;
+import com.example.npquy.database.UserDb;
 import com.example.npquy.entity.Address;
+import com.example.npquy.entity.User;
 import com.example.npquy.service.WebServiceTaskManager;
 
 import org.json.JSONArray;
@@ -44,7 +46,9 @@ public class GetHomeAddressActivity extends AppCompatActivity {
     private SelectHomeAddressAdapter selectHomeAddressAdapter;
     private ArrayList<Object> addressesData = new ArrayList<>();
 
-    private AddressDb addressDb ;
+    private AddressDb addressDb;
+    private UserDb userDb;
+    private String cusId;
 
     private EditText inputSearch;
 
@@ -60,7 +64,7 @@ public class GetHomeAddressActivity extends AppCompatActivity {
         actionBar.setDisplayShowTitleEnabled(false);
 
 
-        LayoutInflater inflator = (LayoutInflater) this .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflator = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = inflator.inflate(R.layout.search_layout, null);
 
         actionBar.setCustomView(v);
@@ -68,7 +72,11 @@ public class GetHomeAddressActivity extends AppCompatActivity {
         lvGetAddress = (ListView) findViewById(R.id.frequent_view);
         // getDatabase();
         addressDb = new AddressDb(this);
-
+        userDb = new UserDb(this);
+        User currentUser = userDb.getCurrentUser();
+        if (currentUser != null) {
+            cusId = currentUser.getCusID();
+        }
         inputSearch = (EditText) findViewById(R.id.inputSearch);
         addDataForAddressListView();
 
@@ -113,7 +121,9 @@ public class GetHomeAddressActivity extends AppCompatActivity {
                 }
                 // doInsertRecord(address);
                 if (address != null) {
-                    addressDb.insertAddress(address);
+                    if(cusId != null) {
+                        addressDb.insertHomeAddress(address, cusId);
+                    }
                     Intent homeAddressData = new Intent();
                     homeAddressData.putExtra("HomeAddress", address);
                     setResult(RESULT_OK, homeAddressData);
@@ -142,7 +152,9 @@ public class GetHomeAddressActivity extends AppCompatActivity {
 //                    Address.class).deserialize(homeAddressJson);
 //        }
         addressesData.add("SELECT HOME ADDRESS");
-        addressesData.addAll(addressDb.getAddressFromDb());
+        if(cusId != null) {
+            addressesData.addAll(addressDb.getHomeAddressFromDb(cusId));
+        }
 
 
     }
@@ -161,6 +173,7 @@ public class GetHomeAddressActivity extends AppCompatActivity {
 
     /**
      * GET /SearchAddress -> find Address by using key word
+     *
      * @param text
      */
     private void findSearchAddress(String text) {

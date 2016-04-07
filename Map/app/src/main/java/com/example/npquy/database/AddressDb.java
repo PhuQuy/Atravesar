@@ -53,7 +53,7 @@ public class AddressDb extends SQLiteOpenHelper {
                         + AddressDb.ADDRESS_COLUMN_CATEGORY + " VARCHAR(255), "
                         + AddressDb.ADDRESS_COLUMN_ICON_PATH + " VARCHAR(255), "
                         + AddressDb.ADDRESS_COLUMN_LATITUDE + " DOUBLE, "
-                        + AddressDb.ADDRESS_COLUMN_LONGITUDE + " DOUBLE),"
+                        + AddressDb.ADDRESS_COLUMN_LONGITUDE + " DOUBLE,"
                         + AddressDb.ADDRESS_COLUMN_USER_ID + " VARCHAR(255))"
         );
     }
@@ -113,6 +113,7 @@ public class AddressDb extends SQLiteOpenHelper {
         if (db.insert(AddressDb.ADDRESS_TABLE_NAME, null, values) == -1) {
             return false;
         }
+        Log.e("Insert data","Succeed");
         return true;
     }
 

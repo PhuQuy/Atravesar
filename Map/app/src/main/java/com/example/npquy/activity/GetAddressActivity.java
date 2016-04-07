@@ -25,7 +25,9 @@ import android.widget.Toast;
 import com.example.npquy.adapter.AddressAdapter;
 import com.example.npquy.adapter.FrequentAdapter;
 import com.example.npquy.database.AddressDb;
+import com.example.npquy.database.UserDb;
 import com.example.npquy.entity.Address;
+import com.example.npquy.entity.User;
 import com.example.npquy.service.WebServiceTaskManager;
 
 import org.json.JSONArray;
@@ -44,7 +46,8 @@ public class GetAddressActivity extends AppCompatActivity {
     private FrequentAdapter frequentAdapter;
     private ArrayList<Object> addressesData = new ArrayList<>();
 
-    private AddressDb addressDb ;
+    private AddressDb addressDb;
+    private UserDb userDb;
     private TextView homeRoadName, homeAddressName;
     private EditText inputSearch;
 
@@ -72,6 +75,7 @@ public class GetAddressActivity extends AppCompatActivity {
         lvGetAddress = (ListView) findViewById(R.id.frequent_view);
        // getDatabase();
         addressDb = new AddressDb(this);
+        userDb = new UserDb(this);
 
         inputSearch = (EditText) findViewById(R.id.inputSearch);
         addDataForAddressListView();
@@ -157,8 +161,34 @@ public class GetAddressActivity extends AppCompatActivity {
             homeAddress = new JSONDeserializer<Address>().use(null,
                     Address.class).deserialize(homeAddressJson);
         }
+        User currentUser = userDb.getCurrentUser();
+        if(currentUser != null) {
+            List<Address> addresses = addressDb.getHomeAddressFromDb(currentUser.getCusID());
+            if(!addresses.isEmpty()) {
+                homeAddress = addresses.get(0);
+            }
+        }
         addressesData.add("HOME");
+        Log.e("Home address", homeAddress.toString());
         addressesData.add(homeAddress);
+        String fullAddress = homeAddress.getFulladdress();
+        /*if (!fullAddress.isEmpty()) {
+            String[] data = fullAddress.split(",");
+            homeRoadName.setText(data[0]);
+            try {
+                homeAddressName.setText(data[2]);
+            } catch (ArrayIndexOutOfBoundsException e) {
+                if (data.length == 1) {
+                    homeAddressName.setText("");
+                } else {
+                    homeAddressName.setText(data[1]);
+                }
+            } catch (Exception e) {
+                homeAddressName.setText("");
+            }
+        } else {
+            homeRoadName.setText("Unknown");
+        }*/
         addressesData.add("FREQUENT");
         addressesData.addAll(addressDb.getAddressFromDb());
 

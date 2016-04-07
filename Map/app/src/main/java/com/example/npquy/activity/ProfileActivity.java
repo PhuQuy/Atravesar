@@ -6,8 +6,12 @@ import android.util.Log;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.example.npquy.database.AddressDb;
 import com.example.npquy.database.UserDb;
+import com.example.npquy.entity.Address;
 import com.example.npquy.entity.User;
+
+import java.util.List;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -15,6 +19,7 @@ public class ProfileActivity extends AppCompatActivity {
     private Switch enableSnoozeSwitch;
 
     private UserDb userDb;
+    private AddressDb addressDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +27,7 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
         config();
         userDb = new UserDb(this);
+        addressDb = new AddressDb(this);
         setData();
     }
 
@@ -48,6 +54,9 @@ public class ProfileActivity extends AppCompatActivity {
             fullNameTextView.setText(currentUser.getName());
             mobileTextView.setText(currentUser.getMobile());
             emailTextView.setText(currentUser.getEmail());
+            List<Address> addressList = addressDb.getHomeAddressFromDb(currentUser.getCusID());
+            Address homeAddress = addressList.get(0);
+            homeTextView.setText(homeAddress.getFulladdress());
         }
     }
 }
