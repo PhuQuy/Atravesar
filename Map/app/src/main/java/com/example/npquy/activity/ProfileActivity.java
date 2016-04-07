@@ -29,6 +29,7 @@ public class ProfileActivity extends AppCompatActivity {
         userDb = new UserDb(this);
         addressDb = new AddressDb(this);
         setData();
+
     }
 
     /**
@@ -39,7 +40,7 @@ public class ProfileActivity extends AppCompatActivity {
         mobileTextView = (TextView) findViewById(R.id.mobile_text_view);
         emailTextView = (TextView) findViewById(R.id.email_profile_text_view);
         homeTextView = (TextView) findViewById(R.id.home_profile_text_view);
-       // passwordTextView = (TextView) findViewById(R.id.change_password_text_view);
+        //passwordTextView = (TextView) findViewById(R.id.change_password_text_view);
 
         enableSnoozeSwitch = (Switch) findViewById(R.id.enable_snooze_switch);
     }
@@ -51,7 +52,7 @@ public class ProfileActivity extends AppCompatActivity {
         User currentUser = userDb.getCurrentUser();
         if(currentUser != null) {
             Log.e("user", currentUser.toString());
-            fullNameTextView.setText(currentUser.getName());
+//            fullNameTextView.setText(currentUser.getName());
             mobileTextView.setText(currentUser.getMobile());
             emailTextView.setText(currentUser.getEmail());
             List<Address> addressList = addressDb.getHomeAddressFromDb(currentUser.getCusID());

@@ -299,9 +299,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } else {
             bundle.putString("pickUpAddress", null);
         }
-        String homeAddressJson = new JSONSerializer().exclude("*.class").serialize(
-                getLocationByGeoCode(yourLocation));
-        bundle.putString("homeAddress", homeAddressJson);
+//        String homeAddressJson = new JSONSerializer().exclude("*.class").serialize(
+//                getLocationByGeoCode(yourLocation));
+        //bundle.putString("homeAddress", homeAddressJson);
         myIntent.putExtra("data", bundle);
         startActivityForResult(myIntent, type);
     }
