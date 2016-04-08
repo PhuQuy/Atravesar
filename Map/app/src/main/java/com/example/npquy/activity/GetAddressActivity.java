@@ -74,8 +74,8 @@ public class GetAddressActivity extends AppCompatActivity {
         homeRoadName = (TextView)findViewById(R.id.home_road_name);
         lvGetAddress = (ListView) findViewById(R.id.frequent_view);
        // getDatabase();
-        addressDb = new AddressDb(this);
-        userDb = new UserDb(this);
+        addressDb = new AddressDb(GetAddressActivity.this);
+        userDb = new UserDb(GetAddressActivity.this);
 
         inputSearch = (EditText) findViewById(R.id.inputSearch);
         addDataForAddressListView();
@@ -155,11 +155,14 @@ public class GetAddressActivity extends AppCompatActivity {
             Bundle packageFromCaller =
                     callerIntent.getBundleExtra("data");
             String pickUpJson = packageFromCaller.getString("pickUpAddress");
-            String homeAddressJson = packageFromCaller.getString("homeAddress");
-            pickUpAddress = new JSONDeserializer<Address>().use(null,
-                    Address.class).deserialize(pickUpJson);
-            homeAddress = new JSONDeserializer<Address>().use(null,
-                    Address.class).deserialize(homeAddressJson);
+            try {
+                pickUpAddress = new JSONDeserializer<Address>().use(null,
+                        Address.class).deserialize(pickUpJson);
+            }catch (Exception e) {
+                Log.e("Error","No pick up address!");
+            }
+           /* homeAddress = new JSONDeserializer<Address>().use(null,
+                    Address.class).deserialize(homeAddressJson);*/
         }
         User currentUser = userDb.getCurrentUser();
         if(currentUser != null) {
@@ -169,9 +172,11 @@ public class GetAddressActivity extends AppCompatActivity {
             }
         }
         addressesData.add("HOME");
-        Log.e("Home address", homeAddress.toString());
+//        Log.e("Home address", homeAddress.toString());
         addressesData.add(homeAddress);
-        String fullAddress = homeAddress.getFulladdress();
+        if(homeAddress != null) {
+            String fullAddress = homeAddress.getFulladdress();
+        }
         /*if (!fullAddress.isEmpty()) {
             String[] data = fullAddress.split(",");
             homeRoadName.setText(data[0]);

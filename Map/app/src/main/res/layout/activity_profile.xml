@@ -119,7 +119,7 @@
         </LinearLayout>
     </LinearLayout>
     <LinearLayout
-        android:id="@+id/home"
+        android:id="@+id/home_lay_out"
         android:layout_below="@+id/email_profile"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -156,44 +156,6 @@
                 android:textSize="18dp" />
         </LinearLayout>
     </LinearLayout>
-    <!--<LinearLayout
-        android:id="@+id/change_password"
-        android:layout_below="@+id/home"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="@dimen/activity_horizontal_margin"
-            android:weightSum="1.0">
-
-            <ImageView
-                android:layout_width="0dip"
-                android:layout_height="25dp"
-                android:layout_gravity="center"
-                android:layout_weight="0.1"
-                android:src="@drawable/ic_current_booking" />
-
-            <TextView
-                android:paddingLeft="7dp"
-                android:layout_width="0dip"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:layout_weight="0.4"
-                android:text="Change password"
-                android:textSize="18dp" />
-
-            <TextView
-                android:id="@+id/change_password_text_view"
-                android:layout_width="0dip"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:layout_weight="0.5"
-                android:gravity="right"
-                android:inputType="textPassword"
-                android:textSize="18dp" />
-        </LinearLayout>
-    </LinearLayout>-->
     <RelativeLayout
         android:id="@+id/preference"
         android:layout_width="match_parent"

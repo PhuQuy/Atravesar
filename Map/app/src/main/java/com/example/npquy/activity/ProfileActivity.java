@@ -1,8 +1,11 @@
 package com.example.npquy.activity;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -15,11 +18,13 @@ import java.util.List;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    private TextView fullNameTextView, mobileTextView, emailTextView, homeTextView, passwordTextView;
+    private TextView fullNameTextView, mobileTextView, emailTextView, homeTextView;
     private Switch enableSnoozeSwitch;
 
     private UserDb userDb;
     private AddressDb addressDb;
+
+    private LinearLayout homeLayOut;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +34,7 @@ public class ProfileActivity extends AppCompatActivity {
         userDb = new UserDb(this);
         addressDb = new AddressDb(this);
         setData();
-
+        setListener();
     }
 
     /**
@@ -40,9 +45,19 @@ public class ProfileActivity extends AppCompatActivity {
         mobileTextView = (TextView) findViewById(R.id.mobile_text_view);
         emailTextView = (TextView) findViewById(R.id.email_profile_text_view);
         homeTextView = (TextView) findViewById(R.id.home_profile_text_view);
-        //passwordTextView = (TextView) findViewById(R.id.change_password_text_view);
+        homeLayOut = (LinearLayout) findViewById(R.id.home_lay_out);
 
         enableSnoozeSwitch = (Switch) findViewById(R.id.enable_snooze_switch);
+    }
+
+    private void setListener() {
+        homeLayOut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent myIntent = new Intent(ProfileActivity.this, GetHomeAddressActivity.class);
+                startActivity(myIntent);
+            }
+        });
     }
 
     /**

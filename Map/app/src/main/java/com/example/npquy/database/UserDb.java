@@ -28,9 +28,9 @@ public class UserDb extends SQLiteOpenHelper {
         super(context, UserDb.DATABASE_NAME, null, 1);
     }
 
-    public UserDb(Context context, String name, SQLiteDatabase.CursorFactory factory, int version, DatabaseErrorHandler errorHandler) {
+ /*   public UserDb(Context context, String name, SQLiteDatabase.CursorFactory factory, int version, DatabaseErrorHandler errorHandler) {
         super(context, name, factory, version, errorHandler);
-    }
+    }*/
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(

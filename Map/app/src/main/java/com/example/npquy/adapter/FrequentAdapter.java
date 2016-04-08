@@ -96,37 +96,34 @@ public class FrequentAdapter extends BaseAdapter {
                 Address homeAddress = (Address) getItem(position);
                 TextView homeRoadName = (TextView)convertView.findViewById(R.id.home_road_name);
                 TextView homeAddressName = (TextView)convertView.findViewById(R.id.home_address_name);
-//                userDb = new UserDb(context);
-//                user = new User();
-//                user = userDb.getCurrentUser();
-//
-//                addressDb = new AddressDb(context);
-//                addressDb.getHomeAddressFromDb(user.getCusID());
-//                if(userDb.getCurrentUser()!=null) {
-//                    if (homeAddress != null) {
-//                        String fullAddress = homeAddress.getFulladdress();
-//                        if (!fullAddress.isEmpty()) {
-//                            String[] data = fullAddress.split(",");
-//                            homeRoadName.setText(data[0]);
-//                            try {
-//                                homeAddressName.setText(data[2]);
-//                            } catch (ArrayIndexOutOfBoundsException e) {
-//                                if (data.length == 1) {
-//                                    homeAddressName.setText("");
-//                                } else {
-//                                    homeAddressName.setText(data[1]);
-//                                }
-//                            } catch (Exception e) {
-//                                homeAddressName.setText("");
-//                            }
-//                        } else {
-//                            homeRoadName.setText("Unknown");
-//                        }
-//                    }
-//                } else {
+                user = new User();
+                user = userDb.getCurrentUser();
+
+                addressDb = new AddressDb(context);
+                addressDb.getHomeAddressFromDb(user.getCusID());
+                if(userDb.getCurrentUser()!=null) {
+                    if (homeAddress != null) {
+                        String fullAddress = homeAddress.getFulladdress();
+                        if (!fullAddress.isEmpty()) {
+                            String[] data = fullAddress.split(",");
+                            homeRoadName.setText(data[0]);
+                            try {
+                                homeAddressName.setText(data[2]);
+                            } catch (ArrayIndexOutOfBoundsException e) {
+                                if (data.length == 1) {
+                                    homeAddressName.setText("");
+                                } else {
+                                    homeAddressName.setText(data[1]);
+                                }
+                            } catch (Exception e) {
+                                homeAddressName.setText("");
+                            }
+                        } else {
+                            homeRoadName.setText("Unknown");
+                        }
+                    }
                     homeAddressName.setText("Tap to select");
                     homeRoadName.setText("Home address");
-
                 break;
             case TYPE_ADDRESS:
                 Address address = (Address) getItem(position);
