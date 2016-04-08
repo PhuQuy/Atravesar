@@ -159,7 +159,7 @@
     <RelativeLayout
         android:id="@+id/preference"
         android:layout_width="match_parent"
-        android:layout_below="@id/home"
+        android:layout_below="@id/home_lay_out"
         android:layout_height="wrap_content"
         android:background="#E0E0E0">
 

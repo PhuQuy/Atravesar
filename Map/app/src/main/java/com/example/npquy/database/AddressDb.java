@@ -158,15 +158,17 @@ public class AddressDb extends SQLiteOpenHelper {
                 cursor.moveToLast();
                 if(cursor != null) {
                     while (cursor.isBeforeFirst() == false) {
-                        Address address = new Address();
-                        address.setOutcode(cursor.getString(1));
-                        address.setPostcode(cursor.getString(2));
-                        address.setFulladdress(cursor.getString(3));
-                        address.setCategory(cursor.getString(4));
-                        address.setIcon_Path(cursor.getString(5));
-                        address.setLatitude(cursor.getDouble(6));
-                        address.setLongitude(cursor.getDouble(7));
-                        addresses.add(address);
+                        if(cursor.getString(8) == null) {
+                            Address address = new Address();
+                            address.setOutcode(cursor.getString(1));
+                            address.setPostcode(cursor.getString(2));
+                            address.setFulladdress(cursor.getString(3));
+                            address.setCategory(cursor.getString(4));
+                            address.setIcon_Path(cursor.getString(5));
+                            address.setLatitude(cursor.getDouble(6));
+                            address.setLongitude(cursor.getDouble(7));
+                            addresses.add(address);
+                        }
                         cursor.moveToPrevious();
                     }
                 }
@@ -188,15 +190,17 @@ public class AddressDb extends SQLiteOpenHelper {
             cursor.moveToLast();
             if(cursor != null) {
                 while (cursor.isBeforeFirst() == false) {
-                    Address address = new Address();
-                    address.setOutcode(cursor.getString(1));
-                    address.setPostcode(cursor.getString(2));
-                    address.setFulladdress(cursor.getString(3));
-                    address.setCategory(cursor.getString(4));
-                    address.setIcon_Path(cursor.getString(5));
-                    address.setLatitude(cursor.getDouble(6));
-                    address.setLongitude(cursor.getDouble(7));
-                    addresses.add(address);
+                    if(cursor.getString(8) != null) {
+                        Address address = new Address();
+                        address.setOutcode(cursor.getString(1));
+                        address.setPostcode(cursor.getString(2));
+                        address.setFulladdress(cursor.getString(3));
+                        address.setCategory(cursor.getString(4));
+                        address.setIcon_Path(cursor.getString(5));
+                        address.setLatitude(cursor.getDouble(6));
+                        address.setLongitude(cursor.getDouble(7));
+                        addresses.add(address);
+                    }
                     cursor.moveToPrevious();
                 }
             }

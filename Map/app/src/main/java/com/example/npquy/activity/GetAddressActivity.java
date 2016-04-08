@@ -65,33 +65,32 @@ public class GetAddressActivity extends AppCompatActivity {
         actionBar.setDisplayShowTitleEnabled(false);
 
 
-        LayoutInflater inflator = (LayoutInflater) this .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflator = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = inflator.inflate(R.layout.search_layout, null);
 
         actionBar.setCustomView(v);
 
-        homeAddressName = (TextView)findViewById(R.id.home_address_name);
-        homeRoadName = (TextView)findViewById(R.id.home_road_name);
         lvGetAddress = (ListView) findViewById(R.id.frequent_view);
-       // getDatabase();
+        // getDatabase();
         addressDb = new AddressDb(GetAddressActivity.this);
         userDb = new UserDb(GetAddressActivity.this);
 
         inputSearch = (EditText) findViewById(R.id.inputSearch);
         addDataForAddressListView();
 
-       // lv.setAdapter(addressArrayAdapter);
+        // lv.setAdapter(addressArrayAdapter);
         frequentAdapter = new FrequentAdapter(this, addressesData);
         lvGetAddress.setAdapter(frequentAdapter);
         handleListener();
     }
+
     public void selectHome(View v) {
 
         //Toast.makeText(this,"Select Home Address",Toast.LENGTH_LONG).show();
-        if(homeAddress == null) {
+        if (homeAddress == null) {
             Intent myIntent = new Intent(GetAddressActivity.this, GetHomeAddressActivity.class);
             startActivityForResult(myIntent, 1);
-        }else {
+        } else {
             Intent data = new Intent();
             data.putExtra("pickUp", homeAddress);
             data.putExtra("dropOff", homeAddress);
@@ -101,6 +100,7 @@ public class GetAddressActivity extends AppCompatActivity {
             finish();
         }
     }
+
     public void editHomeAddress(View v) {
         //Toast.makeText(this,"Edit Home Address",Toast.LENGTH_LONG).show();
         Intent myIntent = new Intent(GetAddressActivity.this, GetHomeAddressActivity.class);
@@ -114,30 +114,8 @@ public class GetAddressActivity extends AppCompatActivity {
             if (data.hasExtra("HomeAddress")) {
                 Address address = (Address) data.getExtras().get("HomeAddress");
                 homeAddress = address;
-                Log.e("homeAddree", homeAddress.toString());
-                /*if (homeAddress != null) {
-                    String fullAddress = homeAddress.getFulladdress();
-                    if (!fullAddress.isEmpty()) {
-                        String[] fullAddressSplit = fullAddress.split(",");
-                        homeRoadName.setText(fullAddressSplit[0]);
-                        try {
-                            homeAddressName.setText(fullAddressSplit[2]);
-                        } catch (ArrayIndexOutOfBoundsException e) {
-                            if (fullAddressSplit.length == 1) {
-                                homeAddressName.setText("");
-                            } else {
-                                homeAddressName.setText(fullAddressSplit[1]);
-                            }
-                        } catch (Exception e) {
-                            homeAddressName.setText("");
-                        }
-                    } else {
-                        homeRoadName.setText("Unknown");
-                    }
-                }else {
-                    homeAddressName.setText("Tap to select");
-                    homeRoadName.setText("Home address");
-                }*/
+                addressesData.remove(homeAddress);
+                addressesData.set(1,address);
             }
             frequentAdapter.notifyDataSetChanged();
             lvGetAddress.setAdapter(frequentAdapter);
@@ -205,30 +183,30 @@ public class GetAddressActivity extends AppCompatActivity {
             try {
                 pickUpAddress = new JSONDeserializer<Address>().use(null,
                         Address.class).deserialize(pickUpJson);
-            }catch (Exception e) {
-                Log.e("Error","No pick up address!");
+            } catch (Exception e) {
+                Log.e("Error", "No pick up address!");
             }
            /* homeAddress = new JSONDeserializer<Address>().use(null,
                     Address.class).deserialize(homeAddressJson);*/
         }
         User currentUser = userDb.getCurrentUser();
-        if(currentUser != null) {
+        if (currentUser != null) {
             List<Address> addresses = addressDb.getHomeAddressFromDb(currentUser.getCusID());
-            if(!addresses.isEmpty()) {
+            if (!addresses.isEmpty()) {
                 homeAddress = addresses.get(0);
             }
         }
         addressesData.add("HOME");
 //        Log.e("Home address", homeAddress.toString());
-        if(homeAddress != null) {
+        if (homeAddress != null) {
             addressesData.add(homeAddress);
-        }else {
+        } else {
             addressesData.add(null);
         }
         addressesData.add("FREQUENT");
         addressesData.addAll(addressDb.getAddressFromDb());
 
-        if(pickUpAddress != null) {
+        if (pickUpAddress != null) {
             String postCode = pickUpAddress.getPostcode();
             getNearlyAddress(postCode);
         }
@@ -250,6 +228,7 @@ public class GetAddressActivity extends AppCompatActivity {
 
     /**
      * GET /SearchAddress -> find Address by using key word
+     *
      * @param text
      */
     private void findSearchAddress(String text) {
@@ -288,6 +267,7 @@ public class GetAddressActivity extends AppCompatActivity {
 
     /**
      * GET /NearByPlaces -> get Address around pickup address from mapActivity
+     *
      * @param postCode
      */
     private void getNearlyAddress(String postCode) {
@@ -308,9 +288,9 @@ public class GetAddressActivity extends AppCompatActivity {
                             .use(null, ArrayList.class).use("values", Address.class).deserialize(addressArray.toString());
                     Log.e("message", message.toString(), null);
                     Log.e("code", code.toString(), null);
-                    if(addresses.size() <=5 ) {
+                    if (addresses.size() <= 5) {
                         nearlyAddress.addAll(addresses);
-                    }else {
+                    } else {
                         for (int i = 0; i < 5; i++) {
                             nearlyAddress.add(addresses.get(i));
                         }

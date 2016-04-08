@@ -26,12 +26,19 @@ public class ProfileActivity extends AppCompatActivity {
 
     private LinearLayout homeLayOut;
 
+    private String cusId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
         config();
         userDb = new UserDb(this);
+
+        User currentUser = userDb.getCurrentUser();
+        if(currentUser != null) {
+            cusId = currentUser.getCusID();
+        }
         addressDb = new AddressDb(this);
         setData();
         setListener();
@@ -55,9 +62,23 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent myIntent = new Intent(ProfileActivity.this, GetHomeAddressActivity.class);
-                startActivity(myIntent);
+                startActivityForResult(myIntent, 2);
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 2 && resultCode == RESULT_OK) {
+            if (data.hasExtra("HomeAddress")) {
+                Address address = (Address) data.getExtras().get("HomeAddress");
+                if(cusId != null) {
+                    addressDb.insertHomeAddress(address, cusId);
+                    homeTextView.setText(address.getFulladdress());
+                }
+            }
+        }
     }
 
     /**
