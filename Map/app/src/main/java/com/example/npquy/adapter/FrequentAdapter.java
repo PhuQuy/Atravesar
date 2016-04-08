@@ -96,6 +96,7 @@ public class FrequentAdapter extends BaseAdapter {
                 Address homeAddress = (Address) getItem(position);
                 TextView homeRoadName = (TextView)convertView.findViewById(R.id.home_road_name);
                 TextView homeAddressName = (TextView)convertView.findViewById(R.id.home_address_name);
+               /* userDb = new UserDb(context);
                 user = new User();
                 user = userDb.getCurrentUser();
 
@@ -122,8 +123,10 @@ public class FrequentAdapter extends BaseAdapter {
                             homeRoadName.setText("Unknown");
                         }
                     }
+                } else {*/
                     homeAddressName.setText("Tap to select");
                     homeRoadName.setText("Home address");
+           //     }
                 break;
             case TYPE_ADDRESS:
                 Address address = (Address) getItem(position);
