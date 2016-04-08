@@ -90,7 +90,7 @@ public class GetAddressActivity extends AppCompatActivity {
         //Toast.makeText(this,"Select Home Address",Toast.LENGTH_LONG).show();
         if(homeAddress == null) {
             Intent myIntent = new Intent(GetAddressActivity.this, GetHomeAddressActivity.class);
-            startActivity(myIntent);
+            startActivityForResult(myIntent, 1);
         }else {
             Intent data = new Intent();
             data.putExtra("pickUp", homeAddress);
@@ -104,7 +104,44 @@ public class GetAddressActivity extends AppCompatActivity {
     public void editHomeAddress(View v) {
         //Toast.makeText(this,"Edit Home Address",Toast.LENGTH_LONG).show();
         Intent myIntent = new Intent(GetAddressActivity.this, GetHomeAddressActivity.class);
-        startActivity(myIntent);
+        startActivityForResult(myIntent, 1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            if (data.hasExtra("HomeAddress")) {
+                Address address = (Address) data.getExtras().get("HomeAddress");
+                homeAddress = address;
+                Log.e("homeAddree", homeAddress.toString());
+                /*if (homeAddress != null) {
+                    String fullAddress = homeAddress.getFulladdress();
+                    if (!fullAddress.isEmpty()) {
+                        String[] fullAddressSplit = fullAddress.split(",");
+                        homeRoadName.setText(fullAddressSplit[0]);
+                        try {
+                            homeAddressName.setText(fullAddressSplit[2]);
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            if (fullAddressSplit.length == 1) {
+                                homeAddressName.setText("");
+                            } else {
+                                homeAddressName.setText(fullAddressSplit[1]);
+                            }
+                        } catch (Exception e) {
+                            homeAddressName.setText("");
+                        }
+                    } else {
+                        homeRoadName.setText("Unknown");
+                    }
+                }else {
+                    homeAddressName.setText("Tap to select");
+                    homeRoadName.setText("Home address");
+                }*/
+            }
+            frequentAdapter.notifyDataSetChanged();
+            lvGetAddress.setAdapter(frequentAdapter);
+        }
     }
 
     /**
