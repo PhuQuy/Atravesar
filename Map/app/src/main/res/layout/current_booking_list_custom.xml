@@ -38,12 +38,12 @@
             android:layout_width="0dip"
             android:layout_weight="0.1"
             android:layout_height="wrap_content"
-            android:src="@drawable/restore"/>
+            android:src="@drawable/wait_return"/>
         <TextView
             android:layout_width="0dip"
             android:layout_weight="0.3"
             android:layout_height="wrap_content"
-            android:text="When"/>
+            android:text=" When"/>
         <TextView
             android:id="@+id/date_time_history"
             android:layout_width="0dip"
@@ -65,13 +65,13 @@
             android:layout_width="0dip"
             android:layout_weight="0.1"
             android:layout_height="50dp"
-            android:src="@drawable/ic_action_name"/>
+            android:src="@drawable/pickup_icon"/>
         <TextView
             android:layout_width="0dip"
             android:layout_weight="0.3"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Pick up"/>
+            android:text=" Pick up"/>
         <TextView
             android:id="@+id/pick_up_history_value"
             android:layout_width="0dip"
@@ -93,13 +93,13 @@
             android:layout_width="0dip"
             android:layout_weight="0.1"
             android:layout_height="50dp"
-            android:src="@drawable/ic_action_name"/>
+            android:src="@drawable/destination_icon"/>
         <TextView
             android:layout_width="0dip"
             android:layout_weight="0.3"
             android:layout_gravity="center"
             android:layout_height="wrap_content"
-            android:text="Drop off"/>
+            android:text=" Drop off"/>
         <TextView
             android:id="@+id/drop_off_history_value"
             android:layout_width="0dip"
