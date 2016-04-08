@@ -73,7 +73,9 @@ public class GetAddressActivity extends AppCompatActivity {
         actionBar.setCustomView(v);
 
 
+
         lvGetAddress = (ListView) findViewById(R.id.frequent_view);
+
 
         // getDatabase();
         addressDb = new AddressDb(GetAddressActivity.this);
@@ -83,7 +85,9 @@ public class GetAddressActivity extends AppCompatActivity {
         addDataForAddressListView();
 
         // lv.setAdapter(addressArrayAdapter);
+
         selectHomeAddressAdapter = new SelectHomeAddressAdapter(this, addressesData);
+
 
         frequentAdapter = new FrequentAdapter(this, addressesData);
         lvGetAddress.setAdapter(frequentAdapter);
@@ -97,6 +101,7 @@ public class GetAddressActivity extends AppCompatActivity {
             Intent myIntent = new Intent(GetAddressActivity.this, GetHomeAddressActivity.class);
 
             startActivityForResult(myIntent, 1);
+
         }
         else {
 
@@ -125,6 +130,7 @@ public class GetAddressActivity extends AppCompatActivity {
             if (data.hasExtra("HomeAddress")) {
                 Address address = (Address) data.getExtras().get("HomeAddress");
                 homeAddress = address;
+
                 Log.e("homeAddree", homeAddress.toString());
 
                 /*if (homeAddress != null) {
@@ -150,6 +156,10 @@ public class GetAddressActivity extends AppCompatActivity {
                     homeAddressName.setText("Tap to select");
                     homeRoadName.setText("Home address");
                 }*/
+
+                addressesData.remove(homeAddress);
+                addressesData.set(1,address);
+
             }
             frequentAdapter.notifyDataSetChanged();
             lvGetAddress.setAdapter(frequentAdapter);
@@ -233,7 +243,9 @@ public class GetAddressActivity extends AppCompatActivity {
                     Address.class).deserialize(homeAddressJson);*/
         }
         User currentUser = userDb.getCurrentUser();
-        if (currentUser != null&& homeAddress!=null) {
+
+        if (currentUser != null) {
+
             List<Address> addresses = addressDb.getHomeAddressFromDb(currentUser.getCusID());
             if (!addresses.isEmpty()) {
                 homeAddress = addresses.get(0);
@@ -241,9 +253,9 @@ public class GetAddressActivity extends AppCompatActivity {
         }
         addressesData.add("HOME");
 //        Log.e("Home address", homeAddress.toString());
-        if(homeAddress != null) {
+        if (homeAddress != null) {
             addressesData.add(homeAddress);
-        }else {
+        } else {
             addressesData.add(null);
         }
         addressesData.add("FREQUENT");

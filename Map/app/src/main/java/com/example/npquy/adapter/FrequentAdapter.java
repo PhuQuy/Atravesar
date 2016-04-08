@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 
@@ -156,6 +157,8 @@ public class FrequentAdapter extends BaseAdapter {
                 TextView roadName = (TextView) convertView.findViewById(R.id.road_name);
                 TextView addressName = (TextView) convertView.findViewById(R.id.address);
                 if (address != null) {
+                  //  ImageView icon = (ImageView) convertView.findViewById(R.id.imgitem);
+                  //  icon.setImageResource(R.drawable.);
                     String fullAddress = address.getFulladdress();
                     if (!fullAddress.isEmpty()) {
                         String[] data = fullAddress.split(",");

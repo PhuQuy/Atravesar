@@ -43,7 +43,7 @@
                 android:layout_width="0dip"
                 android:onClick="editHomeAddress"
                 android:layout_weight="0.1"
-                android:layout_height="50dip"
+                android:layout_height="40dip"
                 android:paddingLeft="2dp"
                 android:paddingRight="10dp"
                 android:paddingTop="2dp"
