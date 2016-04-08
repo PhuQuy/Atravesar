@@ -131,7 +131,7 @@ public class AddressDb extends SQLiteOpenHelper {
 
     public Cursor getData() {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res = db.rawQuery("select * from " + AddressDb.ADDRESS_TABLE_NAME, null);
+        Cursor res = db.rawQuery("select * from " + AddressDb.ADDRESS_TABLE_NAME  + " where " + AddressDb.ADDRESS_COLUMN_USER_ID + " = null", null);
         return res;
     }
 

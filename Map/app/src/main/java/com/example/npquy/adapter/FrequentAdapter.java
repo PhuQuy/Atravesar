@@ -124,9 +124,28 @@ public class FrequentAdapter extends BaseAdapter {
                         }
                     }
                 } else {*/
-                    homeAddressName.setText("Tap to select");
-                    homeRoadName.setText("Home address");
-           //     }
+                   // homeAddressName.setText("Tap to select");
+                //    homeRoadName.setText("Home address");
+                if (homeAddress != null) {
+                    String fullAddress = homeAddress.getFulladdress();
+                    if (!fullAddress.isEmpty()) {
+                        String[] data = fullAddress.split(",");
+                        homeRoadName.setText(data[0]);
+                        try {
+                            homeAddressName.setText(data[2]);
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            if (data.length == 1) {
+                                homeAddressName.setText("");
+                            } else {
+                                homeAddressName.setText(data[1]);
+                            }
+                        } catch (Exception e) {
+                            homeAddressName.setText("");
+                        }
+                    } else {
+                        homeRoadName.setText("Unknown");
+                    }
+                }
                 break;
             case TYPE_ADDRESS:
                 Address address = (Address) getItem(position);

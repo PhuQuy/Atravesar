@@ -88,8 +88,18 @@ public class GetAddressActivity extends AppCompatActivity {
     public void selectHome(View v) {
 
         //Toast.makeText(this,"Select Home Address",Toast.LENGTH_LONG).show();
-        Intent myIntent = new Intent(GetAddressActivity.this, GetHomeAddressActivity.class);
-        startActivity(myIntent);
+        if(homeAddress == null) {
+            Intent myIntent = new Intent(GetAddressActivity.this, GetHomeAddressActivity.class);
+            startActivity(myIntent);
+        }else {
+            Intent data = new Intent();
+            data.putExtra("pickUp", homeAddress);
+            data.putExtra("dropOff", homeAddress);
+            data.putExtra("viaAdd", homeAddress);
+            setResult(RESULT_OK, data);
+            addressDb.close();
+            finish();
+        }
     }
     public void editHomeAddress(View v) {
         //Toast.makeText(this,"Edit Home Address",Toast.LENGTH_LONG).show();
@@ -174,26 +184,6 @@ public class GetAddressActivity extends AppCompatActivity {
         addressesData.add("HOME");
 //        Log.e("Home address", homeAddress.toString());
         addressesData.add(homeAddress);
-        if(homeAddress != null) {
-            String fullAddress = homeAddress.getFulladdress();
-        }
-        /*if (!fullAddress.isEmpty()) {
-            String[] data = fullAddress.split(",");
-            homeRoadName.setText(data[0]);
-            try {
-                homeAddressName.setText(data[2]);
-            } catch (ArrayIndexOutOfBoundsException e) {
-                if (data.length == 1) {
-                    homeAddressName.setText("");
-                } else {
-                    homeAddressName.setText(data[1]);
-                }
-            } catch (Exception e) {
-                homeAddressName.setText("");
-            }
-        } else {
-            homeRoadName.setText("Unknown");
-        }*/
         addressesData.add("FREQUENT");
         addressesData.addAll(addressDb.getAddressFromDb());
 

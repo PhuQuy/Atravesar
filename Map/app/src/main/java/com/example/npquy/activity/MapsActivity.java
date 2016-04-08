@@ -317,19 +317,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK) {
             if (data.hasExtra("pickUp")) {
-                mMap.clear();
-                MarkerOptions home = new MarkerOptions().position(yourLocation)
-                        .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, homeMarker)));
-                mMap.addMarker(home).showInfoWindow();
                 Address address = (Address) data.getExtras().get("pickUp");
                 pickUpAddress = address;
                 pickUp.setText(address.getFulladdress());
-                pickUpLocation = new LatLng(address.getLatitude(), address.getLongitude());
-                findNearestDriverWithoutPostQuotation(pickUpLocation);
-                MarkerOptions dragMark = new MarkerOptions().position(pickUpLocation)
-                        .title("")
-                        .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, marker)));
-                mMap.addMarker(dragMark).showInfoWindow();
+                try {
+                    mMap.clear();
+                    MarkerOptions home = new MarkerOptions().position(yourLocation)
+                            .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, homeMarker)));
+                    mMap.addMarker(home).showInfoWindow();
+
+                    pickUpLocation = new LatLng(address.getLatitude(), address.getLongitude());
+                    findNearestDriverWithoutPostQuotation(pickUpLocation);
+                    MarkerOptions dragMark = new MarkerOptions().position(pickUpLocation)
+                            .title("")
+                            .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, marker)));
+                    mMap.addMarker(dragMark).showInfoWindow();
+
+                }catch (Exception e) {
+                    Log.e("Error", "No gps connection");
+                }
                 //    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pickUpLocation, 12.0f));
             }
         } else if (requestCode == 2 && resultCode == RESULT_OK) {
