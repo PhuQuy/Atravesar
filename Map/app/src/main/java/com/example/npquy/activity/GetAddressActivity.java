@@ -183,7 +183,11 @@ public class GetAddressActivity extends AppCompatActivity {
         }
         addressesData.add("HOME");
 //        Log.e("Home address", homeAddress.toString());
-        addressesData.add(homeAddress);
+        if(homeAddress != null) {
+            addressesData.add(homeAddress);
+        }else {
+            addressesData.add(null);
+        }
         addressesData.add("FREQUENT");
         addressesData.addAll(addressDb.getAddressFromDb());
 
