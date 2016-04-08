@@ -152,7 +152,7 @@ public class GetHomeAddressActivity extends AppCompatActivity {
 //                    Address.class).deserialize(homeAddressJson);
 //        }
         addressesData.add("SELECT HOME ADDRESS");
-        if(cusId != null) {
+        if(cusId != null&&addressDb.getHomeAddressFromDb(cusId)!=null) {
             addressesData.addAll(addressDb.getHomeAddressFromDb(cusId));
         }
 

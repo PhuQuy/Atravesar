@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.example.npquy.adapter.AddressAdapter;
 import com.example.npquy.adapter.FrequentAdapter;
+import com.example.npquy.adapter.SelectHomeAddressAdapter;
 import com.example.npquy.database.AddressDb;
 import com.example.npquy.database.UserDb;
 import com.example.npquy.entity.Address;
@@ -44,6 +45,7 @@ public class GetAddressActivity extends AppCompatActivity {
 
     private ListView lvGetAddress;
     private FrequentAdapter frequentAdapter;
+    private SelectHomeAddressAdapter selectHomeAddressAdapter;
     private ArrayList<Object> addressesData = new ArrayList<>();
 
     private AddressDb addressDb;
@@ -65,33 +67,36 @@ public class GetAddressActivity extends AppCompatActivity {
         actionBar.setDisplayShowTitleEnabled(false);
 
 
-        LayoutInflater inflator = (LayoutInflater) this .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflator = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = inflator.inflate(R.layout.search_layout, null);
 
         actionBar.setCustomView(v);
 
-        homeAddressName = (TextView)findViewById(R.id.home_address_name);
-        homeRoadName = (TextView)findViewById(R.id.home_road_name);
+
         lvGetAddress = (ListView) findViewById(R.id.frequent_view);
-       // getDatabase();
+
+        // getDatabase();
         addressDb = new AddressDb(GetAddressActivity.this);
         userDb = new UserDb(GetAddressActivity.this);
 
         inputSearch = (EditText) findViewById(R.id.inputSearch);
         addDataForAddressListView();
 
-       // lv.setAdapter(addressArrayAdapter);
+        // lv.setAdapter(addressArrayAdapter);
+        selectHomeAddressAdapter = new SelectHomeAddressAdapter(this, addressesData);
+
         frequentAdapter = new FrequentAdapter(this, addressesData);
         lvGetAddress.setAdapter(frequentAdapter);
         handleListener();
     }
+
     public void selectHome(View v) {
 
         //Toast.makeText(this,"Select Home Address",Toast.LENGTH_LONG).show();
-        if(homeAddress == null) {
+        if (homeAddress == null) {
             Intent myIntent = new Intent(GetAddressActivity.this, GetHomeAddressActivity.class);
-            startActivity(myIntent);
-        }else {
+            startActivityForResult(myIntent, 4);
+        } else {
             Intent data = new Intent();
             data.putExtra("pickUp", homeAddress);
             data.putExtra("dropOff", homeAddress);
@@ -101,10 +106,11 @@ public class GetAddressActivity extends AppCompatActivity {
             finish();
         }
     }
+
     public void editHomeAddress(View v) {
         //Toast.makeText(this,"Edit Home Address",Toast.LENGTH_LONG).show();
         Intent myIntent = new Intent(GetAddressActivity.this, GetHomeAddressActivity.class);
-        startActivity(myIntent);
+        startActivityForResult(myIntent, 4);
     }
 
     /**
@@ -134,11 +140,14 @@ public class GetAddressActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View viewClicked, int position,
                                     long id) {
                 Address address = null;
+
                 try {
                     address = (Address) frequentAdapter.getItem(position);
+                    // address = (Address) selectHomeAddressAdapter.getItem(position);
                 } catch (ClassCastException ex) {
                     Log.e("Cast Exception", ex.toString());
                 }
+
                 // doInsertRecord(address);
                 if (address != null) {
                     addressDb.insertAddress(address);
@@ -150,9 +159,40 @@ public class GetAddressActivity extends AppCompatActivity {
                     addressDb.close();
                     finish();
                 }
+
             }
         });
+        lvGetAddress.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View viewClicked, int position,
+                                    long id) {
+                Address address = null;
+
+                try {
+                    address = (Address) selectHomeAddressAdapter.getItem(position);
+                    // address = (Address) selectHomeAddressAdapter.getItem(position);
+                } catch (ClassCastException ex) {
+                    Log.e("Cast Exception", ex.toString());
+                }
+
+                // doInsertRecord(address);
+                if (address != null) {
+                    addressDb.insertAddress(address);
+                    Intent data = new Intent();
+                    data.putExtra("pickUp", address);
+                    data.putExtra("dropOff", address);
+                    data.putExtra("viaAdd", address);
+                    setResult(RESULT_OK, data);
+                    addressDb.close();
+                    finish();
+                }
+
+            }
+        });
+
     }
+
+
 
     /**
      * add data for address adapter
@@ -168,16 +208,16 @@ public class GetAddressActivity extends AppCompatActivity {
             try {
                 pickUpAddress = new JSONDeserializer<Address>().use(null,
                         Address.class).deserialize(pickUpJson);
-            }catch (Exception e) {
-                Log.e("Error","No pick up address!");
+            } catch (Exception e) {
+                Log.e("Error", "No pick up address!");
             }
            /* homeAddress = new JSONDeserializer<Address>().use(null,
                     Address.class).deserialize(homeAddressJson);*/
         }
         User currentUser = userDb.getCurrentUser();
-        if(currentUser != null) {
+        if (currentUser != null&& homeAddress!=null) {
             List<Address> addresses = addressDb.getHomeAddressFromDb(currentUser.getCusID());
-            if(!addresses.isEmpty()) {
+            if (!addresses.isEmpty()) {
                 homeAddress = addresses.get(0);
             }
         }
@@ -187,7 +227,7 @@ public class GetAddressActivity extends AppCompatActivity {
         addressesData.add("FREQUENT");
         addressesData.addAll(addressDb.getAddressFromDb());
 
-        if(pickUpAddress != null) {
+        if (pickUpAddress != null) {
             String postCode = pickUpAddress.getPostcode();
             getNearlyAddress(postCode);
         }
@@ -209,6 +249,7 @@ public class GetAddressActivity extends AppCompatActivity {
 
     /**
      * GET /SearchAddress -> find Address by using key word
+     *
      * @param text
      */
     private void findSearchAddress(String text) {
@@ -247,6 +288,7 @@ public class GetAddressActivity extends AppCompatActivity {
 
     /**
      * GET /NearByPlaces -> get Address around pickup address from mapActivity
+     *
      * @param postCode
      */
     private void getNearlyAddress(String postCode) {
@@ -267,9 +309,9 @@ public class GetAddressActivity extends AppCompatActivity {
                             .use(null, ArrayList.class).use("values", Address.class).deserialize(addressArray.toString());
                     Log.e("message", message.toString(), null);
                     Log.e("code", code.toString(), null);
-                    if(addresses.size() <=5 ) {
+                    if (addresses.size() <= 5) {
                         nearlyAddress.addAll(addresses);
-                    }else {
+                    } else {
                         for (int i = 0; i < 5; i++) {
                             nearlyAddress.add(addresses.get(i));
                         }
@@ -287,4 +329,34 @@ public class GetAddressActivity extends AppCompatActivity {
         wst.addNameValuePair("prefix", postCode);
         wst.execute(new String[]{url});
     }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent homeAddressData) {
+        super.onActivityResult(requestCode, resultCode, homeAddressData);
+        if (requestCode == 4 && resultCode == RESULT_OK) {
+            homeAddressName = (TextView) findViewById(R.id.home_address_name);
+            homeRoadName = (TextView) findViewById(R.id.home_road_name);
+            if (homeAddressData.hasExtra("HomeAddress")) {
+                Address homeAddress = (Address) homeAddressData.getExtras().get("HomeAddress");
+                String fullAddress = homeAddress.getFulladdress();
+                if (!fullAddress.isEmpty()) {
+                    String[] data = fullAddress.split(",");
+                    homeRoadName.setText(data[0]);
+                    try {
+                        homeAddressName.setText(data[2]);
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        if (data.length == 1) {
+                            homeAddressName.setText("");
+                        } else {
+                            homeAddressName.setText(data[1]);
+                        }
+                    } catch (Exception e) {
+                        homeAddressName.setText("");
+                    }
+                } else {
+                    homeRoadName.setText("Unknown");
+                }
+            }
+        }
+    }
 }
+
