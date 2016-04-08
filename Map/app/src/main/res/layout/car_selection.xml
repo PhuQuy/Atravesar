@@ -57,7 +57,7 @@
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
-            android:src="@drawable/car" />
+            android:src="@drawable/saloon" />
         <LinearLayout
             android:layout_width="0dp"
             android:layout_weight="0.4"
@@ -68,7 +68,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="20dp"
-                android:text="Salon"/>
+                android:text="Saloon"/>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -79,7 +79,7 @@
                     android:layout_weight="0.2"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right|center"
-                    android:src="@drawable/ic_current_booking"/>
+                    android:src="@drawable/passengers"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_weight="0.1"
@@ -93,7 +93,7 @@
                     android:layout_marginLeft="20dp"
                     android:layout_height="25dp"
                     android:layout_gravity="right|center"
-                    android:src="@drawable/luggage8"/>
+                    android:src="@drawable/bags"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_weight="0.1"
@@ -127,7 +127,7 @@
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
-            android:src="@drawable/car" />
+            android:src="@drawable/mpv" />
         <LinearLayout
             android:layout_width="0dp"
             android:layout_weight="0.4"
@@ -149,7 +149,7 @@
                     android:layout_weight="0.2"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right|center"
-                    android:src="@drawable/ic_current_booking"/>
+                    android:src="@drawable/passengers"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_weight="0.1"
@@ -163,7 +163,7 @@
                     android:layout_marginLeft="20dp"
                     android:layout_height="25dp"
                     android:layout_gravity="right|center"
-                    android:src="@drawable/luggage8"/>
+                    android:src="@drawable/bags"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_weight="0.1"
@@ -197,7 +197,7 @@
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
-            android:src="@drawable/car" />
+            android:src="@drawable/executive" />
         <LinearLayout
             android:layout_width="0dp"
             android:layout_weight="0.4"
@@ -219,7 +219,7 @@
                     android:layout_weight="0.2"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right|center"
-                    android:src="@drawable/ic_current_booking"/>
+                    android:src="@drawable/passengers"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_weight="0.1"
@@ -233,7 +233,7 @@
                     android:layout_marginLeft="20dp"
                     android:layout_height="25dp"
                     android:layout_gravity="right|center"
-                    android:src="@drawable/luggage8"/>
+                    android:src="@drawable/bags"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_weight="0.1"
@@ -266,7 +266,7 @@
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
-            android:src="@drawable/car" />
+            android:src="@drawable/estate" />
         <LinearLayout
             android:layout_width="0dp"
             android:layout_weight="0.4"
@@ -288,7 +288,7 @@
                     android:layout_weight="0.2"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right|center"
-                    android:src="@drawable/ic_current_booking"/>
+                    android:src="@drawable/passengers"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_weight="0.1"
@@ -302,7 +302,7 @@
                     android:layout_marginLeft="20dp"
                     android:layout_height="25dp"
                     android:layout_gravity="right|center"
-                    android:src="@drawable/luggage8"/>
+                    android:src="@drawable/bags"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_weight="0.1"

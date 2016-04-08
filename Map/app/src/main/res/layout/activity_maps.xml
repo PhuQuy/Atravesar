@@ -121,7 +121,7 @@
                     android:layout_width="0dip"
                     android:layout_weight="0.3"
                     android:layout_height="50dp"
-                    android:src="@drawable/car"/>
+                    android:src="@drawable/saloon"/>
                 <TextView
                     android:layout_width="0dip"
                     android:layout_weight="0.3"
@@ -135,7 +135,7 @@
                     android:layout_marginLeft="10dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_current_booking"/>
+                    android:src="@drawable/passengers"/>
                 <TextView
                     android:id="@+id/people"
                     android:layout_width="0dp"
@@ -150,7 +150,7 @@
                     android:layout_marginLeft="20dp"
                     android:layout_height="40dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/luggage8"/>
+                    android:src="@drawable/bags"/>
                 <TextView
                     android:id="@+id/luggage"
                     android:layout_width="0dp"

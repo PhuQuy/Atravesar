@@ -54,10 +54,10 @@
         android:weightSum="1.0">
 
         <ImageView
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
+            android:layout_width="25dip"
+            android:layout_height="match_parent"
             android:layout_weight="0.3"
-            android:src="@drawable/cash_receiving" />
+            android:src="@drawable/cash" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -88,9 +88,9 @@
 
         <ImageView
             android:layout_width="0dip"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="0.3"
-            android:src="@drawable/credit" />
+            android:src="@drawable/card" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
