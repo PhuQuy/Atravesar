@@ -145,6 +145,7 @@ public class FrequentAdapter extends BaseAdapter {
                     } else {
                         homeRoadName.setText("Unknown");
                     }
+
                 } else {
                     homeAddressName.setText("Tap to select");
                     homeRoadName.setText("Home address");

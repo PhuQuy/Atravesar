@@ -95,8 +95,11 @@ public class GetAddressActivity extends AppCompatActivity {
         //Toast.makeText(this,"Select Home Address",Toast.LENGTH_LONG).show();
         if (homeAddress == null) {
             Intent myIntent = new Intent(GetAddressActivity.this, GetHomeAddressActivity.class);
-            startActivityForResult(myIntent, 4);
-        } else {
+
+            startActivityForResult(myIntent, 1);
+        }
+        else {
+
             Intent data = new Intent();
             data.putExtra("pickUp", homeAddress);
             data.putExtra("dropOff", homeAddress);
@@ -110,7 +113,48 @@ public class GetAddressActivity extends AppCompatActivity {
     public void editHomeAddress(View v) {
         //Toast.makeText(this,"Edit Home Address",Toast.LENGTH_LONG).show();
         Intent myIntent = new Intent(GetAddressActivity.this, GetHomeAddressActivity.class);
-        startActivityForResult(myIntent, 4);
+
+
+        startActivityForResult(myIntent, 1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            if (data.hasExtra("HomeAddress")) {
+                Address address = (Address) data.getExtras().get("HomeAddress");
+                homeAddress = address;
+                Log.e("homeAddree", homeAddress.toString());
+
+                /*if (homeAddress != null) {
+                    String fullAddress = homeAddress.getFulladdress();
+                    if (!fullAddress.isEmpty()) {
+                        String[] fullAddressSplit = fullAddress.split(",");
+                        homeRoadName.setText(fullAddressSplit[0]);
+                        try {
+                            homeAddressName.setText(fullAddressSplit[2]);
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            if (fullAddressSplit.length == 1) {
+                                homeAddressName.setText("");
+                            } else {
+                                homeAddressName.setText(fullAddressSplit[1]);
+                            }
+                        } catch (Exception e) {
+                            homeAddressName.setText("");
+                        }
+                    } else {
+                        homeRoadName.setText("Unknown");
+                    }
+                }else {
+                    homeAddressName.setText("Tap to select");
+                    homeRoadName.setText("Home address");
+                }*/
+            }
+            frequentAdapter.notifyDataSetChanged();
+            lvGetAddress.setAdapter(frequentAdapter);
+        }
+
     }
 
     /**
@@ -143,34 +187,7 @@ public class GetAddressActivity extends AppCompatActivity {
 
                 try {
                     address = (Address) frequentAdapter.getItem(position);
-                    // address = (Address) selectHomeAddressAdapter.getItem(position);
-                } catch (ClassCastException ex) {
-                    Log.e("Cast Exception", ex.toString());
-                }
-
-                // doInsertRecord(address);
-                if (address != null) {
-                    addressDb.insertAddress(address);
-                    Intent data = new Intent();
-                    data.putExtra("pickUp", address);
-                    data.putExtra("dropOff", address);
-                    data.putExtra("viaAdd", address);
-                    setResult(RESULT_OK, data);
-                    addressDb.close();
-                    finish();
-                }
-
-            }
-        });
-        lvGetAddress.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View viewClicked, int position,
-                                    long id) {
-                Address address = null;
-
-                try {
                     address = (Address) selectHomeAddressAdapter.getItem(position);
-                    // address = (Address) selectHomeAddressAdapter.getItem(position);
                 } catch (ClassCastException ex) {
                     Log.e("Cast Exception", ex.toString());
                 }
@@ -189,6 +206,7 @@ public class GetAddressActivity extends AppCompatActivity {
 
             }
         });
+
 
     }
 
@@ -223,7 +241,11 @@ public class GetAddressActivity extends AppCompatActivity {
         }
         addressesData.add("HOME");
 //        Log.e("Home address", homeAddress.toString());
-        addressesData.add(homeAddress);
+        if(homeAddress != null) {
+            addressesData.add(homeAddress);
+        }else {
+            addressesData.add(null);
+        }
         addressesData.add("FREQUENT");
         addressesData.addAll(addressDb.getAddressFromDb());
 
@@ -272,8 +294,8 @@ public class GetAddressActivity extends AppCompatActivity {
                     Log.e("code", code.toString(), null);
                     addressesData.clear();
                     addressesData.addAll(addresses);
-                    frequentAdapter.notifyDataSetChanged();
-                    lvGetAddress.setAdapter(frequentAdapter);
+                    selectHomeAddressAdapter.notifyDataSetChanged();
+                    lvGetAddress.setAdapter(selectHomeAddressAdapter);
                 } catch (JSONException e) {
                     Log.e("Error", e.getLocalizedMessage(), e);
                 }
@@ -330,33 +352,8 @@ public class GetAddressActivity extends AppCompatActivity {
         wst.execute(new String[]{url});
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent homeAddressData) {
-        super.onActivityResult(requestCode, resultCode, homeAddressData);
-        if (requestCode == 4 && resultCode == RESULT_OK) {
-            homeAddressName = (TextView) findViewById(R.id.home_address_name);
-            homeRoadName = (TextView) findViewById(R.id.home_road_name);
-            if (homeAddressData.hasExtra("HomeAddress")) {
-                Address homeAddress = (Address) homeAddressData.getExtras().get("HomeAddress");
-                String fullAddress = homeAddress.getFulladdress();
-                if (!fullAddress.isEmpty()) {
-                    String[] data = fullAddress.split(",");
-                    homeRoadName.setText(data[0]);
-                    try {
-                        homeAddressName.setText(data[2]);
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        if (data.length == 1) {
-                            homeAddressName.setText("");
-                        } else {
-                            homeAddressName.setText(data[1]);
-                        }
-                    } catch (Exception e) {
-                        homeAddressName.setText("");
-                    }
-                } else {
-                    homeRoadName.setText("Unknown");
-                }
-            }
-        }
-    }
+
+
+
 }
 
