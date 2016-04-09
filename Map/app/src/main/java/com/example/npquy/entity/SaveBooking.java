@@ -6,7 +6,7 @@ package com.example.npquy.entity;
 public class SaveBooking {
     private String Outcode;
     private String RtnOutcode;
-    private Integer cusid;
+    private Integer custid;
     private String pick;
     private String doff;
     private String via;
@@ -55,12 +55,12 @@ public class SaveBooking {
         RtnOutcode = rtnOutcode;
     }
 
-    public Integer getCusid() {
-        return cusid;
+    public Integer getCustid() {
+        return custid;
     }
 
-    public void setCusid(Integer cusid) {
-        this.cusid = cusid;
+    public void setCustid(Integer custid) {
+        this.custid = custid;
     }
 
     public String getPick() {
@@ -292,7 +292,7 @@ public class SaveBooking {
         return "SaveBooking{" +
                 "Outcode='" + Outcode + '\'' +
                 ", RtnOutcode='" + RtnOutcode + '\'' +
-                ", cusid=" + cusid +
+                ", cusid=" + custid +
                 ", pick=" + pick +
                 ", doff=" + doff +
                 ", via='" + via + '\'' +

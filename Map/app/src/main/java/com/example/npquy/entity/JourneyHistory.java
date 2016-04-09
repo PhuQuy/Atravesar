@@ -4,18 +4,18 @@ package com.example.npquy.entity;
  * Created by ITACHI on 3/27/2016.
  */
 public class JourneyHistory {
-    String JobPartID;
+    Integer JobPartID;
     String Status;
     String Contact;
-    Address PickupAddress;
-    Address DropoffAddress;
-    Double TotalFare;
+    String PickupAddress;
+    String DropoffAddress;
+    String TotalFare;
     String Notes;
     String PickupDateTime;
     String ViaLocations;
     String FlightNumber;
     Double ExpFlightArrival;
-    Integer ChildSeat;
+    String ChildSeat;
     Integer Passengers;
     Integer Suitcases;
     String MeetAndGreet;
@@ -26,13 +26,6 @@ public class JourneyHistory {
     public JourneyHistory() {
     }
 
-    public String getJobPartID() {
-        return JobPartID;
-    }
-
-    public void setJobPartID(String jobPartID) {
-        JobPartID = jobPartID;
-    }
 
     public String getStatus() {
         return Status;
@@ -50,27 +43,35 @@ public class JourneyHistory {
         Contact = contact;
     }
 
-    public Address getPickupAddress() {
+    public String getPickupAddress() {
         return PickupAddress;
     }
 
-    public void setPickupAddress(Address pickupAddress) {
+    public void setPickupAddress(String pickupAddress) {
         PickupAddress = pickupAddress;
     }
 
-    public Address getDropoffAddress() {
+    public String getDropoffAddress() {
         return DropoffAddress;
     }
 
-    public void setDropoffAddress(Address dropoffAddress) {
+    public void setDropoffAddress(String dropoffAddress) {
         DropoffAddress = dropoffAddress;
     }
 
-    public Double getTotalFare() {
+    public Integer getJobPartID() {
+        return JobPartID;
+    }
+
+    public void setJobPartID(Integer jobPartID) {
+        JobPartID = jobPartID;
+    }
+
+    public String getTotalFare() {
         return TotalFare;
     }
 
-    public void setTotalFare(Double totalFare) {
+    public void setTotalFare(String totalFare) {
         TotalFare = totalFare;
     }
 
@@ -114,11 +115,11 @@ public class JourneyHistory {
         ExpFlightArrival = expFlightArrival;
     }
 
-    public Integer getChildSeat() {
+    public String getChildSeat() {
         return ChildSeat;
     }
 
-    public void setChildSeat(Integer childSeat) {
+    public void setChildSeat(String childSeat) {
         ChildSeat = childSeat;
     }
 

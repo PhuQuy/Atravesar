@@ -54,11 +54,17 @@ public class BookingHistoryActivity extends AppCompatActivity {
       /*         */
                 try {
                     JSONObject root = new JSONObject(response);
-                    JSONArray addressArray = root.getJSONArray("addresses");
+                    JSONArray addressArray = root.getJSONArray("jlist");
                     String message = root.getString("message");
                     String code = root.getString("code");
-                    List<JourneyHistory> journeyHistories = new JSONDeserializer<List<JourneyHistory>>()
-                            .use(null, ArrayList.class).use("values", JourneyHistory.class).deserialize(addressArray.toString());
+                    List<JourneyHistory> journeyHistories = new ArrayList<>();
+                    if(addressArray.length() != 0) {
+                        for (int i = 0; i < addressArray.length(); i++) {
+                            JourneyHistory journeyHistory = new JSONDeserializer<JourneyHistory>().use(null,
+                                    JourneyHistory.class).deserialize(addressArray.get(i).toString());
+                            journeyHistories.add(journeyHistory);
+                        }
+                    }
                     Log.e("message", message.toString(), null);
                     Log.e("code", code.toString(), null);
                     bookingHistoryAdapter.addAll(journeyHistories);

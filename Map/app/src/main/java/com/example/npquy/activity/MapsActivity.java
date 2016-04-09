@@ -272,9 +272,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             retrieveQuote.setBags(Integer.parseInt(luggage.getText().toString()));
             retrieveQuote.setPickpostcode(pickUpAddress.getPostcode());
             retrieveQuote.setDroppostcode(dropOffAddress.getPostcode());
-            retrieveQuote.setPetfriendly(false);
-            retrieveQuote.setExecutive(false);
-            retrieveQuote.setChildseat(false);
             String json = new JSONSerializer().exclude("*.class").serialize(
                     retrieveQuote);
             Log.e("Quotation", json, null);
@@ -556,6 +553,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (!addresses.isEmpty()) {
                 android.location.Address firstAddress = addresses.get(0);
                 yourAddressPick.setPostcode(firstAddress.getPostalCode());
+                String[] outCodes = firstAddress.getPostalCode().split(" ");
+                if(outCodes[1] != null || outCodes[1].isEmpty()) {
+                    yourAddressPick.setOutcode(outCodes[1]);
+                }
                 String fullAddress = "";
                 for (int i = 0; i < firstAddress.getMaxAddressLineIndex(); i++) {
                     fullAddress += firstAddress.getAddressLine(i) + ",";

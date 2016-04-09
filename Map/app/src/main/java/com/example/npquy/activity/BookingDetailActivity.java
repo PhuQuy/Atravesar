@@ -111,14 +111,14 @@ public class BookingDetailActivity extends AppCompatActivity {
       /*         */
                 try {
                     JSONObject root = new JSONObject(response);
-                    JSONObject journeyHistoryJson = root.getJSONObject("a");
+                    JSONArray journeyHistoryJsonArray = root.getJSONArray("jlist");
                     String message = root.getString("message");
                     String code = root.getString("code");
                     JourneyHistory journeyHistory = new JSONDeserializer<JourneyHistory>().use(null,
-                            JourneyHistory.class).deserialize(journeyHistoryJson.toString());
+                            JourneyHistory.class).deserialize(journeyHistoryJsonArray.get(0).toString());
+                    pickUp.setText(journeyHistory.getPickupAddress());
+                    dropOff.setText(journeyHistory.getDropoffAddress());
 
-                    pickUp.setText(journeyHistory.getPickupAddress().getFulladdress());
-                    dropOff.setText(journeyHistory.getDropoffAddress().getFulladdress());
                 } catch (JSONException e) {
                     Log.e("Error", e.getLocalizedMessage(), e);
                 }
@@ -126,8 +126,8 @@ public class BookingDetailActivity extends AppCompatActivity {
             }
         };
 
-        wst.addNameValuePair("CustID", cusId);
-        wst.addNameValuePair("DeviceID", deviceId);
+        wst.addNameValuePair("CustID", "16510");
+        wst.addNameValuePair("DeviceID", "3502cc24ff467f7d");
         Log.d("send data", url);
         wst.execute(new String[]{url});
     }

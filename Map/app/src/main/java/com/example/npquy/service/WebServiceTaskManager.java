@@ -184,6 +184,7 @@ public abstract class WebServiceTaskManager extends
                         url += "?" + paramString;
                     }
                     HttpGet httpget = new HttpGet(url);
+                    Log.i(TAG,"HTTP Entiry : " + url);
                     response = httpclient.execute(httpget);
                     break;
             }

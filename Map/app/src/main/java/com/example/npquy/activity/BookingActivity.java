@@ -63,6 +63,7 @@ public class BookingActivity extends AppCompatActivity implements
     private AutoCompleteTextView mEmailView, signUpEmail, cardNumberTv;
     private Menu menu;
 
+    private SaveBooking saveBooking;
     private Boolean isClickOnAddImage = false;
     private Boolean isClickOnRemoveImage = false;
 
@@ -362,8 +363,8 @@ public class BookingActivity extends AppCompatActivity implements
                 electronicPayment.setCustID(currentUserId);
                 postElectronicPayment(electronicPayment);
                 Log.e("RetrieveQuoteResult", retrieveQuoteResult.toString());
-                SaveBooking saveBooking = new SaveBooking();
-                saveBooking.setCusid(currentUserId);
+                saveBooking = new SaveBooking();
+                saveBooking.setCustid(currentUserId);
                 saveBooking.setRoutedistance(retrieveQuoteResult.getRoutedistance());
                 saveBooking.setVehTypeID(retrieveQuoteResult.getVehTypeID());
                 saveBooking.setTravelTime(retrieveQuoteResult.getTraveltime());
@@ -380,27 +381,21 @@ public class BookingActivity extends AppCompatActivity implements
                 saveBooking.setPkLong(pickUpAddress.getLongitude());
                 saveBooking.setPaq(Integer.parseInt(people.getText().toString()));
                 saveBooking.setBags(Integer.parseInt(luggage.getText().toString()));
-                saveBooking.setPetfriendly(isPet);
-                saveBooking.setChildseat(isChildSeat);
+             /*   saveBooking.setPetfriendly(isPet);
+                saveBooking.setChildseat(isChildSeat);*/
                 saveBooking.setOutcode(pickUpAddress.getOutcode());
                 saveBooking.setVehType(retrieveQuoteResult.getVehType());
-                saveBooking.setExecutive(false);
+                saveBooking.setRjType(":");
+                saveBooking.setNote(":");
                 saveBooking.setDoLat(dropOffAddress.getLatitude());
                 saveBooking.setDoLong(dropOffAddress.getLongitude());
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
                 String date = sdf.format(dateBook);
                 saveBooking.setBookingdate(date);
                 saveBooking.setInServiceArea(true);
-                getSaveBooking(saveBooking);
+                getSaveBooking();
 
-                Intent myIntent = new Intent(BookingActivity.this, BookingSaved.class);
 
-                Bundle bundle = new Bundle();
-                String savedBooking = new JSONSerializer().exclude("*.class").serialize(
-                        saveBooking);
-                bundle.putString("savedBooking", savedBooking);
-                myIntent.putExtra("data", bundle);
-                startActivity(myIntent);
             }
         }
     }
@@ -682,7 +677,7 @@ public class BookingActivity extends AppCompatActivity implements
 
     }
 
-    private void getSaveBooking(SaveBooking saveBooking) {
+    private void getSaveBooking() {
         String url = WebServiceTaskManager.URL + "SaveBooking";
 
         WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
@@ -690,6 +685,14 @@ public class BookingActivity extends AppCompatActivity implements
             @Override
             public void handleResponse(String response) {
                 Log.e("response_SaveBooking", response, null);
+                Intent myIntent = new Intent(BookingActivity.this, BookingSaved.class);
+
+                Bundle bundle = new Bundle();
+                String savedBooking = new JSONSerializer().exclude("*.class").serialize(
+                        saveBooking);
+                bundle.putString("savedBooking", savedBooking);
+                myIntent.putExtra("data", bundle);
+                startActivity(myIntent);
             }
         };
 

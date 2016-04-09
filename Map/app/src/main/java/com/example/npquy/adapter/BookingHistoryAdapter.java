@@ -50,18 +50,10 @@ public class BookingHistoryAdapter extends ArrayAdapter<JourneyHistory> {
                     convertView.findViewById(R.id.drop_off_history_value);
 
             JourneyHistory journeyHistory = myArray.get(position);
-            final Address pickupAddress = journeyHistory.getPickupAddress();
-            final Address droAddress = journeyHistory.getDropoffAddress();
-            if (pickupAddress != null) {
-                String fullAddress = pickupAddress.getFulladdress();
-                pickUpHistory.setText(fullAddress);
+            if (journeyHistory != null) {
+                pickUpHistory.setText(journeyHistory.getPickupAddress());
+                dropOffHistory.setText(journeyHistory.getDropoffAddress());
             }
-
-            if (droAddress != null) {
-                String fullAddress = pickupAddress.getFulladdress();
-                dropOffHistory.setText(fullAddress);
-            }
-
             when.setText(journeyHistory.getPickupDateTime());
         }
         return convertView;
