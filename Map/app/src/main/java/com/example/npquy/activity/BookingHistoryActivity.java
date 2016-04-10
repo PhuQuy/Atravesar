@@ -33,15 +33,8 @@ public class BookingHistoryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_booking_history);
 
         listView = (ListView) findViewById(R.id.booking_history);
-
         userDb = new UserDb(this);
-
-        getBookingHistory(userDb.getCurrentUser().getMobile());
-/*        bookingHistoryAdapter = new BookingHistoryAdapter(this,
-                R.layout.current_booking_list_custom,
-                journeyHistories);
-
-        listView.setAdapter(bookingHistoryAdapter);*/
+        getBookingHistory(userDb.getCurrentUser().getCusID());
     }
 
     @Override
@@ -56,7 +49,7 @@ public class BookingHistoryActivity extends AppCompatActivity {
         }
     }
 
-    private void getBookingHistory(String phone) {
+    private void getBookingHistory(String cusId) {
         String url = WebServiceTaskManager.URL + "JourneyHistory";
 
         WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.GET_TASK, this, "") {
@@ -70,21 +63,27 @@ public class BookingHistoryActivity extends AppCompatActivity {
                     JSONArray addressArray = root.getJSONArray("jlist");
                     String message = root.getString("message");
                     String code = root.getString("code");
-                    List<JourneyHistory> journeyHistories = new ArrayList<>();
+                    List<JourneyHistory> journeyHistoryList = new ArrayList<>();
                     if(addressArray.length() != 0) {
                         for (int i = 0; i < addressArray.length(); i++) {
                             JourneyHistory journeyHistory = new JSONDeserializer<JourneyHistory>().use(null,
                                     JourneyHistory.class).deserialize(addressArray.get(i).toString());
-                            journeyHistories.add(journeyHistory);
+                            journeyHistoryList.add(journeyHistory);
+                            Log.e("item", journeyHistory.toString());
                         }
                     }
                     Log.e("message", message.toString(), null);
                     Log.e("code", code.toString(), null);
+                    Log.e("size", journeyHistoryList.size() + "");
                     if(Integer.parseInt(code) == 1) {
+                        journeyHistories.addAll(journeyHistoryList);
+                        bookingHistoryAdapter = new BookingHistoryAdapter(BookingHistoryActivity.this,
+                                R.layout.booking_history_list_custom,
+                                journeyHistories);
                         bookingHistoryAdapter.addAll(journeyHistories);
-                        bookingHistoryAdapter.notifyDataSetChanged();
                         listView.setAdapter(bookingHistoryAdapter);
                     }
+
                 } catch (JSONException e) {
                     Log.e("Error", e.getLocalizedMessage(), e);
                 }
@@ -92,7 +91,7 @@ public class BookingHistoryActivity extends AppCompatActivity {
             }
         };
 
-        wst.addNameValuePair("Phone", phone);
+        wst.addNameValuePair("CustID", cusId);
 
         wst.execute(new String[]{url});
     }

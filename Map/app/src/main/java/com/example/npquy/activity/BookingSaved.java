@@ -19,7 +19,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import flexjson.JSONDeserializer;
-import flexjson.JSONSerializer;
 
 public class BookingSaved extends AppCompatActivity implements  OnMapReadyCallback {
 
@@ -58,7 +57,7 @@ public class BookingSaved extends AppCompatActivity implements  OnMapReadyCallba
         bookingDetail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent bookingDetailIntent = new Intent(BookingSaved.this, BookingDetailActivity.class);
+                Intent bookingDetailIntent = new Intent(BookingSaved.this, CurrentBookingActivity.class);
 /*                Bundle bundle = new Bundle();
                 String savedBooking = new JSONSerializer().exclude("*.class").serialize(
                         saveBooking);

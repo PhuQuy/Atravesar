@@ -10,8 +10,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TimePicker;
 
+import com.example.npquy.adapter.CurrentBookingAdapter;
 import com.example.npquy.database.UserDb;
 import com.example.npquy.entity.Address;
 import com.example.npquy.entity.JourneyHistory;
@@ -32,7 +34,7 @@ import java.util.List;
 import flexjson.JSONDeserializer;
 import flexjson.JSONSerializer;
 
-public class BookingDetailActivity extends AppCompatActivity {
+public class CurrentBookingActivity extends AppCompatActivity {
 
     private EditText pickUp;
     private EditText dropOff;
@@ -43,29 +45,24 @@ public class BookingDetailActivity extends AppCompatActivity {
     private Date dateBook;
     private int mYear, mMonth, mDay, mHour, mMinute, hours, minutes;
 
+    private CurrentBookingAdapter currentBookingAdapter;
+
+    private ArrayList<JourneyHistory> journeyHistories = new ArrayList<>();
+
+    private ListView currentBookingListView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_booking_history);
+        setContentView(R.layout.activity_current_booking);
       /*  pickUp = (EditText) findViewById(R.id.pick_up_detail);
         dropOff = (EditText) findViewById(R.id.drop_off_detail);*/
 
         userDb = new UserDb(this);
-
-      /*  Intent callerIntent = getIntent();
-        Bundle packageFromCaller =
-                callerIntent.getBundleExtra("data");
-        String data = packageFromCaller.getString("savedBooking");
-        saveBooking = new JSONDeserializer<SaveBooking>().use(null,
-                SaveBooking.class).deserialize(data);
-        Log.d("SaveBooking", saveBooking.toString());
-        if(saveBooking != null) {
-            pickUp.setText(saveBooking.getPick().getFulladdress());
-            dropOff.setText(saveBooking.getDoff().getFulladdress());
-        }*/
+        currentBookingListView = (ListView) findViewById(R.id.current_booking);
 
         User user = userDb.getCurrentUser();
-        getBookingHistory(user.getCusID(), user.getDeviceID());
+        getCurrentBooking(user.getCusID(), user.getDeviceID());
     }
 
     @Override
@@ -99,7 +96,7 @@ public class BookingDetailActivity extends AppCompatActivity {
         }
     }
 
-    private void getBookingHistory(String cusId, String deviceId) {
+    private void getCurrentBooking(String cusId, String deviceId) {
         String url = WebServiceTaskManager.URL + "CurrentBookings";
 
         WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.GET_TASK, this, "") {
@@ -113,18 +110,17 @@ public class BookingDetailActivity extends AppCompatActivity {
                     JSONArray journeyHistoryJsonArray = root.getJSONArray("jlist");
                     String message = root.getString("message");
                     String code = root.getString("code");
-                    //list may` can` ne`
-                    List<JourneyHistory> journeyHistoryList = new ArrayList<>();
+                    ArrayList jouArrayList = new ArrayList();
                     for (int i = 0; i < journeyHistoryJsonArray.length(); i++) {
                         JourneyHistory journeyHistory = new JSONDeserializer<JourneyHistory>().use(null,
                                 JourneyHistory.class).deserialize(journeyHistoryJsonArray.get(i).toString());
-                        journeyHistoryList.add(journeyHistory);
+                        jouArrayList.add(journeyHistory);
                     }
-                    Log.e("journey size", journeyHistoryList.size() + "");
-                    JourneyHistory journeyHistory = journeyHistoryList.get(0);
-                    Log.e("Journey", journeyHistory.toString());
-                   /* pickUp.setText(journeyHistory.getPickupAddress());
-                    dropOff.setText(journeyHistory.getDropoffAddress());*/
+                    journeyHistories.addAll(jouArrayList);
+                    currentBookingAdapter = new CurrentBookingAdapter(CurrentBookingActivity.this,
+                            R.layout.current_booking_item, journeyHistories);
+                    currentBookingAdapter.addAll(jouArrayList);
+                    currentBookingListView.setAdapter(currentBookingAdapter);
 
                 } catch (JSONException e) {
                     Log.e("Error", e.getLocalizedMessage(), e);
@@ -133,8 +129,8 @@ public class BookingDetailActivity extends AppCompatActivity {
             }
         };
 
-        wst.addNameValuePair("CustID", "16510");
-        wst.addNameValuePair("DeviceID", "3502cc24ff467f7d");
+        wst.addNameValuePair("CustID", cusId);
+        wst.addNameValuePair("DeviceID", deviceId);
         wst.execute(new String[]{url});
     }
 
@@ -161,7 +157,7 @@ public class BookingDetailActivity extends AppCompatActivity {
         mDay = c.get(Calendar.DAY_OF_MONTH);
         mHour = c.get(Calendar.HOUR_OF_DAY);
         mMinute = c.get(Calendar.MINUTE);
-        DatePickerDialog datePickerDialog = new DatePickerDialog(BookingDetailActivity.this,
+        DatePickerDialog datePickerDialog = new DatePickerDialog(CurrentBookingActivity.this,
                 new DatePickerDialog.OnDateSetListener() {
 
                     @Override
@@ -171,7 +167,7 @@ public class BookingDetailActivity extends AppCompatActivity {
                     }
                 }, mYear, mMonth, mDay);
         datePickerDialog.show();
-        TimePickerDialog timePickerDialog = new TimePickerDialog(BookingDetailActivity.this,
+        TimePickerDialog timePickerDialog = new TimePickerDialog(CurrentBookingActivity.this,
                 new TimePickerDialog.OnTimeSetListener() {
 
                     @Override

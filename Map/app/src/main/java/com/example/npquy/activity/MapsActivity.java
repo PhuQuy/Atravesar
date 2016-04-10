@@ -30,7 +30,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -78,7 +77,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private Address pickUpAddress, dropOffAddress;
 
-    private TextView people, luggage, numMinuteDisplayOnMarker;
+    private TextView people, luggage, numMinuteDisplayOnMarker, userEmail;
 
     private LatLng yourLocation, lastLocation, currentLocation, pickUpLocation;
 
@@ -189,6 +188,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         dropOff = (EditText) findViewById(R.id.drop_off);
         pickUp.setInputType(InputType.TYPE_NULL);
         dropOff.setInputType(InputType.TYPE_NULL);
+        userEmail = (TextView) findViewById(R.id.email_user);
         book = (Button) findViewById(R.id.book);
         total = (Button) findViewById(R.id.total);
         swap = (ImageView) findViewById(R.id.swap_location);
@@ -575,8 +575,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 android.location.Address firstAddress = addresses.get(0);
                 yourAddressPick.setPostcode(firstAddress.getPostalCode());
                 String[] outCodes = firstAddress.getPostalCode().split(" ");
-                if(outCodes[1] != null || outCodes[1].isEmpty()) {
-                    yourAddressPick.setOutcode(outCodes[1]);
+                if(outCodes.length > 2) {
+                    if (outCodes[1] != null || outCodes[1].isEmpty()) {
+                        yourAddressPick.setOutcode(outCodes[1]);
+                    }
                 }
                 String fullAddress = "";
                 for (int i = 0; i < firstAddress.getMaxAddressLineIndex(); i++) {
@@ -711,6 +713,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * set visible/invisible some items when login/logout was called
      */
     public void setVisibleItem() {
+
         if (userDb.getCurrentUser() == null) {
             navigationView.getMenu().findItem(R.id.nav_booking_history).setVisible(false);
             navigationView.getMenu().findItem(R.id.nav_currentbooking).setVisible(false);
@@ -718,6 +721,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             navigationView.getMenu().findItem(R.id.nav_profile).setVisible(false);
             navigationView.getMenu().findItem(R.id.nav_login).setVisible(true);
         } else {
+           // userEmail.setText(user.getEmail());
             navigationView.getMenu().findItem(R.id.nav_login).setVisible(false);
             navigationView.getMenu().findItem(R.id.nav_booking_history).setVisible(true);
             navigationView.getMenu().findItem(R.id.nav_currentbooking).setVisible(true);
@@ -743,7 +747,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Intent intent = new Intent(MapsActivity.this, BookingHistoryActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_currentbooking) {
-            Intent intent = new Intent(MapsActivity.this, BookingDetailActivity.class);
+            Intent intent = new Intent(MapsActivity.this, CurrentBookingActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_login) {
             openDialogSignIn(this);

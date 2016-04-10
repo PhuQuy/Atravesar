@@ -36,6 +36,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.npquy.activity.MapsActivity;
+import com.example.npquy.activity.R;
 
 public abstract class WebServiceTaskManager extends
         AsyncTask<String, Integer, String> {
@@ -133,6 +134,15 @@ public abstract class WebServiceTaskManager extends
         if(processMessage.length() > 0) {
             pDlg.show();
         }
+
+       /* pDlg = new ProgressDialog(mContext, R.style.MyTheme);
+        pDlg.setMessage(processMessage);
+        pDlg.setCancelable(false);
+        pDlg.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
+        pDlg.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        if(processMessage.length() > 0) {
+            pDlg.show();
+        }*/
     }
 
     @Override

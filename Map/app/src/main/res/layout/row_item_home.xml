@@ -43,13 +43,13 @@
                 android:layout_width="0dip"
                 android:onClick="editHomeAddress"
                 android:layout_weight="0.1"
-                android:layout_height="40dip"
+                android:layout_height="20dip"
                 android:paddingLeft="2dp"
                 android:paddingRight="10dp"
-                android:paddingTop="2dp"
+                android:layout_gravity="center"
                 android:layout_marginTop="6dp"
                 android:contentDescription="here"
-                android:src="@drawable/ic_edit" />
+                android:src="@drawable/edit" />
 
         </LinearLayout>
 

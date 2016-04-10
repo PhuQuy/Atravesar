@@ -138,7 +138,6 @@ public class BookingActivity extends AppCompatActivity implements
         dateTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 final Calendar c = Calendar.getInstance();
                 mYear = c.get(Calendar.YEAR);
                 mMonth = c.get(Calendar.MONTH);
@@ -166,7 +165,6 @@ public class BookingActivity extends AppCompatActivity implements
                             @Override
                             public void onTimeSet(TimePicker view, int hourOfDay,
                                                   int minute) {
-
                                 hours = hourOfDay;
                                 minutes = minute;
                             }

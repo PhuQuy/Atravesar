@@ -6,14 +6,11 @@
     android:orientation="vertical"
     >
 
-
-
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Customer@gmail.com"
-        android:id="@+id/email"
+        android:text="phuquy.uit@gmail.com"
+        android:id="@+id/email_user"
         android:gravity="left"
         android:layout_marginBottom="42dp"
         android:textSize="20sp"

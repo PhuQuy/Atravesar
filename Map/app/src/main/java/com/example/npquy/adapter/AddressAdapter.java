@@ -43,12 +43,12 @@ public class AddressAdapter extends ArrayAdapter<Address> {
         convertView = inflater.inflate(layoutId, null);
 
         if (myArray.size() > 0 && position >= 0) {
-            final TextView roadName = (TextView)
+            TextView roadName = (TextView)
                     convertView.findViewById(R.id.road_name);
-            final TextView addressName = (TextView)
+            TextView addressName = (TextView)
                     convertView.findViewById(R.id.address);
 
-            final Address address = myArray.get(position);
+            Address address = myArray.get(position);
             if (address != null) {
                 String fullAddress = address.getFulladdress();
                 if (!fullAddress.isEmpty()) {

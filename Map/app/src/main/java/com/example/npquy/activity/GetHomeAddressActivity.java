@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -68,6 +69,10 @@ public class GetHomeAddressActivity extends AppCompatActivity {
         View v = inflator.inflate(R.layout.search_layout, null);
 
         actionBar.setCustomView(v);
+        View view = actionBar.getCustomView();
+        ViewGroup.LayoutParams  lp = view.getLayoutParams();
+        lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        view.setLayoutParams(lp);
 
         lvGetAddress = (ListView) findViewById(R.id.frequent_view);
         // getDatabase();

@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="@dimen/activity_vertical_margin"
+    android:background="#FFFFFF"
     android:orientation="vertical" >
     <LinearLayout
         android:id="@+id/status_history"
@@ -77,8 +78,7 @@
             android:layout_width="0dip"
             android:layout_weight="0.6"
             android:gravity="right"
-            android:layout_height="wrap_content"
-            android:text="Camden Tube Station, London, NW1 8NH"/>
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 
     <LinearLayout

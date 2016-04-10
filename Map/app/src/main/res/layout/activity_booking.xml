@@ -96,6 +96,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Date time"
+                android:drawableRight="@drawable/date2"
                 android:imeActionId="@+id/login"
                 android:imeActionLabel="@string/phone_number"
                 android:imeOptions="actionUnspecified"
