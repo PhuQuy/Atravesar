@@ -3,6 +3,7 @@ package com.example.npquy.activity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.ListView;
 
 import com.example.npquy.adapter.BookingHistoryAdapter;
@@ -29,7 +30,7 @@ public class BookingHistoryActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_current_booking);
+        setContentView(R.layout.activity_booking_history);
 
         listView = (ListView) findViewById(R.id.booking_history);
 
@@ -41,6 +42,18 @@ public class BookingHistoryActivity extends AppCompatActivity {
                 journeyHistories);
 
         listView.setAdapter(bookingHistoryAdapter);*/
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // app icon in action bar clicked; goto parent activity.
+                this.finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private void getBookingHistory(String phone) {
@@ -67,9 +80,11 @@ public class BookingHistoryActivity extends AppCompatActivity {
                     }
                     Log.e("message", message.toString(), null);
                     Log.e("code", code.toString(), null);
-                    bookingHistoryAdapter.addAll(journeyHistories);
-                    bookingHistoryAdapter.notifyDataSetChanged();
-                    listView.setAdapter(bookingHistoryAdapter);
+                    if(Integer.parseInt(code) == 1) {
+                        bookingHistoryAdapter.addAll(journeyHistories);
+                        bookingHistoryAdapter.notifyDataSetChanged();
+                        listView.setAdapter(bookingHistoryAdapter);
+                    }
                 } catch (JSONException e) {
                     Log.e("Error", e.getLocalizedMessage(), e);
                 }

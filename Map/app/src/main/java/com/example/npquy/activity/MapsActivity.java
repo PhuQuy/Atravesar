@@ -30,6 +30,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -96,12 +97,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private UserDb userDb;
     private User user;
+    private String custId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Config before running
-        config();
+        configActivity();
         configListener();
 
 
@@ -150,12 +152,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         swap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (pickUpAddress != null && dropOff != null) {
+                if (pickUpAddress != null && dropOffAddress != null) {
                     Address address = pickUpAddress.clone();
                     pickUpAddress = dropOffAddress;
                     pickUp.setText(pickUpAddress.getFulladdress());
                     dropOffAddress = address;
                     dropOff.setText(dropOffAddress.getFulladdress());
+                    postQuotation();
                 }
             }
         });
@@ -171,7 +174,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      * Config all field before we use
      */
-    private void config() {
+    private void configActivity() {
         String languageToLoad = "en"; // your language
         Locale locale = new Locale(languageToLoad);
         Locale.setDefault(locale);
@@ -192,7 +195,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         carLayout = (LinearLayout) findViewById(R.id.car);
         userDb = new UserDb(this);
-        user = new User();
+        if(userDb.getCurrentUser() != null) {
+            user = userDb.getCurrentUser();
+        }else {
+            user =  new User();
+            user.setCusID("0");
+        }
         marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker_layout, null);
         pickUpMarker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker_layout, null);
         homeMarker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_home_marker, null);
@@ -233,6 +241,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * POST /Quotation -> When you have both the pickup and dropoff addresses you will need to call another web service method at the following endpoint and display the returned quote
      */
     private void postQuotation() {
+        beforePostData();
         if (pickUpAddress != null && dropOffAddress != null) {
             String url = WebServiceTaskManager.URL + "Quotation";
 
@@ -249,6 +258,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             totalFare = Double.parseDouble(bookingSaved.getTotalfare());
                             total.setText("Total \n £" + totalFare);
                             book.setText("Continue \n Booking");
+                            afterPostData();
                             book.setClickable(bookingSaved.getInServiceArea());
                         }
                     } catch (Exception jsonEx) {
@@ -256,8 +266,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                 }
             };
-
-            retrieveQuote.setCustid(0);
+            retrieveQuote.setCustid(Integer.parseInt(user.getCusID()));
             retrieveQuote.setPick(pickUpAddress.getFulladdress());
             retrieveQuote.setPickLat(pickUpAddress.getLatitude());
             retrieveQuote.setPickLong(pickUpAddress.getLongitude());
@@ -279,6 +288,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             wst.execute(new String[]{url});
         }
+    }
+
+    private void beforePostData() {
+        book.setTextColor(Color.WHITE);
+        book.setClickable(false);
+    }
+
+    private void afterPostData() {
+        book.setTextColor(Color.parseColor("#00CCCC"));
+        book.setClickable(true);
     }
 
     /**
@@ -375,6 +394,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 myIntent.putExtra("data", bundle);
                 startActivity(myIntent);
             }
+        }else {
+            Toast.makeText(MapsActivity.this, "Please fill the information",Toast.LENGTH_LONG).show();
         }
     }
 

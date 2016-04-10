@@ -9,8 +9,15 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".BookingHistoryActivity">
     <!-- List View -->
+    <TextView
+        android:id="@+id/history_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="PAST BOOKINGS"
+        android:textSize="20dp"/>
     <ListView
         android:id="@+id/booking_history"
+        android:layout_below="@id/history_title"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" />
 </RelativeLayout>

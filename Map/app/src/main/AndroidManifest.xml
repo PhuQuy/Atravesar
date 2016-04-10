@@ -71,6 +71,7 @@
             android:parentActivityName=".BookingSaved" />
         <activity
             android:name=".BookingHistoryActivity"
+            android:label="Bookings"
             android:parentActivityName=".MapsActivity" />
         <activity android:name=".ProfileActivity"
             android:label="Profile"

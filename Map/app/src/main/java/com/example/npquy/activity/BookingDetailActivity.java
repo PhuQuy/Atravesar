@@ -2,7 +2,6 @@ package com.example.npquy.activity;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
-import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -47,7 +46,7 @@ public class BookingDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_booking_detail);
+        setContentView(R.layout.activity_booking_history);
         pickUp = (EditText) findViewById(R.id.pick_up_detail);
         dropOff = (EditText) findViewById(R.id.drop_off_detail);
 
@@ -114,10 +113,15 @@ public class BookingDetailActivity extends AppCompatActivity {
                     JSONArray journeyHistoryJsonArray = root.getJSONArray("jlist");
                     String message = root.getString("message");
                     String code = root.getString("code");
-                    JourneyHistory journeyHistory = new JSONDeserializer<JourneyHistory>().use(null,
-                            JourneyHistory.class).deserialize(journeyHistoryJsonArray.get(0).toString());
-                    pickUp.setText(journeyHistory.getPickupAddress());
-                    dropOff.setText(journeyHistory.getDropoffAddress());
+                    //list may` can` ne`
+                    List<JourneyHistory> journeyHistoryList = new ArrayList<>();
+                    for(int i=0; i<journeyHistoryJsonArray.length(); i++) {
+                        JourneyHistory journeyHistory = new JSONDeserializer<JourneyHistory>().use(null,
+                                JourneyHistory.class).deserialize(journeyHistoryJsonArray.get(i).toString());
+                        journeyHistoryList.add(journeyHistory);
+                    }
+                    pickUp.setText(journeyHistoryList.get(0).getPickupAddress());
+                    dropOff.setText(journeyHistoryList.get(0).getDropoffAddress());
 
                 } catch (JSONException e) {
                     Log.e("Error", e.getLocalizedMessage(), e);
@@ -128,7 +132,6 @@ public class BookingDetailActivity extends AppCompatActivity {
 
         wst.addNameValuePair("CustID", "16510");
         wst.addNameValuePair("DeviceID", "3502cc24ff467f7d");
-        Log.d("send data", url);
         wst.execute(new String[]{url});
     }
 
