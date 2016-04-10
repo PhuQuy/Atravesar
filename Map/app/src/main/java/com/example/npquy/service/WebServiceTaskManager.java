@@ -29,6 +29,8 @@ import org.apache.http.util.EntityUtils;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
@@ -124,6 +126,7 @@ public abstract class WebServiceTaskManager extends
     private void showProgressDialog() {
         pDlg = new ProgressDialog(mContext);
         pDlg.setMessage(processMessage);
+        pDlg.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         pDlg.setProgressDrawable(mContext.getWallpaper());
         pDlg.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         pDlg.setCancelable(false);

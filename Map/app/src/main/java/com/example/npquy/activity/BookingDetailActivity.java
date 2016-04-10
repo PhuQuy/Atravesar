@@ -47,8 +47,8 @@ public class BookingDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_booking_history);
-        pickUp = (EditText) findViewById(R.id.pick_up_detail);
-        dropOff = (EditText) findViewById(R.id.drop_off_detail);
+      /*  pickUp = (EditText) findViewById(R.id.pick_up_detail);
+        dropOff = (EditText) findViewById(R.id.drop_off_detail);*/
 
         userDb = new UserDb(this);
 
@@ -70,7 +70,7 @@ public class BookingDetailActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater=getMenuInflater();
+        MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.booking_detail_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
@@ -82,15 +82,15 @@ public class BookingDetailActivity extends AppCompatActivity {
                 // app icon in action bar clicked; goto parent activity.
                 this.finish();
                 return true;
-            case R.id.repeat_journey : {
+            case R.id.repeat_journey: {
                 repeatJourney(saveBooking);
                 return true;
             }
-            case R.id.return_journey : {
+            case R.id.return_journey: {
                 returnJourney(saveBooking);
                 return true;
             }
-            case R.id.cancel_booking : {
+            case R.id.cancel_booking: {
                 cancelBooking();
                 return true;
             }
@@ -115,13 +115,16 @@ public class BookingDetailActivity extends AppCompatActivity {
                     String code = root.getString("code");
                     //list may` can` ne`
                     List<JourneyHistory> journeyHistoryList = new ArrayList<>();
-                    for(int i=0; i<journeyHistoryJsonArray.length(); i++) {
+                    for (int i = 0; i < journeyHistoryJsonArray.length(); i++) {
                         JourneyHistory journeyHistory = new JSONDeserializer<JourneyHistory>().use(null,
                                 JourneyHistory.class).deserialize(journeyHistoryJsonArray.get(i).toString());
                         journeyHistoryList.add(journeyHistory);
                     }
-                    pickUp.setText(journeyHistoryList.get(0).getPickupAddress());
-                    dropOff.setText(journeyHistoryList.get(0).getDropoffAddress());
+                    Log.e("journey size", journeyHistoryList.size() + "");
+                    JourneyHistory journeyHistory = journeyHistoryList.get(0);
+                    Log.e("Journey", journeyHistory.toString());
+                   /* pickUp.setText(journeyHistory.getPickupAddress());
+                    dropOff.setText(journeyHistory.getDropoffAddress());*/
 
                 } catch (JSONException e) {
                     Log.e("Error", e.getLocalizedMessage(), e);
