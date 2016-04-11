@@ -506,6 +506,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+        mMap.setMyLocationEnabled(true);
         GPSTracker mGPS = new GPSTracker(this);
         try {
             if (mGPS.isCanGetLocation()) {
@@ -514,7 +516,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } catch (Exception e) {
             Log.e("Exception", e.getLocalizedMessage(), e);
         }
-        mMap = googleMap;
+
 
         double latitude, longitude;
 
@@ -574,10 +576,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (!addresses.isEmpty()) {
                 android.location.Address firstAddress = addresses.get(0);
                 yourAddressPick.setPostcode(firstAddress.getPostalCode());
-                String[] outCodes = firstAddress.getPostalCode().split(" ");
-                if(outCodes.length > 2) {
-                    if (outCodes[1] != null || outCodes[1].isEmpty()) {
-                        yourAddressPick.setOutcode(outCodes[1]);
+                if(firstAddress.getPostalCode() != null) {
+                    String[] outCodes = firstAddress.getPostalCode().split(" ");
+                    if (outCodes.length > 2) {
+                        if (outCodes[1] != null || outCodes[1].isEmpty()) {
+                            yourAddressPick.setOutcode(outCodes[1]);
+                        }
                     }
                 }
                 String fullAddress = "";
