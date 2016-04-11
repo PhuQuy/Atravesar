@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/activity_vertical_margin"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/status_history"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:padding="10dp"
+        android:background="#00CCCC"
+        android:layout_height="wrap_content"
+        android:weightSum="1.0">
+
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="0dip"
+            android:gravity="center_vertical"
+            android:layout_weight="0.5"
+            android:layout_height="wrap_content"
+            android:text="Your car will arrive on"/>
+        <TextView
+            android:id="@+id/booking_day"
+            android:layout_width="0dip"
+            android:layout_weight="0.45"
+            android:gravity="right"
+            android:layout_height="wrap_content"
+            android:text="Wed 24 Feb, 20:15"/>
+        <ImageView
+            android:id="@+id/button_popup"
+            android:layout_height="match_parent"
+            android:layout_weight="0.05"
+            android:layout_width="0dip"
+            android:background="?attr/selectableItemBackground"
+            android:src="@drawable/ic_overflow"
+            />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="vertical"
+        android:paddingBottom="5dp">
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text=" Pick up"/>
+        <TextView
+            android:layout_width="fill_parent"
+            android:textSize="18dp"
+            android:layout_height="wrap_content"
+            android:text="Camden Tube Station, London, NW1 8NH"/>
+    </LinearLayout>
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="0.2dp"
+        android:background="#000000"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="vertical"
+        android:paddingBottom="5dp">
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text=" Drop off"/>
+        <TextView
+            android:layout_width="fill_parent"
+            android:textSize="18dp"
+            android:layout_height="wrap_content"
+            android:text="17 Ladycroft Road, London, SE13 7BY"/>
+    </LinearLayout>
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="0.2dp"
+        android:background="#000000"/>
+    <LinearLayout
+        android:id="@+id/car"
+        android:layout_width="fill_parent"
+        android:layout_height="60dp"
+        android:background="@drawable/bottom_line"
+        android:layout_margin="0dp"
+        android:paddingRight="20dp"
+        android:layout_below="@+id/text_view"
+        android:orientation="horizontal"
+        android:weightSum="1.0">
+        <LinearLayout
+            android:layout_width="0dip"
+            android:layout_weight="0.5"
+            android:layout_height="60dp"
+            android:orientation="vertical"
+            >
+            <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+                android:gravity="center"
+
+            android:text="Payment method"/>
+            <TextView android:id="@+id/layout_payment"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:drawableLeft="@drawable/cash"
+                android:text="CASH"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dip"
+            android:layout_weight="0.2"
+            android:layout_height="40dp"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            >
+            <TextView android:id="@+id/layout_car"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:text="Saloon"/>
+            <ImageView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:foregroundGravity="center"
+                android:src="@drawable/saloon"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dip"
+            android:layout_weight="0.3"
+            android:layout_height="40dp"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            >
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:text="Tootal Price"/>
+            <TextView
+                android:id="@+id/layout_price"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:text="$ 69"
+                />
+        </LinearLayout>
+
+
+    </LinearLayout>
+</LinearLayout>
