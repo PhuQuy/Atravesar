@@ -30,6 +30,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +47,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -87,16 +89,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private NavigationView navigationView = null;
     private Toolbar toolbar = null;
 
-    private ImageView swap;
+    private ImageView swap, locationImage;
     private Double totalFare;
     private int num_people, num_luggage;
     private RetrieveQuote retrieveQuote;
-    private View marker, pickUpMarker, homeMarker;
+    private View marker, homeMarker, taxiMarker;
     private AutoCompleteTextView mEmailView, signUpEmail;
 
     private UserDb userDb;
     private User user;
     private String custId;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -186,8 +189,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         people = (TextView) findViewById(R.id.people);
         luggage = (TextView) findViewById(R.id.luggage);
         dropOff = (EditText) findViewById(R.id.drop_off);
+        progressBar = (ProgressBar) findViewById(R.id.search_location_progress);
+        progressBar.setVisibility(View.INVISIBLE);
+        progressBar.setClickable(false);
         pickUp.setInputType(InputType.TYPE_NULL);
         dropOff.setInputType(InputType.TYPE_NULL);
+        locationImage = (ImageView) findViewById(R.id.pick_up_img);
         userEmail = (TextView) findViewById(R.id.email_user);
         book = (Button) findViewById(R.id.book);
         total = (Button) findViewById(R.id.total);
@@ -201,10 +208,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             user =  new User();
             user.setCusID("0");
         }
-        marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker_layout, null);
-        pickUpMarker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker_layout, null);
+        marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.taxi_marker_layout, null);
+        taxiMarker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.taxi_marker_layout, null);
         homeMarker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_home_marker, null);
-        numMinuteDisplayOnMarker = (TextView) marker.findViewById(R.id.num_txt);
+        numMinuteDisplayOnMarker = (TextView) findViewById(R.id.num_txt);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
@@ -343,11 +350,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     mMap.addMarker(home).showInfoWindow();
 
                     pickUpLocation = new LatLng(address.getLatitude(), address.getLongitude());
-                    findNearestDriverWithoutPostQuotation(pickUpLocation);
-                    MarkerOptions dragMark = new MarkerOptions().position(pickUpLocation)
-                            .title("")
-                            .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, marker)));
-                    mMap.addMarker(dragMark).showInfoWindow();
+                   // findNearestDriverWithoutPostQuotation(pickUpLocation);
+                    findNearestDriver(pickUpLocation);
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pickUpLocation, 12.0f));
 
                 }catch (Exception e) {
                     Log.e("Error", "No gps connection");
@@ -515,6 +520,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.e("Exception", e.getLocalizedMessage(), e);
         }
         mMap = googleMap;
+        mMap.setMyLocationEnabled(true);
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
 
         double latitude, longitude;
 
@@ -526,30 +533,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             yourLocation = new LatLng(mGPS.getLatitude(), mGPS.getLongitude());
             //  mMap.add
             //  mMap.addMarker(new MarkerOptions().position(yourLocation).title("You're here"));
+/*            MarkerOptions home = new MarkerOptions().position(yourLocation)
+                    .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, homeMarker)));
+            mMap.addMarker(home).showInfoWindow();*/
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(yourLocation, 12.0f));
             mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
                 public void onCameraChange(CameraPosition arg0) {
-                    mMap.clear();
+                    /*mMap.clear();
                     MarkerOptions home = new MarkerOptions().position(yourLocation)
                             .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, homeMarker)));
-                    mMap.addMarker(home).showInfoWindow();
+                    mMap.addMarker(home).showInfoWindow();*/
 
 
                     currentLocation = arg0.target;
 
                     if (lastLocation != null && calculationByDistance(currentLocation, lastLocation) > 20) {
                         findNearestDriver(currentLocation);
-
-                        MarkerOptions dragMark = new MarkerOptions().position(currentLocation)
-                                .title("")
-                                .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, marker)));
-                        mMap.addMarker(dragMark).showInfoWindow();
+                        progressBar.setVisibility(View.VISIBLE);
                     }
                     lastLocation = arg0.target;
                     pickUpAddress = getLocationByGeoCode(currentLocation);
                     pickUp.setText(pickUpAddress.getFulladdress());
 
 
+                }
+            });
+            mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+                @Override
+                public boolean onMyLocationButtonClick() {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(yourLocation, 12.0f));
+                    return true;
                 }
             });
             findNearestDriver(yourLocation);
@@ -574,10 +587,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (!addresses.isEmpty()) {
                 android.location.Address firstAddress = addresses.get(0);
                 yourAddressPick.setPostcode(firstAddress.getPostalCode());
-                String[] outCodes = firstAddress.getPostalCode().split(" ");
-                if(outCodes.length > 2) {
-                    if (outCodes[1] != null || outCodes[1].isEmpty()) {
-                        yourAddressPick.setOutcode(outCodes[1]);
+                if(firstAddress.getPostalCode() != null) {
+                    String[] outCodes = firstAddress.getPostalCode().split(" ");
+                    if (outCodes.length > 2) {
+                        if (outCodes[1] != null || outCodes[1].isEmpty()) {
+                            yourAddressPick.setOutcode(outCodes[1]);
+                        }
                     }
                 }
                 String fullAddress = "";
@@ -661,6 +676,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             NearestDriver.class).deserialize(response);
                     postQuotation();
                     numMinuteDisplayOnMarker.setText((int) (yourNearestDriver.getTravelTime() / 1) + " mins");
+                    LatLng taxiNearest = new LatLng(yourNearestDriver.getCurrentPosition().getLat(), yourNearestDriver.getCurrentPosition().getLgn());
+                    MarkerOptions dragMark = new MarkerOptions().position(taxiNearest)
+                            .title("")
+                            .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, taxiMarker)));
+                    mMap.addMarker(dragMark).showInfoWindow();
+                    progressBar.setVisibility(View.INVISIBLE);
                 } catch (Exception e) {
                     Log.e("Error Parse Json", e.getLocalizedMessage());
                 }

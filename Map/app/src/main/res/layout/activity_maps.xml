@@ -20,8 +20,36 @@
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="100dp"
+            android:layout_marginTop="50dp"
+            android:layout_marginBottom="150dp"
             tools:context="com.example.npquy.activity.MapsActivity" />
+        <ImageView
+            android:id="@+id/pick_up_img"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginBottom="100dp"
+            android:src="@drawable/custom_maker"
+            android:layout_gravity="center"/>
+        <TextView
+            android:id="@+id/num_txt"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:textAlignment="center"
+            android:paddingBottom="15dp"
+            android:gravity="center"
+            android:text="2 mins"
+            android:layout_marginBottom="100dp"
+            android:layout_gravity="center"
+            android:textColor="#FFFFFF"
+            android:textSize="16dp"
+            android:textStyle="bold" />
+        <ProgressBar
+            android:id="@+id/search_location_progress"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:layout_marginBottom="108dp"
+            />
 
         <RelativeLayout
             android:id="@+id/content_data"
