@@ -15,6 +15,8 @@ import com.example.npquy.service.GPSTracker;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -26,6 +28,7 @@ public class BookingSaved extends AppCompatActivity implements  OnMapReadyCallba
     private Button bookingDetail;
     private TextView date;
     private GoogleMap mMap;
+    private LatLng dropOffLocation, viaLocation, pickUpLocation;
     private SaveBooking saveBooking;
 
     @Override
@@ -66,6 +69,11 @@ public class BookingSaved extends AppCompatActivity implements  OnMapReadyCallba
                 startActivity(bookingDetailIntent);
             }
         });
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
     }
 
     @Override
@@ -79,21 +87,31 @@ public class BookingSaved extends AppCompatActivity implements  OnMapReadyCallba
             Log.e("Exception", e.getLocalizedMessage(), e);
         }
         mMap = googleMap;
+        mMap.setMyLocationEnabled(true);
 
-        double latitude, longitude;
+        double pkLat, pkLong,doLat,doLong,viaLat,viaLong;
+        pkLat = saveBooking.getPkLat();
+        pkLong = saveBooking.getPkLong();
+        doLat = saveBooking.getDoLat();
+        doLong = saveBooking.getDoLong();
 
-        latitude = mGPS.getLatitude();
-        longitude = mGPS.getLongitude();
-
-        if(latitude != 0 && longitude != 0) {
-            // Add a marker in Sydney and move the camera
-            LatLng sydney = new LatLng(mGPS.getLatitude(), mGPS.getLongitude());
-            mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 12.0f));
-        }else {
-            Toast.makeText(this, "Can't find your location! Please check your GPS!", Toast.LENGTH_LONG).show();
+            pickUpLocation = new LatLng(pkLat,pkLong);
+            dropOffLocation = new LatLng(doLat,doLong);
+        if(saveBooking.getViaLat() !=null&& saveBooking.getViaLong() != null) {
+            viaLat = saveBooking.getViaLat();
+            viaLong = saveBooking.getViaLong();
+            viaLocation = new LatLng(viaLat,viaLong);
+            mMap.addMarker(new MarkerOptions().position(viaLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.pickup_icon)).title("Via"));
         }
-    }
+
+            mMap.addMarker(new MarkerOptions().position(pickUpLocation).title("").icon(BitmapDescriptorFactory.fromResource(R.drawable.pickup_icon)));
+            mMap.addMarker(new MarkerOptions().position(dropOffLocation).title("").icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_icon)));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(dropOffLocation, 10.0f));
+            Log.e("test1",saveBooking.getDoLong()+"");
+            Log.e("test1",saveBooking.getDoLat()+"");
+
+        }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

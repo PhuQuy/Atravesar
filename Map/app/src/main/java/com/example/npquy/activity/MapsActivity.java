@@ -47,7 +47,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -93,12 +92,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Double totalFare;
     private int num_people, num_luggage;
     private RetrieveQuote retrieveQuote;
-    private View marker, homeMarker, taxiMarker;
+    private View marker, taxiMarker, homeMarker;
     private AutoCompleteTextView mEmailView, signUpEmail;
 
     private UserDb userDb;
     private User user;
     private String custId;
+
     private ProgressBar progressBar;
 
     @Override
@@ -189,12 +189,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         people = (TextView) findViewById(R.id.people);
         luggage = (TextView) findViewById(R.id.luggage);
         dropOff = (EditText) findViewById(R.id.drop_off);
-        progressBar = (ProgressBar) findViewById(R.id.search_location_progress);
-        progressBar.setVisibility(View.INVISIBLE);
-        progressBar.setClickable(false);
         pickUp.setInputType(InputType.TYPE_NULL);
         dropOff.setInputType(InputType.TYPE_NULL);
         locationImage = (ImageView) findViewById(R.id.pick_up_img);
+        progressBar = (ProgressBar) findViewById(R.id.search_location_progress);
+        progressBar.setVisibility(View.INVISIBLE);
+        progressBar.setClickable(false);
         userEmail = (TextView) findViewById(R.id.email_user);
         book = (Button) findViewById(R.id.book);
         total = (Button) findViewById(R.id.total);
@@ -208,9 +208,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             user =  new User();
             user.setCusID("0");
         }
-        marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.taxi_marker_layout, null);
+      //  marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.taxi_marker_layout, null);
         taxiMarker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.taxi_marker_layout, null);
-        homeMarker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_home_marker, null);
         numMinuteDisplayOnMarker = (TextView) findViewById(R.id.num_txt);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -344,13 +343,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 pickUpAddress = address;
                 pickUp.setText(address.getFulladdress());
                 try {
-                    mMap.clear();
-                    MarkerOptions home = new MarkerOptions().position(yourLocation)
-                            .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, homeMarker)));
-                    mMap.addMarker(home).showInfoWindow();
-
                     pickUpLocation = new LatLng(address.getLatitude(), address.getLongitude());
-                   // findNearestDriverWithoutPostQuotation(pickUpLocation);
                     findNearestDriver(pickUpLocation);
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pickUpLocation, 12.0f));
 
@@ -533,18 +526,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             yourLocation = new LatLng(mGPS.getLatitude(), mGPS.getLongitude());
             //  mMap.add
             //  mMap.addMarker(new MarkerOptions().position(yourLocation).title("You're here"));
-/*            MarkerOptions home = new MarkerOptions().position(yourLocation)
-                    .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, homeMarker)));
-            mMap.addMarker(home).showInfoWindow();*/
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(yourLocation, 12.0f));
             mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
                 public void onCameraChange(CameraPosition arg0) {
-                    /*mMap.clear();
-                    MarkerOptions home = new MarkerOptions().position(yourLocation)
-                            .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, homeMarker)));
-                    mMap.addMarker(home).showInfoWindow();*/
-
-
                     currentLocation = arg0.target;
 
                     if (lastLocation != null && calculationByDistance(currentLocation, lastLocation) > 20) {
