@@ -1,5 +1,8 @@
 package com.example.npquy.adapter;
 
+import com.example.npquy.entity.JourneyHistory;
+
+
 
 import android.app.Activity;
 import android.content.Context;
@@ -11,64 +14,67 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.PopupMenu;
 
+import android.app.Activity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.TextView;
+
+
 import com.example.npquy.activity.R;
 import com.example.npquy.entity.JourneyHistory;
 
 import java.util.ArrayList;
 
-public class CurrentBookingAdapter extends ArrayAdapter<JourneyHistory>{
-    Drawable drawable;
-    Activity context = null;
-    ArrayList<JourneyHistory> myArray = null;
-    int layoutId;
+
+
+public class CurrentBookingAdapter extends ArrayAdapter<JourneyHistory> {
+    private Activity context;
+    private ArrayList<JourneyHistory> myArray = new ArrayList<>();
+    private int layoutId;
+
+
     public CurrentBookingAdapter(Activity context, int resource, ArrayList<JourneyHistory> arr) {
         super(context, resource);
         this.context = context;
         this.layoutId = resource;
         this.myArray = arr;
     }
+
+
     public View getView(int position, View convertView,
                         ViewGroup parent) {
-        LayoutInflater inflater =
-                context.getLayoutInflater();
-        final View rowView = inflater.inflate(R.layout.current_booking_item, null, true);
+        if (convertView == null)
+        {
+            LayoutInflater inflater =
+                    context.getLayoutInflater();
+            convertView = inflater.inflate(layoutId, null);
+        }
 
-        //your stuff here
+        if (myArray.size() > 0 && position >= 0 && (myArray.size() > position)) {
+            final TextView bookingDate = (TextView)
+                    convertView.findViewById(R.id.booking_current_date);
+            final TextView paymentType = (TextView)
+                    convertView.findViewById(R.id.payment_type);
 
-        final View popUpButton = rowView.findViewById(R.id.button_popup);
-        popUpButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final PopupMenu popup = new PopupMenu(context, popUpButton);
-                popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    public boolean onMenuItemClick(MenuItem item) {
-                        int i = item.getItemId();
-                        if (i == R.id.menu_repeat_journey) {
-                            //do something
-                            return true;
-                        }
-                        else if (i == R.id.menu_return_journey){
-                            //do something
-                            return true;
-                        }
-                        else if (i == R.id.cancel_booking) {
-                            //do something
-                            return true;
-                        }
-                        else {
-                            return onMenuItemClick(item);
-                        }
-                    }
-                });
+            final TextView pickUpED = (TextView) convertView.findViewById(R.id.pick_up_current_booking);
+            final TextView dropUpED = (TextView) convertView.findViewById(R.id.drop_off_current_booking);
 
-                popup.show();
+            final TextView price = (TextView)
+                    convertView.findViewById(R.id.current_booking_price);
 
+            JourneyHistory journeyHistory = myArray.get(position);
+            if (journeyHistory != null) {
+                bookingDate.setText(journeyHistory.getPickupDateTime());
+                paymentType.setText(journeyHistory.getPaymentMethod());
+                pickUpED.setText(journeyHistory.getPickupAddress());
+                dropUpED.setText(journeyHistory.getDropoffAddress());
+                price.setText("£" + journeyHistory.getTotalFare());
             }
-        });
-
-        return rowView;
-
+        }
+        return convertView;
     }
 }
 

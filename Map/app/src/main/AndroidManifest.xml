@@ -66,11 +66,12 @@
             android:name=".BookingSaved"
             android:parentActivityName=".BookingActivity" />
         <activity
-            android:name=".BookingDetailActivity"
-            android:label="Booking Detail"
+            android:name=".CurrentBookingActivity"
+            android:label="Current Booking"
             android:parentActivityName=".BookingSaved" />
         <activity
             android:name=".BookingHistoryActivity"
+            android:label="Bookings"
             android:parentActivityName=".MapsActivity" />
         <activity android:name=".ProfileActivity"
             android:label="Profile"

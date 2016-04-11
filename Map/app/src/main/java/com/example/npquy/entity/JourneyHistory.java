@@ -170,4 +170,28 @@ public class JourneyHistory {
     public void setVehicleType(String vehicleType) {
         VehicleType = vehicleType;
     }
+
+    @Override
+    public String toString() {
+        return "JourneyHistory{" +
+                "JobPartID=" + JobPartID +
+                ", Status='" + Status + '\'' +
+                ", Contact='" + Contact + '\'' +
+                ", PickupAddress='" + PickupAddress + '\'' +
+                ", DropoffAddress='" + DropoffAddress + '\'' +
+                ", TotalFare='" + TotalFare + '\'' +
+                ", Notes='" + Notes + '\'' +
+                ", PickupDateTime='" + PickupDateTime + '\'' +
+                ", ViaLocations='" + ViaLocations + '\'' +
+                ", FlightNumber='" + FlightNumber + '\'' +
+                ", ExpFlightArrival=" + ExpFlightArrival +
+                ", ChildSeat='" + ChildSeat + '\'' +
+                ", Passengers=" + Passengers +
+                ", Suitcases=" + Suitcases +
+                ", MeetAndGreet='" + MeetAndGreet + '\'' +
+                ", PaymentMethod='" + PaymentMethod + '\'' +
+                ", JourneyType='" + JourneyType + '\'' +
+                ", VehicleType='" + VehicleType + '\'' +
+                '}';
+    }
 }

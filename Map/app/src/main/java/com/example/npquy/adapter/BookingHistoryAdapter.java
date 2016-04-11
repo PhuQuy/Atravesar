@@ -2,12 +2,14 @@ package com.example.npquy.adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.example.npquy.activity.R;
 
 import com.example.npquy.entity.Address;
@@ -20,7 +22,7 @@ import java.util.ArrayList;
  */
 public class BookingHistoryAdapter extends ArrayAdapter<JourneyHistory> {
     Activity context = null;
-    ArrayList<JourneyHistory> myArray = null;
+    ArrayList<JourneyHistory> myArray;
     int layoutId;
 
     public BookingHistoryAdapter(Activity context, int resource, ArrayList<JourneyHistory> arr) {
@@ -30,31 +32,41 @@ public class BookingHistoryAdapter extends ArrayAdapter<JourneyHistory> {
         this.myArray = arr;
     }
 
+    @Override
     public View getView(int position, View convertView,
                         ViewGroup parent) {
         LayoutInflater inflater =
                 context.getLayoutInflater();
         convertView = inflater.inflate(layoutId, null);
 
-        if (myArray.size() > 0 && position >= 0) {
-            final TextView status = (TextView)
-                    convertView.findViewById(R.id.status);
-            final TextView status_value = (TextView)
-                    convertView.findViewById(R.id.booking_id);
+        /*if (myArray.size() > 0 && position >= 0 && (myArray.size() > position)) {
 
-            final TextView when = (TextView)
-                    convertView.findViewById(R.id.date_time_history);
-            final TextView pickUpHistory = (TextView)
-                    convertView.findViewById(R.id.pick_up_history_value);
-            final TextView dropOffHistory = (TextView)
-                    convertView.findViewById(R.id.drop_off_history_value);
+        }*/
+        TextView status = (TextView)
+                convertView.findViewById(R.id.status);
+        TextView status_value = (TextView)
+                convertView.findViewById(R.id.booking_id);
 
-            JourneyHistory journeyHistory = myArray.get(position);
-            if (journeyHistory != null) {
-                pickUpHistory.setText(journeyHistory.getPickupAddress());
-                dropOffHistory.setText(journeyHistory.getDropoffAddress());
+        TextView when = (TextView)
+                convertView.findViewById(R.id.date_time_history);
+        TextView pickUpHistory = (TextView)
+                convertView.findViewById(R.id.pick_up_history_value);
+        TextView dropOffHistory = (TextView)
+                convertView.findViewById(R.id.drop_off_history_value);
+        if (myArray.size() > 0 && position >= 0 && (myArray.size() > position)) {
+            try {
+                JourneyHistory journeyHistory = myArray.get(position);
+                Log.e("journeyHistory", journeyHistory.toString());
+                if (journeyHistory != null) {
+                    status.setText(journeyHistory.getStatus());
+                    pickUpHistory.setText(journeyHistory.getPickupAddress());
+                    dropOffHistory.setText(journeyHistory.getDropoffAddress());
+                    when.setText(journeyHistory.getPickupDateTime());
+                    status_value.setText("#" + journeyHistory.getJobPartID());
+                }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                Log.e("journeyHistoryException", e.getLocalizedMessage());
             }
-            when.setText(journeyHistory.getPickupDateTime());
         }
         return convertView;
     }

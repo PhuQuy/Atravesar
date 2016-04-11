@@ -29,11 +29,14 @@ import org.apache.http.util.EntityUtils;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.example.npquy.activity.MapsActivity;
+import com.example.npquy.activity.R;
 
 public abstract class WebServiceTaskManager extends
         AsyncTask<String, Integer, String> {
@@ -124,12 +127,22 @@ public abstract class WebServiceTaskManager extends
     private void showProgressDialog() {
         pDlg = new ProgressDialog(mContext);
         pDlg.setMessage(processMessage);
+        pDlg.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         pDlg.setProgressDrawable(mContext.getWallpaper());
         pDlg.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         pDlg.setCancelable(false);
         if(processMessage.length() > 0) {
             pDlg.show();
         }
+
+       /* pDlg = new ProgressDialog(mContext, R.style.MyTheme);
+        pDlg.setMessage(processMessage);
+        pDlg.setCancelable(false);
+        pDlg.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
+        pDlg.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        if(processMessage.length() > 0) {
+            pDlg.show();
+        }*/
     }
 
     @Override

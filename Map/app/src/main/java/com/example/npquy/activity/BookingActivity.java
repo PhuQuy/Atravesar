@@ -7,6 +7,7 @@ import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -42,6 +43,7 @@ import com.example.npquy.service.CustomEditText;
 import com.example.npquy.service.DrawableClickListener;
 import com.example.npquy.service.WebServiceTaskManager;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.Override;
@@ -88,7 +90,7 @@ public class BookingActivity extends AppCompatActivity implements
 
     private User user;
 
-
+    private boolean isFocus;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,9 +101,9 @@ public class BookingActivity extends AppCompatActivity implements
 
         userDb = new UserDb(this);
         User userCurrent = userDb.getCurrentUser();
-        if(userCurrent != null) {
+        if (userCurrent != null) {
             user = userCurrent;
-        }else {
+        } else {
             user = new User();
         }
 
@@ -123,6 +125,7 @@ public class BookingActivity extends AppCompatActivity implements
             Integer num_luggage = packageFromCaller.getInt("luggage");
             totalFare = packageFromCaller.getDouble("totalFare");
             totalBooking.setText("Total\n£" + totalFare);
+            dateTime.setInputType(InputType.TYPE_NULL);
             pickUp.setText(pickUpAddress.getFulladdress());
             dropOff.setText(dropOffAddress.getFulladdress());
             people.setText(num_people + "");
@@ -162,7 +165,6 @@ public class BookingActivity extends AppCompatActivity implements
                             @Override
                             public void onTimeSet(TimePicker view, int hourOfDay,
                                                   int minute) {
-
                                 hours = hourOfDay;
                                 minutes = minute;
                             }
@@ -212,16 +214,32 @@ public class BookingActivity extends AppCompatActivity implements
             }
         });
         pickUp.setOnClickListener(this);
+        pickUp.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    pickLocation(1);
+                }
+            }
+        });
         dropOff.setOnClickListener(this);
+        dropOff.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    pickLocation(2);
+                }
+            }
+        });
         viaAdd.setOnClickListener(this);
-/*        viaAdd.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        viaAdd.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     pickLocation(3);
                 }
             }
-        });*/
+        });
         viaAdd.setDrawableClickListener(new DrawableClickListener() {
 
             public void onClick(DrawablePosition target) {
@@ -306,7 +324,7 @@ public class BookingActivity extends AppCompatActivity implements
         luggage = (TextView) findViewById(R.id.luggage_booking);
         pickUp = (EditText) findViewById(R.id.pick_up_booking);
         dropOff = (CustomEditText) findViewById(R.id.drop_off_booking);
-        viaAdd = (CustomEditText)findViewById(R.id.via_address_booking);
+        viaAdd = (CustomEditText) findViewById(R.id.via_address_booking);
         confirmBooking = (Button) findViewById(R.id.book_booking);
         totalBooking = (Button) findViewById(R.id.total_booking);
         waitAndReturn = (Switch) findViewById(R.id.w8);
@@ -317,6 +335,10 @@ public class BookingActivity extends AppCompatActivity implements
 
         pay_by = (EditText) findViewById(R.id.pay_by_edit);
         pay_by.setInputType(InputType.TYPE_NULL);
+
+        pickUp.setInputType(InputType.TYPE_NULL);
+        dropOff.setInputType(InputType.TYPE_NULL);
+        viaAdd.setInputType(InputType.TYPE_NULL);
     }
 
     @Override
@@ -334,9 +356,9 @@ public class BookingActivity extends AppCompatActivity implements
     public void pickLocation(int type) {
         Intent myIntent = new Intent(BookingActivity.this, GetAddressActivity.class);
         Bundle bundle = new Bundle();
-        if(pickUpAddress != null) {
+        if (pickUpAddress != null) {
             bundle.putString("postCode", pickUpAddress.getPostcode());
-        }else {
+        } else {
             bundle.putString("postCode", "");
         }
         myIntent.putExtra("data", bundle);
@@ -352,51 +374,71 @@ public class BookingActivity extends AppCompatActivity implements
         } else if (v == viaAdd) {
             pickLocation(3);
         } else if (v == confirmBooking) {
-            postQuotation(retrieveQuote);
-            User userDbCurrentUser = userDb.getCurrentUser();
-            if (userDbCurrentUser == null || userDbCurrentUser.getCusID() == null) {
-                openDialogSignIn(this);
-            } else {
-                int currentUserId = Integer.parseInt(userDbCurrentUser.getCusID());
-                ElectronicPayment electronicPayment = new ElectronicPayment();
-                electronicPayment.setAmount(totalFare);
-                electronicPayment.setCustID(currentUserId);
-                postElectronicPayment(electronicPayment);
-                Log.e("RetrieveQuoteResult", retrieveQuoteResult.toString());
-                saveBooking = new SaveBooking();
-                saveBooking.setCustid(currentUserId);
-                saveBooking.setRoutedistance(retrieveQuoteResult.getRoutedistance());
-                saveBooking.setVehTypeID(retrieveQuoteResult.getVehTypeID());
-                saveBooking.setTravelTime(retrieveQuoteResult.getTraveltime());
-                saveBooking.setTotalfare(totalFare);
-                saveBooking.setFare(Double.parseDouble(retrieveQuoteResult.getFare()));
-                saveBooking.setPick(pickUpAddress.getFulladdress());
-                saveBooking.setDoff(dropOffAddress.getFulladdress());
-                if(viaAddress != null) {
-                    saveBooking.setVia(viaAddress.getFulladdress());
-                    saveBooking.setViaLat(viaAddress.getLatitude());
-                    saveBooking.setViaLong(viaAddress.getLongitude());
+            if(dateBook == null) {
+                Toast.makeText(BookingActivity.this, "Please select the time to booking car",Toast.LENGTH_LONG).show();
+            }else{
+                if(retrieveQuoteResult != null) {
+                    saveBookingFunction();
+                }else {
+                    postQuotationBeforeBooking(retrieveQuote);
                 }
-                saveBooking.setPkLat(pickUpAddress.getLatitude());
-                saveBooking.setPkLong(pickUpAddress.getLongitude());
-                saveBooking.setPaq(Integer.parseInt(people.getText().toString()));
-                saveBooking.setBags(Integer.parseInt(luggage.getText().toString()));
-             /*   saveBooking.setPetfriendly(isPet);
-                saveBooking.setChildseat(isChildSeat);*/
-                saveBooking.setOutcode(pickUpAddress.getOutcode());
-                saveBooking.setVehType(retrieveQuoteResult.getVehType());
-                saveBooking.setRjType(":");
-                saveBooking.setNote(":");
-                saveBooking.setDoLat(dropOffAddress.getLatitude());
-                saveBooking.setDoLong(dropOffAddress.getLongitude());
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-                String date = sdf.format(dateBook);
-                saveBooking.setBookingdate(date);
-                saveBooking.setInServiceArea(true);
-                getSaveBooking();
-
-
             }
+        }
+    }
+
+    private void beforePostData() {
+        confirmBooking.setTextColor(Color.WHITE);
+        confirmBooking.setClickable(false);
+    }
+
+    private void afterPostData() {
+        confirmBooking.setTextColor(Color.parseColor("#00CCCC"));
+        confirmBooking.setClickable(true);
+    }
+
+
+    private void saveBookingFunction() {
+        User userDbCurrentUser = userDb.getCurrentUser();
+        if (userDbCurrentUser == null || userDbCurrentUser.getCusID() == null) {
+            openDialogSignIn(this);
+        } else {
+            int currentUserId = Integer.parseInt(userDbCurrentUser.getCusID());
+            ElectronicPayment electronicPayment = new ElectronicPayment();
+            electronicPayment.setAmount(totalFare);
+            electronicPayment.setCustID(currentUserId);
+            postElectronicPayment(electronicPayment);
+            Log.e("RetrieveQuoteResult", retrieveQuoteResult.toString());
+            saveBooking = new SaveBooking();
+            saveBooking.setCustid(currentUserId);
+            saveBooking.setRoutedistance(retrieveQuoteResult.getRoutedistance());
+            saveBooking.setVehTypeID(retrieveQuoteResult.getVehTypeID());
+            saveBooking.setTravelTime(retrieveQuoteResult.getTraveltime());
+            saveBooking.setTotalfare(totalFare);
+            saveBooking.setFare(Double.parseDouble(retrieveQuoteResult.getFare()));
+            saveBooking.setPick(pickUpAddress.getFulladdress());
+            saveBooking.setDoff(dropOffAddress.getFulladdress());
+            if (viaAddress != null) {
+                saveBooking.setVia(viaAddress.getFulladdress());
+                saveBooking.setViaLat(viaAddress.getLatitude());
+                saveBooking.setViaLong(viaAddress.getLongitude());
+            }
+            saveBooking.setPkLat(pickUpAddress.getLatitude());
+            saveBooking.setPkLong(pickUpAddress.getLongitude());
+            saveBooking.setPaq(Integer.parseInt(people.getText().toString()));
+            saveBooking.setBags(Integer.parseInt(luggage.getText().toString()));
+            saveBooking.setPetfriendly(isPet);
+            saveBooking.setChildseat(isChildSeat);
+            saveBooking.setOutcode(pickUpAddress.getOutcode());
+            saveBooking.setVehType(retrieveQuoteResult.getVehType());
+            saveBooking.setRjType(":");
+            saveBooking.setNote(note.getText().toString());
+            saveBooking.setDoLat(dropOffAddress.getLatitude());
+            saveBooking.setDoLong(dropOffAddress.getLongitude());
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            String date = sdf.format(dateBook);
+            saveBooking.setBookingdate(date);
+            saveBooking.setInServiceArea(true);
+            getSaveBooking();
         }
     }
 
@@ -458,21 +500,22 @@ public class BookingActivity extends AppCompatActivity implements
                     JSONObject root = new JSONObject(response);
                     int code = root.getInt("code");
                     message = root.getString("message");
-                    if(code == 1) {
+                    if (code == 1) {
                         String cusId = root.getString("CustID");
                         if (cusId != null) {
                             Log.e("CusId", cusId, null);
                             user.setCusID(cusId);
                             userDb.login(user);
                         }
-                    }else {
+                    } else {
                         BookingActivity.this.runOnUiThread(new Runnable() {
                             public void run() {
                                 Toast.makeText(BookingActivity.this, message, Toast.LENGTH_SHORT).show();
 
-                            }});
+                            }
+                        });
                     }
-                }catch (Exception e) {
+                } catch (Exception e) {
                     Log.e("Exception Sign Up", e.getLocalizedMessage());
                 }
             }
@@ -583,7 +626,7 @@ public class BookingActivity extends AppCompatActivity implements
                 if (!payType.isEmpty()) {
                     pay_by.setText(payType);
                 }
-                String cardNumber =  cardNumberTv.getText().toString();
+                String cardNumber = cardNumberTv.getText().toString();
                 String billingPostcode = billingPostcodeTv.getText().toString();
                 String cvv = cvvTv.getText().toString();
                 String expiry = expiryTv.getText().toString();
@@ -650,6 +693,37 @@ public class BookingActivity extends AppCompatActivity implements
     private void postQuotation(RetrieveQuote retrieveQuote) {
 
         String url = WebServiceTaskManager.URL + "Quotation";
+        beforePostData();
+        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
+
+            @Override
+            public void handleResponse(String response) {
+                try {
+                    retrieveQuoteResult = new JSONDeserializer<RetrieveQuoteResult>().use(null,
+                            RetrieveQuoteResult.class).deserialize(response);
+                    Log.e("RetrieveQuoteResult", retrieveQuoteResult.toString());
+                    if (retrieveQuoteResult != null) {
+                        totalFare = Double.parseDouble(retrieveQuoteResult.getTotalfare().trim());
+                        totalBooking.setText("Total\n£" + totalFare);
+                        afterPostData();
+                    }
+                } catch (Exception e) {
+                    Log.e("post Quotation", e.getLocalizedMessage());
+                }
+            }
+        };
+
+        String json = new JSONSerializer().exclude("*.class").serialize(
+                retrieveQuote);
+        wst.addNameValuePair("", json);
+
+        wst.execute(new String[]{url});
+
+    }
+
+    private void postQuotationBeforeBooking(RetrieveQuote retrieveQuote) {
+
+        String url = WebServiceTaskManager.URL + "Quotation";
 
         WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
 
@@ -662,9 +736,10 @@ public class BookingActivity extends AppCompatActivity implements
                     if (retrieveQuoteResult != null) {
                         totalFare = Double.parseDouble(retrieveQuoteResult.getTotalfare().trim());
                         totalBooking.setText("Total\n£" + totalFare);
+                        saveBookingFunction();
                     }
-                }catch (Exception e) {
-                    Log.e("post Quotation",e.getLocalizedMessage());
+                } catch (Exception e) {
+                    Log.e("post Quotation", e.getLocalizedMessage());
                 }
             }
         };
@@ -679,20 +754,30 @@ public class BookingActivity extends AppCompatActivity implements
 
     private void getSaveBooking() {
         String url = WebServiceTaskManager.URL + "SaveBooking";
-
-        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
+        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "Saving Booking") {
 
             @Override
             public void handleResponse(String response) {
                 Log.e("response_SaveBooking", response, null);
-                Intent myIntent = new Intent(BookingActivity.this, BookingSaved.class);
+                try {
+                    JSONObject root = new JSONObject(response);
+                    String message = root.getString("message");
+                    String code = root.getString("code");
+                    if(message.trim().toLowerCase().equals("success") && code.equals("1")) {
+                        Intent myIntent = new Intent(BookingActivity.this, BookingSaved.class);
 
-                Bundle bundle = new Bundle();
-                String savedBooking = new JSONSerializer().exclude("*.class").serialize(
-                        saveBooking);
-                bundle.putString("savedBooking", savedBooking);
-                myIntent.putExtra("data", bundle);
-                startActivity(myIntent);
+                        Bundle bundle = new Bundle();
+                        String savedBooking = new JSONSerializer().exclude("*.class").serialize(
+                                saveBooking);
+                        bundle.putString("savedBooking", savedBooking);
+                        myIntent.putExtra("data", bundle);
+                        startActivity(myIntent);
+                    }else {
+                        Toast.makeText(BookingActivity.this, message,Toast.LENGTH_SHORT).show();
+                    }
+                } catch (JSONException e) {
+                    Log.e("Error", e.getLocalizedMessage(), e);
+                }
             }
         };
 
@@ -727,10 +812,10 @@ public class BookingActivity extends AppCompatActivity implements
                 retrieveQuote.setDoffLong(dropOffAddress.getLongitude());
                 retrieveQuote.setDroppostcode(dropOffAddress.getPostcode());
             }
-        }else if (requestCode == 3 && resultCode == RESULT_OK) {
+        } else if (requestCode == 3 && resultCode == RESULT_OK) {
             if (data.hasExtra("viaAdd")) {
                 Address address = (Address) data.getExtras().get("viaAdd");
-                if(address != null) {
+                if (address != null) {
                     Log.e("address", address.toString());
                     viaAdd.setText(address.getFulladdress());
                     viaAddress = address;
