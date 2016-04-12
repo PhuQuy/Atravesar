@@ -765,7 +765,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             openDialogSignIn(this);
 
         } else if (id == R.id.nav_logout) {
-            userDb.clearDataUserDb();
+            openDialogLogoutConfirm(this);
+
         } else if (id == R.id.nav_profile) {
             Intent intent = new Intent(MapsActivity.this, ProfileActivity.class);
             startActivity(intent);
@@ -823,6 +824,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         dialog.show();
     }
+    private void openDialogLogoutConfirm(Context context) {
+        final Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.logout_confirm);
+        ImageView closeButton = (ImageView) dialog.findViewById(R.id.imageView_close);
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        dialog.setCanceledOnTouchOutside(true);
+        Button yesBtn = (Button) dialog.findViewById(R.id.logout_button);
+        yesBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                userDb.clearDataUserDb();
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+    }
+
 
     /**
      * POST /SignIn -> login
