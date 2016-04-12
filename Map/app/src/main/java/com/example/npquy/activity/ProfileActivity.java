@@ -36,7 +36,7 @@ public class ProfileActivity extends AppCompatActivity {
         userDb = new UserDb(this);
 
         User currentUser = userDb.getCurrentUser();
-        if(currentUser != null) {
+        if (currentUser != null) {
             cusId = currentUser.getCusID();
         }
         addressDb = new AddressDb(this);
@@ -73,7 +73,7 @@ public class ProfileActivity extends AppCompatActivity {
         if (requestCode == 2 && resultCode == RESULT_OK) {
             if (data.hasExtra("HomeAddress")) {
                 Address address = (Address) data.getExtras().get("HomeAddress");
-                if(cusId != null) {
+                if (cusId != null) {
                     addressDb.insertHomeAddress(address, cusId);
                     homeTextView.setText(address.getFulladdress());
                 }
@@ -86,14 +86,19 @@ public class ProfileActivity extends AppCompatActivity {
      */
     private void setData() {
         User currentUser = userDb.getCurrentUser();
-        if(currentUser != null) {
+        if (currentUser != null) {
             Log.e("user", currentUser.toString());
 //            fullNameTextView.setText(currentUser.getName());
             mobileTextView.setText(currentUser.getMobile());
             emailTextView.setText(currentUser.getEmail());
             List<Address> addressList = addressDb.getHomeAddressFromDb(currentUser.getCusID());
-            Address homeAddress = addressList.get(0);
-            homeTextView.setText(homeAddress.getFulladdress());
+            if (addressList.size() != 0) {
+                Address homeAddress = addressList.get(0);
+                homeTextView.setText(homeAddress.getFulladdress());
+            } else {
+                homeTextView.setText("Tap to select home address");
+
+            }
         }
     }
 }

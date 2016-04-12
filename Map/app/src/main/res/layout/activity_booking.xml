@@ -308,28 +308,62 @@
         android:padding="0dp"
         android:layout_margin="0dp"
         android:weightSum="1.0">
-
-        <Button
+        <LinearLayout
             android:id="@+id/total_booking"
-            android:layout_width="0dip"
-            android:layout_weight="0.5"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            style="@style/Widget.AppCompat.ImageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
+            android:orientation="vertical"
             android:background="#00CCCC"
-            android:text="Total"></Button>
+            android:layout_weight="0.5">
 
-        <Button
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textSize="11sp"
+                android:text="Total"/>
+            <TextView
+                android:id="@+id/tv_total_booking"
+                android:layout_width="wrap_content"
+                android:layout_gravity="center"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:text=""/>
+
+        </LinearLayout>
+        <LinearLayout
             android:id="@+id/book_booking"
-            android:layout_width="0dip"
-            android:layout_weight="0.5"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/total"
-            style="@style/Widget.AppCompat.ImageButton"
+            android:layout_weight="0.5"
+            android:orientation="vertical"
             android:background="#000000"
-            android:textColor="#00CCCC"
-            android:textAlignment="center"
-            android:text="Confirm \n Booking"></Button>
+
+            >
+
+            <TextView
+                android:id="@+id/tv_book_booking1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#00CCCC"
+                android:layout_gravity="center"
+                android:textSize="11sp"
+                android:text="Confirm"/>
+            <TextView
+                android:id="@+id/tv_book_booking2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#00CCCC"
+                android:layout_gravity="center"
+                android:textSize="16sp"
+                android:text="Booking"/>
+
+        </LinearLayout>
+
+
+
+
     </LinearLayout>
 
 </RelativeLayout>

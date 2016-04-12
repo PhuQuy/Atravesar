@@ -72,13 +72,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private EditText pickUp, dropOff, phoneNumber, mPhoneNumber, name;
 
-    private Button book, total;
+    private LinearLayout book, total;
 
     private Boolean isCheck = false;
 
     private Address pickUpAddress, dropOffAddress;
 
-    private TextView people, luggage, numMinuteDisplayOnMarker, userEmail;
+    private TextView people, luggage, numMinuteDisplayOnMarker, userEmail,tv_total_1,tv_total_2,tv_booking_1,tv_booking_2;
 
     private LatLng yourLocation, lastLocation, currentLocation, pickUpLocation;
 
@@ -196,8 +196,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         progressBar.setVisibility(View.INVISIBLE);
         progressBar.setClickable(false);
         userEmail = (TextView) findViewById(R.id.email_user);
-        book = (Button) findViewById(R.id.book);
-        total = (Button) findViewById(R.id.total);
+        book = (LinearLayout) findViewById(R.id.book);
+        tv_booking_1 = (TextView) findViewById(R.id.tv_book_1);
+        tv_booking_2 = (TextView) findViewById(R.id.tv_book_2);
+        tv_total_1 = (TextView) findViewById(R.id.tv_total_1);
+        tv_total_2 = (TextView) findViewById(R.id.tv_total_2);
+        total = (LinearLayout) findViewById(R.id.total);
         swap = (ImageView) findViewById(R.id.swap_location);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         carLayout = (LinearLayout) findViewById(R.id.car);
@@ -262,8 +266,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         Log.e("Booking save", bookingSaved.toString());
                         if (bookingSaved != null && bookingSaved.getTotalfare() != null) {
                             totalFare = Double.parseDouble(bookingSaved.getTotalfare());
-                            total.setText("Total \n £" + totalFare);
-                            book.setText("Continue \n Booking");
+                            tv_total_2.setText("Total");
+                            tv_total_1.setText("£" + totalFare);
+                            tv_booking_1.setText("Continue");
                             afterPostData();
                             book.setClickable(bookingSaved.getInServiceArea());
                         }
@@ -297,12 +302,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void beforePostData() {
-        book.setTextColor(Color.WHITE);
+        tv_booking_1.setTextColor(Color.WHITE);
+        tv_booking_2.setTextColor(Color.WHITE);
         book.setClickable(false);
     }
 
     private void afterPostData() {
-        book.setTextColor(Color.parseColor("#00CCCC"));
+        tv_booking_1.setTextColor(Color.parseColor("#00CCCC"));
+        tv_booking_2.setTextColor(Color.parseColor("#00CCCC"));
         book.setClickable(true);
     }
 

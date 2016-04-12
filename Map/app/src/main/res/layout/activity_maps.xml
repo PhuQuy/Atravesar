@@ -202,29 +202,62 @@
                 android:orientation="horizontal"
                 android:weightSum="1.0">
 
-                <Button
+                <LinearLayout
                     android:id="@+id/total"
-                    android:layout_width="0dip"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.5"
-                    style="@style/Widget.AppCompat.ImageButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentBottom="true"
+                    android:orientation="vertical"
                     android:background="#00CCCC"
-                    android:text="Total"
-                    android:textAlignment="center"></Button>
+                    android:layout_weight="0.5">
 
-                <Button
+                    <TextView
+                        android:id="@+id/tv_total_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:textSize="11sp"
+                        android:text=""/>
+                    <TextView
+                        android:id="@+id/tv_total_1"
+                        android:layout_width="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:text="Total"/>
+
+                </LinearLayout>
+                <LinearLayout
                     android:id="@+id/book"
-                    android:layout_width="0dip"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toRightOf="@+id/total"
                     android:layout_weight="0.5"
                     android:onClick="booking"
-                    style="@style/Widget.AppCompat.ImageButton"
-                    android:text="Booking"
-                    android:background="#000000"
-                    android:textColor="#00CCCC"
                     android:clickable="false"
-                    android:textAlignment="center"></Button>
+                    android:orientation="vertical"
+                    android:background="#000000"
+
+                    >
+
+                    <TextView
+                        android:id="@+id/tv_book_1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#00CCCC"
+                        android:layout_gravity="center"
+                        android:textSize="11sp"
+                        android:text=""/>
+                    <TextView
+                        android:id="@+id/tv_book_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#00CCCC"
+                        android:layout_gravity="center"
+                        android:textSize="16sp"
+                        android:text="Booking"/>
+
+                </LinearLayout>
+
             </LinearLayout>
         </RelativeLayout>
     </FrameLayout>

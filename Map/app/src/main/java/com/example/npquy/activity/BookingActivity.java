@@ -60,7 +60,7 @@ public class BookingActivity extends AppCompatActivity implements
     private EditText dateTime, pickUp, phoneNumber, mPhoneNumber, note, name, pay_by, billingPostcodeTv, expiryTv, cvvTv;
     private int mYear, mMonth, mDay, mHour, mMinute, hours, minutes;
     private CustomEditText viaAdd, dropOff;
-    private Button confirmBooking, totalBooking;
+    private LinearLayout confirmBooking, totalBooking;
     private Switch waitAndReturn, childSeat, pet, eco;
     private AutoCompleteTextView mEmailView, signUpEmail, cardNumberTv;
     private Menu menu;
@@ -71,8 +71,8 @@ public class BookingActivity extends AppCompatActivity implements
 
     private Address pickUpAddress, dropOffAddress, viaAddress;
 
-    private TextView people;
-    private TextView luggage;
+    private TextView people,luggage;
+    private TextView total,confirmTv1,confirmTv2;
 
     private Date dateBook;
 
@@ -124,7 +124,7 @@ public class BookingActivity extends AppCompatActivity implements
             Integer num_people = packageFromCaller.getInt("people");
             Integer num_luggage = packageFromCaller.getInt("luggage");
             totalFare = packageFromCaller.getDouble("totalFare");
-            totalBooking.setText("Total\n£" + totalFare);
+            total.setText("£" + totalFare);
             dateTime.setInputType(InputType.TYPE_NULL);
             pickUp.setText(pickUpAddress.getFulladdress());
             dropOff.setText(dropOffAddress.getFulladdress());
@@ -325,8 +325,11 @@ public class BookingActivity extends AppCompatActivity implements
         pickUp = (EditText) findViewById(R.id.pick_up_booking);
         dropOff = (CustomEditText) findViewById(R.id.drop_off_booking);
         viaAdd = (CustomEditText) findViewById(R.id.via_address_booking);
-        confirmBooking = (Button) findViewById(R.id.book_booking);
-        totalBooking = (Button) findViewById(R.id.total_booking);
+        confirmBooking = (LinearLayout) findViewById(R.id.book_booking);
+        totalBooking = (LinearLayout) findViewById(R.id.total_booking);
+        total = (TextView)findViewById(R.id.tv_total_booking);
+        confirmTv1 = (TextView)findViewById(R.id.tv_book_booking1);
+        confirmTv2 = (TextView)findViewById(R.id.tv_book_booking2);
         waitAndReturn = (Switch) findViewById(R.id.w8);
         childSeat = (Switch) findViewById(R.id.child_seat);
         pet = (Switch) findViewById(R.id.pet);
@@ -387,12 +390,14 @@ public class BookingActivity extends AppCompatActivity implements
     }
 
     private void beforePostData() {
-        confirmBooking.setTextColor(Color.WHITE);
+        confirmTv1.setTextColor(Color.WHITE);
+        confirmTv2.setTextColor(Color.WHITE);
         confirmBooking.setClickable(false);
     }
 
     private void afterPostData() {
-        confirmBooking.setTextColor(Color.parseColor("#00CCCC"));
+        confirmTv1.setTextColor(Color.parseColor("#00CCCC"));
+        confirmTv2.setTextColor(Color.parseColor("#00CCCC"));
         confirmBooking.setClickable(true);
     }
 
@@ -704,7 +709,7 @@ public class BookingActivity extends AppCompatActivity implements
                     Log.e("RetrieveQuoteResult", retrieveQuoteResult.toString());
                     if (retrieveQuoteResult != null) {
                         totalFare = Double.parseDouble(retrieveQuoteResult.getTotalfare().trim());
-                        totalBooking.setText("Total\n£" + totalFare);
+                        total.setText("£" + totalFare);
                         afterPostData();
                     }
                 } catch (Exception e) {
@@ -735,7 +740,7 @@ public class BookingActivity extends AppCompatActivity implements
                     Log.e("RetrieveQuoteResult", retrieveQuoteResult.toString());
                     if (retrieveQuoteResult != null) {
                         totalFare = Double.parseDouble(retrieveQuoteResult.getTotalfare().trim());
-                        totalBooking.setText("Total\n£" + totalFare);
+                        total.setText("£" + totalFare);
                         saveBookingFunction();
                     }
                 } catch (Exception e) {
