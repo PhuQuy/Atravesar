@@ -14,6 +14,4 @@ public abstract class Const {
 
 	/** Time alive of a thread. */
 	public static long KeepAliveTime = 60;
-	
-	public static int N=0;
 }

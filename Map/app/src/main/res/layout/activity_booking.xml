@@ -311,13 +311,14 @@
         <LinearLayout
             android:id="@+id/total_booking"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="50dp"
             android:layout_alignParentBottom="true"
             android:orientation="vertical"
             android:background="#00CCCC"
             android:layout_weight="0.5">
 
             <TextView
+                android:paddingTop="7dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -329,20 +330,19 @@
                 android:layout_gravity="center"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
-                android:text=""/>
+                android:text="£0"/>
 
         </LinearLayout>
         <LinearLayout
             android:id="@+id/book_booking"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:layout_weight="0.5"
             android:orientation="vertical"
-            android:background="#000000"
-
-            >
+            android:background="#000000">
 
             <TextView
+                android:paddingTop="7dp"
                 android:id="@+id/tv_book_booking1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

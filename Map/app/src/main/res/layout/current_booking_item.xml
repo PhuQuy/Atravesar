@@ -1,156 +1,180 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
     android:orientation="vertical"
-    android:padding="@dimen/activity_vertical_margin">
+    card_view:cardCornerRadius="0dp"
+    card_view:cardUseCompatPadding="true">
 
-    <LinearLayout
-        android:id="@+id/status_history"
-        android:layout_width="fill_parent"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#00CCCC"
-        android:orientation="horizontal"
-        android:padding="10dp"
-        android:paddingBottom="20dp"
-        android:paddingTop="15dp"
-        android:weightSum="1.0">
-
-        <TextView
-            android:id="@+id/status"
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:text="Your car will arrive on" />
-
-        <TextView
-            android:id="@+id/booking_current_date"
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:gravity="right" />
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:orientation="vertical"
-        android:paddingBottom="5dp">
-
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text=" Pick up" />
-
-        <TextView
-            android:id="@+id/pick_up_current_booking"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:textSize="18dp" />
-    </LinearLayout>
-
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="0.2dp"
-        android:background="#000000" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:orientation="vertical"
-        android:paddingBottom="5dp">
-
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text=" Drop off" />
-
-        <TextView
-            android:id="@+id/drop_off_current_booking"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:textSize="18dp" />
-    </LinearLayout>
-
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="0.2dp"
-        android:background="#000000" />
-
-    <LinearLayout
-        android:id="@+id/car"
-        android:layout_width="fill_parent"
-        android:layout_height="60dp"
-        android:layout_below="@+id/text_view"
-        android:layout_margin="0dp"
-        android:orientation="horizontal"
-        android:paddingRight="20dp"
-        android:weightSum="1.0">
+        android:background="@color/white"
+        android:orientation="vertical">
 
         <LinearLayout
-            android:layout_width="0dip"
+            android:id="@+id/status_history"
+            android:layout_width="fill_parent"
             android:layout_height="60dp"
-            android:layout_weight="0.5"
-            android:orientation="vertical">
+            android:background="#00CCCC"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingLeft="16dp"
+            android:weightSum="1.0">
 
             <TextView
-                android:layout_width="fill_parent"
+                android:id="@+id/status"
+                android:layout_width="0dip"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="Payment method" />
+                android:layout_weight="0.5"
+                android:text="Your car will arrive on"
+                android:textColor="@color/white"
+                android:textSize="15sp" />
 
             <TextView
-                android:id="@+id/payment_type"
-                android:layout_width="fill_parent"
+                android:id="@+id/booking_current_date"
+                android:layout_width="0dip"
                 android:layout_height="wrap_content"
-                android:drawableLeft="@drawable/cash"
-                android:gravity="center_vertical"
-                android:text="Cash" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0dip"
-            android:layout_height="60dp"
-            android:layout_weight="0.2"
-            android:gravity="center_vertical"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/layout_car"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="Saloon"
-                android:textAlignment="center" />
+                android:layout_weight="0.5"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                android:textStyle="bold" />
 
             <ImageView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="left"
-                android:foregroundGravity="center"
-                android:src="@drawable/saloon" />
+                android:id="@+id/imgMenu"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_overflow" />
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="0dip"
-            android:layout_height="40dp"
-            android:layout_weight="0.3"
-            android:gravity="center_vertical"
-            android:orientation="vertical">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp">
 
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="Tootal Price"
-                android:textAlignment="center" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:gravity="center"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/current_booking_price"
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text=" PICK UP" />
+
+                <TextView
+                    android:id="@+id/pick_up_current_booking"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="18dp" />
+            </LinearLayout>
+
+            <View
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:textAlignment="center" />
+                android:layout_height="0.2dp"
+                android:background="#504F4F" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text=" DROP OFF" />
+
+                <TextView
+                    android:id="@+id/drop_off_current_booking"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="18dp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="0.2dp"
+                android:background="#504F4F" />
+
+            <LinearLayout
+                android:id="@+id/car"
+                android:layout_width="fill_parent"
+                android:layout_height="60dp"
+                android:layout_below="@+id/text_view"
+                android:orientation="horizontal"
+                android:weightSum="1.0">
+
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="60dp"
+                    android:layout_weight="0.5"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:text="PAYMENT METHOD" />
+
+                    <TextView
+                        android:id="@+id/payment_type"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:drawableLeft="@drawable/cash"
+                        android:gravity="center_vertical"
+                        android:text="CASH"
+                        android:textSize="18sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="60dp"
+                    android:layout_weight="0.2"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/layout_car"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:text="SALOON"
+                        android:textAlignment="center" />
+
+                    <ImageView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:foregroundGravity="center"
+                        android:src="@drawable/saloon" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="40dp"
+                    android:layout_weight="0.3"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:text="TOTAL PRICE"
+                        android:textAlignment="center" />
+
+                    <TextView
+                        android:id="@+id/current_booking_price"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center" />
+                </LinearLayout>
+
+            </LinearLayout>
         </LinearLayout>
-
-
     </LinearLayout>
-</LinearLayout>
+</android.support.v7.widget.CardView>

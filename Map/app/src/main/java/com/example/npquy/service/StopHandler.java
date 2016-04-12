@@ -11,18 +11,18 @@ import java.io.Serializable;
 public enum StopHandler implements Serializable {
 
 	IS_RUNNING(0);
-	private volatile int isRunning;
+	private volatile int version;
 
-	private StopHandler(int isRunning) {
-		this.isRunning=isRunning;
+	private StopHandler(int version) {
+		this.version=version;
 	}
 
-	public int isRunning() {
-		return isRunning;
+	public int getVersion() {
+		return version;
 	}
 
-	public void setRunning(int isRunning) {
-		this.isRunning = isRunning;
+	public void setVersion(int version) {
+		this.version = version;
 	}
 
 	private static class LazyInit {

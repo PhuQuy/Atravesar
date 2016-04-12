@@ -205,7 +205,7 @@
                 <LinearLayout
                     android:id="@+id/total"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="50dp"
                     android:layout_alignParentBottom="true"
                     android:orientation="vertical"
                     android:background="#00CCCC"
@@ -213,40 +213,40 @@
 
                     <TextView
                         android:id="@+id/tv_total_2"
+                        android:paddingTop="7dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:textSize="11sp"
-                        android:text=""/>
+                        android:text="Total"/>
                     <TextView
                         android:id="@+id/tv_total_1"
                         android:layout_width="wrap_content"
                         android:layout_gravity="center"
                         android:layout_height="wrap_content"
                         android:textSize="16sp"
-                        android:text="Total"/>
+                        android:text="£0"/>
 
                 </LinearLayout>
                 <LinearLayout
                     android:id="@+id/book"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="50dp"
                     android:layout_weight="0.5"
                     android:onClick="booking"
                     android:clickable="false"
                     android:orientation="vertical"
-                    android:background="#000000"
-
-                    >
+                    android:background="#000000">
 
                     <TextView
+                        android:paddingTop="7dp"
                         android:id="@+id/tv_book_1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="#00CCCC"
                         android:layout_gravity="center"
                         android:textSize="11sp"
-                        android:text=""/>
+                        android:text="Continue"/>
                     <TextView
                         android:id="@+id/tv_book_2"
                         android:layout_width="wrap_content"
