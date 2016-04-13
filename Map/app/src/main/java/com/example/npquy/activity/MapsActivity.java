@@ -9,6 +9,9 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.location.Geocoder;
+import android.location.GpsStatus;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.provider.Settings;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentActivity;
@@ -80,9 +83,11 @@ import flexjson.JSONSerializer;
 /**
  * @author npquy
  */
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener,LocationListener, GpsStatus.Listener {
 
     private GoogleMap mMap;
+    private LocationManager mService;
+    private GpsStatus mStatus;
 
     private EditText pickUp, dropOff, phoneNumber, mPhoneNumber, name;
 
@@ -94,7 +99,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private TextView people, luggage, numMinuteDisplayOnMarker, userEmail,tv_total_1,tv_total_2,tv_booking_1,tv_booking_2;
 
-    private LatLng yourLocation, lastLocation, currentLocation, pickUpLocation;
+    private LatLng yourLocation, lastLocation, currentLocation, pickUpLocation, defaultLocation;
 
     private LinearLayout carLayout;
 
@@ -202,6 +207,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Locale.setDefault(locale);
         Configuration config = new Configuration();
         config.locale = locale;
+        mService = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        mService.addGpsStatusListener(this);
         getBaseContext().getResources().updateConfiguration(config,
                 getBaseContext().getResources().getDisplayMetrics());
         setContentView(R.layout.activity_maps);
@@ -612,6 +619,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
 
         double latitude, longitude;
+
 
         latitude = mGPS.getLatitude();
         longitude = mGPS.getLongitude();
@@ -1099,6 +1107,41 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         wst.addNameValuePair("", json);
 
         wst.execute(new String[]{url});
+
+    }
+    @Override
+    public void onLocationChanged(android.location.Location location) {
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+    }
+
+    public void onGpsStatusChanged(int event) {
+        mStatus = mService.getGpsStatus(mStatus);
+        switch (event) {
+            case GpsStatus.GPS_EVENT_STARTED:
+
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(yourLocation, 12.0f));
+                break;
+
+            case GpsStatus.GPS_EVENT_STOPPED:
+
+                defaultLocation = new LatLng(51.5034070,-0.1275920);
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 12.0f));
+                break;
+
+
+        }
 
     }
 }
