@@ -144,21 +144,6 @@ public class BookingActivity extends AppCompatActivity implements
                 mDay = c.get(Calendar.DAY_OF_MONTH);
                 mHour = c.get(Calendar.HOUR_OF_DAY);
                 mMinute = c.get(Calendar.MINUTE);
-                DatePickerDialog datePickerDialog = new DatePickerDialog(BookingActivity.this,
-                        new DatePickerDialog.OnDateSetListener() {
-
-                            @Override
-                            public void onDateSet(DatePicker view, int year,
-                                                  int monthOfYear, int dayOfMonth) {
-                                dateBook = new Date(year, monthOfYear + 1, dayOfMonth, hours, minutes);
-                                dateTime.setText(dateBook.toString());
-                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-                                String date = sdf.format(dateBook);
-                                retrieveQuote.setBookingdate(date);
-                                doChange();
-                            }
-                        }, mYear, mMonth, mDay);
-                datePickerDialog.show();
                 TimePickerDialog timePickerDialog = new TimePickerDialog(BookingActivity.this,
                         new TimePickerDialog.OnTimeSetListener() {
 
@@ -167,9 +152,26 @@ public class BookingActivity extends AppCompatActivity implements
                                                   int minute) {
                                 hours = hourOfDay;
                                 minutes = minute;
+                                DatePickerDialog datePickerDialog = new DatePickerDialog(BookingActivity.this,
+                                        new DatePickerDialog.OnDateSetListener() {
+
+                                            @Override
+                                            public void onDateSet(DatePicker view, int year,
+                                                                  int monthOfYear, int dayOfMonth) {
+                                                dateBook = new Date(year, monthOfYear + 1, dayOfMonth, hours, minutes);
+                                                dateTime.setText(dateBook.toString());
+                                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                                                String date = sdf.format(dateBook);
+                                                retrieveQuote.setBookingdate(date);
+                                                doChange();
+                                            }
+                                        }, mYear, mMonth, mDay);
+                                datePickerDialog.show();
                             }
                         }, mHour, mMinute, false);
                 timePickerDialog.show();
+
+
             }
         });
         dateTime.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -182,21 +184,6 @@ public class BookingActivity extends AppCompatActivity implements
                 mHour = c.get(Calendar.HOUR_OF_DAY);
                 mMinute = c.get(Calendar.MINUTE);
                 if (hasFocus) {
-                    DatePickerDialog datePickerDialog = new DatePickerDialog(BookingActivity.this,
-                            new DatePickerDialog.OnDateSetListener() {
-
-                                @Override
-                                public void onDateSet(DatePicker view, int year,
-                                                      int monthOfYear, int dayOfMonth) {
-                                    dateBook = new Date(year, monthOfYear + 1, dayOfMonth, hours, minutes);
-                                    dateTime.setText(dateBook.toString());
-                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-                                    String date = sdf.format(dateBook);
-                                    retrieveQuote.setBookingdate(date);
-                                    doChange();
-                                }
-                            }, mYear, mMonth, mDay);
-                    datePickerDialog.show();
                     TimePickerDialog timePickerDialog = new TimePickerDialog(BookingActivity.this,
                             new TimePickerDialog.OnTimeSetListener() {
 
@@ -206,9 +193,26 @@ public class BookingActivity extends AppCompatActivity implements
 
                                     hours = hourOfDay;
                                     minutes = minute;
+                                    DatePickerDialog datePickerDialog = new DatePickerDialog(BookingActivity.this,
+                                            new DatePickerDialog.OnDateSetListener() {
+
+                                                @Override
+                                                public void onDateSet(DatePicker view, int year,
+                                                                      int monthOfYear, int dayOfMonth) {
+                                                    dateBook = new Date(year, monthOfYear + 1, dayOfMonth, hours, minutes);
+                                                    dateTime.setText(dateBook.toString());
+                                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                                                    String date = sdf.format(dateBook);
+                                                    retrieveQuote.setBookingdate(date);
+                                                    doChange();
+                                                }
+                                            }, mYear, mMonth, mDay);
+                                    datePickerDialog.show();
                                 }
                             }, mHour, mMinute, false);
                     timePickerDialog.show();
+
+
 
                 }
             }
