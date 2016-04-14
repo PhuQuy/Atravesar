@@ -772,7 +772,7 @@ public class BookingActivity extends AppCompatActivity implements
                     JSONObject root = new JSONObject(response);
                     String message = root.getString("message");
                     String code = root.getString("code");
-                    if(message.trim().toLowerCase().equals("success") && code.equals("1")) {
+                    if(code.equals("1")) {
                         Intent myIntent = new Intent(BookingActivity.this, BookingSaved.class);
 
                         Bundle bundle = new Bundle();
@@ -782,7 +782,7 @@ public class BookingActivity extends AppCompatActivity implements
                         myIntent.putExtra("data", bundle);
                         startActivity(myIntent);
                     }else {
-                        Toast.makeText(BookingActivity.this, message,Toast.LENGTH_SHORT).show();
+                        Toast.makeText(BookingActivity.this, "Booking not succeess",Toast.LENGTH_SHORT).show();
                     }
                 } catch (JSONException e) {
                     Log.e("Error", e.getLocalizedMessage(), e);

@@ -47,7 +47,6 @@
             android:textAlignment="center"
             android:paddingBottom="15dp"
             android:gravity="center"
-            android:text="2 mins"
             android:layout_marginBottom="100dp"
             android:layout_gravity="center"
             android:textColor="#FFFFFF"

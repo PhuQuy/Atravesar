@@ -122,9 +122,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private ProgressBar progressBar;
 
-    private ThreadPoolExecutor threadPoolExecutor;
-    private CompletionService<String> pool;
-
     private int version = 0;
 
     @Override
@@ -292,13 +289,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         toolbar.setNavigationIcon(R.drawable.logo);
         toggle.syncState();
 
-        threadPoolExecutor = new ThreadPoolExecutor(
-                Const.CORE_POOL_SIZE, Const.CORE_POOL_SIZE,
-                Const.KeepAliveTime, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>());
-        pool = new ExecutorCompletionService<String>(
-                threadPoolExecutor);
-
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         setVisibleItem();
     }
@@ -316,19 +306,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 @Override
                 public void handleResponse(String response) {
                     Log.e("response_quotation", response, null);
-                    try {
-                        RetrieveQuoteResult bookingSaved = new JSONDeserializer<RetrieveQuoteResult>().use(null,
-                                RetrieveQuoteResult.class).deserialize(response);
-                        Log.e("Booking save", bookingSaved.toString());
-                        if (bookingSaved != null && bookingSaved.getTotalfare() != null) {
-                            totalFare = Double.parseDouble(bookingSaved.getTotalfare());
-                            tv_total_1.setText("£" + totalFare);
-                            afterPostData();
-                            book.setClickable(bookingSaved.getInServiceArea());
+                    if(response != null) {
+                        try {
+                            RetrieveQuoteResult bookingSaved = new JSONDeserializer<RetrieveQuoteResult>().use(null,
+                                    RetrieveQuoteResult.class).deserialize(response);
+                            Log.e("Booking save", bookingSaved.toString());
+                            if (bookingSaved != null && bookingSaved.getTotalfare() != null) {
+                                totalFare = Double.parseDouble(bookingSaved.getTotalfare());
+                                tv_total_1.setText("£" + totalFare);
+
+                                book.setClickable(bookingSaved.getInServiceArea());
+                            }
+                        } catch (Exception jsonEx) {
+                            Log.e("Json Exception", jsonEx.getLocalizedMessage());
                         }
-                    } catch (Exception jsonEx) {
-                        Log.e("Json Exception", jsonEx.getLocalizedMessage());
                     }
+                    afterPostData();
                 }
             };
             retrieveQuote.setCustid(Integer.parseInt(user.getCusID()));
@@ -355,11 +348,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    private void postQuotationNewWay() {
+    /**
+     * POST /Quotation -> When you have both the pickup and dropoff addresses you will need to call another web service method at the following endpoint and display the returned quote
+     */
+    private void postQuotationDelay() {
         beforePostData();
         if (pickUpAddress != null && dropOffAddress != null) {
             String url = WebServiceTaskManager.URL + "Quotation";
 
+            SingleServiceTaskManager wst = new SingleServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
+
+                @Override
+                public void handleResponse(String response) {
+                    Log.e("response_quotation", response, null);
+                    if(response != null) {
+                        try {
+                            RetrieveQuoteResult bookingSaved = new JSONDeserializer<RetrieveQuoteResult>().use(null,
+                                    RetrieveQuoteResult.class).deserialize(response);
+                            Log.e("Booking save", bookingSaved.toString());
+                            if (bookingSaved != null && bookingSaved.getTotalfare() != null) {
+                                totalFare = Double.parseDouble(bookingSaved.getTotalfare());
+                                tv_total_1.setText("£" + totalFare);
+
+                                book.setClickable(bookingSaved.getInServiceArea());
+                            }
+                        } catch (Exception jsonEx) {
+                            Log.e("Json Exception", jsonEx.getLocalizedMessage());
+                        }
+                    }
+                    afterPostData();
+                }
+            };
             retrieveQuote.setCustid(Integer.parseInt(user.getCusID()));
             retrieveQuote.setPick(pickUpAddress.getFulladdress());
             retrieveQuote.setPickLat(pickUpAddress.getLatitude());
@@ -378,42 +397,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             String json = new JSONSerializer().exclude("*.class").serialize(
                     retrieveQuote);
             Log.e("Quotation", json, null);
+            wst.addNameValuePair("", json);
 
-
-            WebServiceThread webServiceThread = new WebServiceThread();
-            webServiceThread.setTaskType(WebServiceMethod.POST);
-            ArrayList<NameValuePair> postParams = new ArrayList<NameValuePair>();
-            postParams.add(new BasicNameValuePair("", json));
-            webServiceThread.setParams(postParams);
-            webServiceThread.setUrl(url);
-            pool.submit(webServiceThread);
-            threadPoolExecutor.shutdown();
-            try {
-                String result = pool.take().get();
-                if(result != null) {
-                    Log.e("response_quotation", result, null);
-                    try {
-                        RetrieveQuoteResult bookingSaved = new JSONDeserializer<RetrieveQuoteResult>().use(null,
-                                RetrieveQuoteResult.class).deserialize(result);
-                        Log.e("Booking save", bookingSaved.toString());
-                        if (bookingSaved != null && bookingSaved.getTotalfare() != null) {
-                            totalFare = Double.parseDouble(bookingSaved.getTotalfare());
-                            tv_total_1.setText("£" + totalFare);
-                            afterPostData();
-                            book.setClickable(bookingSaved.getInServiceArea());
-                        }
-                    } catch (Exception jsonEx) {
-                        Log.e("Json Exception", jsonEx.getLocalizedMessage());
-                    }
-                }
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-
+            wst.execute(new String[]{url});
         }
     }
 
@@ -659,9 +645,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     beforePostData();
                     if (lastLocation != null && calculationByDistance(currentLocation, lastLocation) > 20) {
                         version++;
+                        progressBar.setVisibility(View.VISIBLE);
                         StopHandler.createInstance().setVersion(version);
                         findNearestDriver(currentLocation);
-                        progressBar.setVisibility(View.VISIBLE);
+
                     }
                     lastLocation = arg0.target;
                     pickUpAddress = getLocationByGeoCode(currentLocation);
@@ -788,15 +775,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     try {
                         yourNearestDriver = new JSONDeserializer<NearestDriver>().use(null,
                                 NearestDriver.class).deserialize(response);
-                        //postQuotation();
-                        postQuotationNewWay();
+                        progressBar.setVisibility(View.INVISIBLE);
+                        postQuotationDelay();
                         numMinuteDisplayOnMarker.setText((int) (yourNearestDriver.getTravelTime() / 1) + " mins");
                         LatLng taxiNearest = new LatLng(yourNearestDriver.getCurrentPosition().getLat(), yourNearestDriver.getCurrentPosition().getLgn());
                         MarkerOptions dragMark = new MarkerOptions().position(taxiNearest)
                                 .title("")
                                 .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, taxiMarker)));
                         mMap.addMarker(dragMark).showInfoWindow();
-                        progressBar.setVisibility(View.INVISIBLE);
+
                     } catch (Exception e) {
                         Log.e("Error Parse Json", e.getLocalizedMessage());
                     }
@@ -813,45 +800,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         wst.execute(new String[]{url});
     }
 
-    private void findNearestDriverNew(LatLng location) {
-        String url = WebServiceTaskManager.URL + "NearestDriver";
-
-        WebServiceThread webServiceThread = new WebServiceThread();
-        webServiceThread.setTaskType(WebServiceMethod.POST);
-        ArrayList<NameValuePair> postParams = new ArrayList<NameValuePair>();
-        postParams.add(new BasicNameValuePair("prefix", "se137jj"));
-        webServiceThread.setParams(postParams);
-        webServiceThread.setUrl(url);
-        pool.submit(webServiceThread);
-        threadPoolExecutor.shutdown();
-        try {
-            String result = pool.take().get();
-            if(result != null) {
-                Log.e("NearestDriver_response", result, null);
-                try {
-                    yourNearestDriver = new JSONDeserializer<NearestDriver>().use(null,
-                            NearestDriver.class).deserialize(result);
-                    //postQuotation();
-                    postQuotationNewWay();
-                    numMinuteDisplayOnMarker.setText((int) (yourNearestDriver.getTravelTime() / 1) + " mins");
-                    LatLng taxiNearest = new LatLng(yourNearestDriver.getCurrentPosition().getLat(), yourNearestDriver.getCurrentPosition().getLgn());
-                    MarkerOptions dragMark = new MarkerOptions().position(taxiNearest)
-                            .title("")
-                            .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(MapsActivity.this, taxiMarker)));
-                    mMap.addMarker(dragMark).showInfoWindow();
-                    progressBar.setVisibility(View.INVISIBLE);
-                } catch (Exception e) {
-                    Log.e("Error Parse Json", e.getLocalizedMessage());
-                }
-            }
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
 
     /**
      * POST /NearestDriver ->Find nearest driver
