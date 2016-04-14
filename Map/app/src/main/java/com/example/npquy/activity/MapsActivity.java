@@ -37,6 +37,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.npquy.database.AddressDb;
 import com.example.npquy.database.UserDb;
 import com.example.npquy.entity.Address;
 import com.example.npquy.entity.Location;
@@ -99,7 +100,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private TextView people, luggage, numMinuteDisplayOnMarker, userEmail,tv_total_1,tv_total_2,tv_booking_1,tv_booking_2;
 
-    private LatLng yourLocation, lastLocation, currentLocation, pickUpLocation, defaultLocation;
+    private LatLng yourLocation, lastLocation, currentLocation, pickUpLocation, defaultLocation,homeAddress;
 
     private LinearLayout carLayout;
 
@@ -107,7 +108,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private NavigationView navigationView = null;
     private Toolbar toolbar = null;
 
-    private ImageView swap, locationImage;
+    private ImageView swap, locationImage,homeAddressImage;
     private Double totalFare;
     private int num_people, num_luggage;
     private RetrieveQuote retrieveQuote;
@@ -115,6 +116,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private AutoCompleteTextView mEmailView, signUpEmail;
 
     private UserDb userDb;
+    private AddressDb addressDb;
     private User user;
     private String custId;
 
@@ -188,6 +190,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         });
+        homeAddressImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                User currentUser = userDb.getCurrentUser();
+                if (currentUser != null) {
+
+                    List<Address> addressList = addressDb.getHomeAddressFromDb(currentUser.getCusID());
+                    if (addressList.size() != 0) {
+                        Address homeAdd = addressList.get(0);
+                        homeAddress = new LatLng(homeAdd.getLatitude(), homeAdd.getLongitude());
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(homeAddress,12.0f));
+                    } else {
+                        Toast.makeText(MapsActivity.this, "Home address not set", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+        });
 
         carLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -230,6 +250,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         tv_total_2 = (TextView) findViewById(R.id.tv_total_2);
         total = (LinearLayout) findViewById(R.id.total);
         swap = (ImageView) findViewById(R.id.swap_location);
+        homeAddressImage = (ImageView) findViewById(R.id.home_address_img);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         carLayout = (LinearLayout) findViewById(R.id.car);
         userDb = new UserDb(this);
@@ -239,6 +260,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             user =  new User();
             user.setCusID("0");
         }
+        addressDb = new AddressDb(this);
       //  marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.taxi_marker_layout, null);
         taxiMarker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.taxi_marker_layout, null);
         numMinuteDisplayOnMarker = (TextView) findViewById(R.id.num_txt);
