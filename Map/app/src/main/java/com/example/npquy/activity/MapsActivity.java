@@ -45,13 +45,17 @@ import com.example.npquy.entity.NearestDriver;
 import com.example.npquy.entity.RetrieveQuote;
 import com.example.npquy.entity.RetrieveQuoteResult;
 import com.example.npquy.entity.User;
-import com.example.npquy.service.Const;
 import com.example.npquy.service.GPSTracker;
 import com.example.npquy.service.SingleServiceTaskManager;
 import com.example.npquy.service.StopHandler;
-import com.example.npquy.service.WebServiceMethod;
 import com.example.npquy.service.WebServiceTaskManager;
-import com.example.npquy.service.WebServiceThread;
+import com.example.npquy.service.volley.AuthFailureError;
+import com.example.npquy.service.volley.Request;
+import com.example.npquy.service.volley.RequestQueue;
+import com.example.npquy.service.volley.Response;
+import com.example.npquy.service.volley.VolleyError;
+import com.example.npquy.service.volley.toolbox.StringRequest;
+import com.example.npquy.service.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -61,22 +65,15 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
 
 import flexjson.JSONDeserializer;
 import flexjson.JSONSerializer;
@@ -98,7 +95,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private Address pickUpAddress, dropOffAddress;
 
-    private TextView people, luggage, numMinuteDisplayOnMarker, userEmail,tv_total_1,tv_total_2,tv_booking_1,tv_booking_2;
+    private TextView people, luggage, numMinuteDisplayOnMarker, userEmail, totalFareTextView,tv_total_2, continueTextView, bookingTextView;
 
     private LatLng yourLocation, lastLocation, currentLocation, pickUpLocation, defaultLocation,homeAddress;
 
@@ -241,9 +238,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         progressBar.setClickable(false);
         userEmail = (TextView) findViewById(R.id.email_user);
         book = (LinearLayout) findViewById(R.id.book);
-        tv_booking_1 = (TextView) findViewById(R.id.tv_book_1);
-        tv_booking_2 = (TextView) findViewById(R.id.tv_book_2);
-        tv_total_1 = (TextView) findViewById(R.id.tv_total_1);
+        continueTextView = (TextView) findViewById(R.id.tv_book_1);
+        bookingTextView = (TextView) findViewById(R.id.tv_book_2);
+        totalFareTextView = (TextView) findViewById(R.id.tv_total_1);
         tv_total_2 = (TextView) findViewById(R.id.tv_total_2);
         total = (LinearLayout) findViewById(R.id.total);
         swap = (ImageView) findViewById(R.id.swap_location);
@@ -296,7 +293,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      * POST /Quotation -> When you have both the pickup and dropoff addresses you will need to call another web service method at the following endpoint and display the returned quote
      */
-    private void postQuotation() {
+    /*private void postQuotation() {
         beforePostData();
         if (pickUpAddress != null && dropOffAddress != null) {
             String url = WebServiceTaskManager.URL + "Quotation";
@@ -313,7 +310,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             Log.e("Booking save", bookingSaved.toString());
                             if (bookingSaved != null && bookingSaved.getTotalfare() != null) {
                                 totalFare = Double.parseDouble(bookingSaved.getTotalfare());
-                                tv_total_1.setText("£" + totalFare);
+                                totalFareTextView.setText("£" + totalFare);
 
                                 book.setClickable(bookingSaved.getInServiceArea());
                             }
@@ -346,12 +343,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             wst.execute(new String[]{url});
         }
-    }
+    }*/
 
     /**
      * POST /Quotation -> When you have both the pickup and dropoff addresses you will need to call another web service method at the following endpoint and display the returned quote
      */
-    private void postQuotationDelay() {
+    /*private void postQuotationDelay() {
         beforePostData();
         if (pickUpAddress != null && dropOffAddress != null) {
             String url = WebServiceTaskManager.URL + "Quotation";
@@ -368,7 +365,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             Log.e("Booking save", bookingSaved.toString());
                             if (bookingSaved != null && bookingSaved.getTotalfare() != null) {
                                 totalFare = Double.parseDouble(bookingSaved.getTotalfare());
-                                tv_total_1.setText("£" + totalFare);
+                                totalFareTextView.setText("£" + totalFare);
 
                                 book.setClickable(bookingSaved.getInServiceArea());
                             }
@@ -401,17 +398,89 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             wst.execute(new String[]{url});
         }
+    }*/
+
+    private String getJsonToPostData(RetrieveQuote data) {
+        data.setCustid(Integer.parseInt(user.getCusID()));
+        data.setPick(pickUpAddress.getFulladdress());
+        data.setPickLat(pickUpAddress.getLatitude());
+        data.setPickLong(pickUpAddress.getLongitude());
+        data.setDoffLat(dropOffAddress.getLatitude());
+        data.setDoffLong(dropOffAddress.getLongitude());
+        data.setDoff(dropOffAddress.getFulladdress());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        Date today = new Date();
+        String date = sdf.format(today);
+        data.setBookingdate(date);
+        data.setPaq(Integer.parseInt(people.getText().toString()));
+        data.setBags(Integer.parseInt(luggage.getText().toString()));
+        data.setPickpostcode(pickUpAddress.getPostcode());
+        data.setDroppostcode(dropOffAddress.getPostcode());
+        String json = new JSONSerializer().exclude("*.class").serialize(
+                data);
+        Log.e("Quotation", json, null);
+        return json;
     }
 
+    public void postQuotation(){
+        if(pickUpAddress == null || dropOffAddress == null) {
+            return;
+        }
+        String url = WebServiceTaskManager.URL + "Quotation";
+        RequestQueue queue = Volley.newRequestQueue(this);
+        StringRequest sr = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.e("response_quotation", response, null);
+                if(response != null) {
+                    try {
+                        RetrieveQuoteResult bookingSaved = new JSONDeserializer<RetrieveQuoteResult>().use(null,
+                                RetrieveQuoteResult.class).deserialize(response);
+                        if (bookingSaved != null && bookingSaved.getTotalfare() != null) {
+                            totalFare = Double.parseDouble(bookingSaved.getTotalfare());
+                            totalFareTextView.setText("£" + totalFare);
+
+                            book.setClickable(bookingSaved.getInServiceArea());
+                        }
+                    } catch (Exception jsonEx) {
+                        Log.e("Json Exception", jsonEx.getLocalizedMessage());
+                    }
+                }
+                afterPostData();
+            }
+        }, new Response.ErrorListener(){
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("Exception", "Post data to /Quotation is failure! Status :" + error.networkResponse.statusCode);
+            }
+        }){
+            @Override
+            protected Map<String,String> getParams(){
+                Map<String,String> params = new HashMap<>();
+                params.put("", getJsonToPostData(retrieveQuote));
+                return params;
+            }
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String,String> params = new HashMap<String, String>();
+                params.put("Content-Type", "application/x-www-form-urlencoded");
+                return params;
+            }
+        };
+        queue.add(sr);
+    }
+
+
     private void beforePostData() {
-        tv_booking_1.setTextColor(Color.WHITE);
-        tv_booking_2.setTextColor(Color.WHITE);
+        continueTextView.setTextColor(Color.WHITE);
+        bookingTextView.setTextColor(Color.WHITE);
         book.setClickable(false);
     }
 
     private void afterPostData() {
-        tv_booking_1.setTextColor(Color.parseColor("#00CCCC"));
-        tv_booking_2.setTextColor(Color.parseColor("#00CCCC"));
+        continueTextView.setTextColor(Color.parseColor("#00CCCC"));
+        bookingTextView.setTextColor(Color.parseColor("#00CCCC"));
         book.setClickable(true);
     }
 
@@ -430,9 +499,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } else {
             bundle.putString("pickUpAddress", null);
         }
-//        String homeAddressJson = new JSONSerializer().exclude("*.class").serialize(
-//                getLocationByGeoCode(yourLocation));
-        //bundle.putString("homeAddress", homeAddressJson);
         myIntent.putExtra("data", bundle);
         startActivityForResult(myIntent, type);
     }
@@ -459,7 +525,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }catch (Exception e) {
                     Log.e("Error", "No gps connection");
                 }
-                //    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pickUpLocation, 12.0f));
             }
         } else if (requestCode == 2 && resultCode == RESULT_OK) {
             if (data.hasExtra("dropOff")) {
@@ -469,7 +534,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
         if (!pickUp.getText().toString().isEmpty() && !dropOff.getText().toString().isEmpty()) {
-            //postQuotation();
             postQuotation();
         }
     }
@@ -635,8 +699,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (latitude != 0 && longitude != 0) {
             // Add a marker in Sydney and move the camera
             yourLocation = new LatLng(mGPS.getLatitude(), mGPS.getLongitude());
-            //  mMap.add
-            //  mMap.addMarker(new MarkerOptions().position(yourLocation).title("You're here"));
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(yourLocation, 12.0f));
             mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
                 public void onCameraChange(CameraPosition arg0) {
@@ -776,8 +838,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         yourNearestDriver = new JSONDeserializer<NearestDriver>().use(null,
                                 NearestDriver.class).deserialize(response);
                         progressBar.setVisibility(View.INVISIBLE);
-                        postQuotationDelay();
-                        numMinuteDisplayOnMarker.setText((int) (yourNearestDriver.getTravelTime() / 1) + " mins");
+                        postQuotation();
+                        int minute = (int) (yourNearestDriver.getTravelTime() / 1);
+                        numMinuteDisplayOnMarker.setText(minute + (minute == 1 ? "min" : "mins"));
                         LatLng taxiNearest = new LatLng(yourNearestDriver.getCurrentPosition().getLat(), yourNearestDriver.getCurrentPosition().getLgn());
                         MarkerOptions dragMark = new MarkerOptions().position(taxiNearest)
                                 .title("")
