@@ -102,7 +102,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private LatLng yourLocation, lastLocation, currentLocation, pickUpLocation, defaultLocation,homeAddress;
 
-    private LinearLayout carLayout;
+
 
     private NearestDriver yourNearestDriver;
     private NavigationView navigationView = null;
@@ -199,6 +199,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         Address homeAdd = addressList.get(0);
                         homeAddress = new LatLng(homeAdd.getLatitude(), homeAdd.getLongitude());
                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(homeAddress,12.0f));
+                        findNearestDriver(homeAddress);
+                        postQuotation();
                     } else {
                         Toast.makeText(MapsActivity.this, "Home address not set", Toast.LENGTH_LONG).show();
                     }
@@ -206,12 +208,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        carLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openCarBox(MapsActivity.this);
-            }
-        });
+
     }
 
     /**
@@ -230,8 +227,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 getBaseContext().getResources().getDisplayMetrics());
         setContentView(R.layout.activity_maps);
         pickUp = (EditText) findViewById(R.id.pick_up);
-        people = (TextView) findViewById(R.id.people);
-        luggage = (TextView) findViewById(R.id.luggage);
         dropOff = (EditText) findViewById(R.id.drop_off);
         pickUp.setInputType(InputType.TYPE_NULL);
         dropOff.setInputType(InputType.TYPE_NULL);
@@ -249,7 +244,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         swap = (ImageView) findViewById(R.id.swap_location);
         homeAddressImage = (ImageView) findViewById(R.id.home_address_img);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        carLayout = (LinearLayout) findViewById(R.id.car);
+
         userDb = new UserDb(this);
         if(userDb.getCurrentUser() != null) {
             user = userDb.getCurrentUser();
@@ -297,6 +292,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * POST /Quotation -> When you have both the pickup and dropoff addresses you will need to call another web service method at the following endpoint and display the returned quote
      */
     private void postQuotation() {
+        totalFare = 0.00;
         beforePostData();
         if (pickUpAddress != null && dropOffAddress != null) {
             String url = WebServiceTaskManager.URL + "Quotation";
@@ -335,8 +331,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Date today = new Date();
             String date = sdf.format(today);
             retrieveQuote.setBookingdate(date);
-            retrieveQuote.setPaq(Integer.parseInt(people.getText().toString()));
-            retrieveQuote.setBags(Integer.parseInt(luggage.getText().toString()));
+//            retrieveQuote.setPaq(Integer.parseInt(people.getText().toString()));
+//            retrieveQuote.setBags(Integer.parseInt(luggage.getText().toString()));
             retrieveQuote.setPickpostcode(pickUpAddress.getPostcode());
             retrieveQuote.setDroppostcode(dropOffAddress.getPostcode());
             String json = new JSONSerializer().exclude("*.class").serialize(
@@ -390,8 +386,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Date today = new Date();
             String date = sdf.format(today);
             retrieveQuote.setBookingdate(date);
-            retrieveQuote.setPaq(Integer.parseInt(people.getText().toString()));
-            retrieveQuote.setBags(Integer.parseInt(luggage.getText().toString()));
+//            retrieveQuote.setPaq(Integer.parseInt(people.getText().toString()));
+//            retrieveQuote.setBags(Integer.parseInt(luggage.getText().toString()));
             retrieveQuote.setPickpostcode(pickUpAddress.getPostcode());
             retrieveQuote.setDroppostcode(dropOffAddress.getPostcode());
             String json = new JSONSerializer().exclude("*.class").serialize(
@@ -407,6 +403,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         tv_booking_1.setTextColor(Color.WHITE);
         tv_booking_2.setTextColor(Color.WHITE);
         book.setClickable(false);
+
     }
 
     private void afterPostData() {
@@ -495,8 +492,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.e("retrieveQuoteJson", retrieveQuoteJson);
                 bundle.putString("pickUpAddress", pickUpJson);
                 bundle.putString("dropOffAddress", dropOffJson);
-                bundle.putInt("people", Integer.parseInt(people.getText().toString()));
-                bundle.putInt("luggage", Integer.parseInt(luggage.getText().toString()));
+//                bundle.putInt("people", Integer.parseInt(people.getText().toString()));
+//                bundle.putInt("luggage", Integer.parseInt(luggage.getText().toString()));
                 bundle.putString("retrieveQuote", retrieveQuoteJson);
                 bundle.putDouble("totalFare", totalFare);
                 myIntent.putExtra("data", bundle);
@@ -527,85 +524,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      *
      * @param context
      */
-    private void openCarBox(Context context) {
-        final Dialog dialog = new Dialog(context);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.car_selection);
-
-        ImageView dialogButton = (ImageView) dialog.findViewById(R.id.imageView_close);
-        dialogButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-
-        LinearLayout salonLayout = (LinearLayout) dialog.findViewById(R.id.salon_layout);
-        final ImageView salon_tick = (ImageView) dialog.findViewById(R.id.salon_tick);
-
-        final LinearLayout mvp_layout = (LinearLayout) dialog.findViewById(R.id.mvp_layout);
-        final ImageView mvp_tick = (ImageView) dialog.findViewById(R.id.mvp_tick);
-
-        LinearLayout executive_layout = (LinearLayout) dialog.findViewById(R.id.executive_layout);
-        final ImageView executive_tick = (ImageView) dialog.findViewById(R.id.executive_tick);
-
-        LinearLayout estate_layout = (LinearLayout) dialog.findViewById(R.id.estate_layout);
-        final ImageView estate_tick = (ImageView) dialog.findViewById(R.id.estate_tick);
-
-        salonLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                hideImage(mvp_tick, executive_tick, salon_tick, estate_tick);
-                salon_tick.setVisibility(View.VISIBLE);
-                num_people = 4;
-                num_luggage = 2;
-            }
-        });
-
-        mvp_layout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                hideImage(mvp_tick, executive_tick, salon_tick, estate_tick);
-                mvp_tick.setVisibility(View.VISIBLE);
-                num_people = 6;
-                num_luggage = 5;
-            }
-        });
-
-        executive_layout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                hideImage(mvp_tick, executive_tick, salon_tick, estate_tick);
-                executive_tick.setVisibility(View.VISIBLE);
-                num_people = 4;
-                num_luggage = 2;
-            }
-        });
-
-        estate_layout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                hideImage(mvp_tick, executive_tick, salon_tick, estate_tick);
-                estate_tick.setVisibility(View.VISIBLE);
-                num_people = 4;
-                num_luggage = 3;
-            }
-        });
-
-        Button chooseCar = (Button) dialog.findViewById(R.id.choose_car);
-        chooseCar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (num_people != 0 && num_luggage != 0) {
-                    people.setText(num_people + "");
-                    luggage.setText(num_luggage + "");
-                }
-                dialog.dismiss();
-            }
-        });
-
-        dialog.show();
-    }
 
     /**
      * Handle all functions involve to map
@@ -667,6 +585,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             });
             findNearestDriver(yourLocation);
         } else {
+            defaultLocation = new LatLng(51.5034070,-0.1275920);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 12.0f));
+            findNearestDriver(defaultLocation);
             Toast.makeText(this, "Can't find your location! Please check your GPS!", Toast.LENGTH_LONG).show();
         }
     }
@@ -1102,12 +1023,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             case GpsStatus.GPS_EVENT_STARTED:
 
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(yourLocation, 12.0f));
+                findNearestDriver(yourLocation);
                 break;
 
             case GpsStatus.GPS_EVENT_STOPPED:
 
                 defaultLocation = new LatLng(51.5034070,-0.1275920);
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 12.0f));
+                findNearestDriver(defaultLocation);
                 break;
 
 
