@@ -74,6 +74,7 @@ public class BookingActivity extends AppCompatActivity implements
     private TextView people,luggage;
     private TextView total,confirmTv1,confirmTv2;
 
+    private int num_people, num_luggage;
     private Date dateBook;
 
     private Boolean isWaitAndReturn = false;
@@ -89,6 +90,7 @@ public class BookingActivity extends AppCompatActivity implements
     private Double totalFare;
 
     private User user;
+    private LinearLayout carLayout;
 
     private boolean isFocus;
     @Override
@@ -107,6 +109,7 @@ public class BookingActivity extends AppCompatActivity implements
             user = new User();
         }
 
+
         Intent callerIntent = getIntent();
         if (callerIntent != null) {
             Bundle packageFromCaller =
@@ -121,20 +124,25 @@ public class BookingActivity extends AppCompatActivity implements
             retrieveQuote = new JSONDeserializer<RetrieveQuote>().use(null,
                     RetrieveQuote.class).deserialize(retrieveQuoteJson);
             Log.e("retrieveQuote", retrieveQuote.toString());
-            Integer num_people = packageFromCaller.getInt("people");
-            Integer num_luggage = packageFromCaller.getInt("luggage");
+
             totalFare = packageFromCaller.getDouble("totalFare");
             total.setText("£" + totalFare);
             dateTime.setInputType(InputType.TYPE_NULL);
             pickUp.setText(pickUpAddress.getFulladdress());
             dropOff.setText(dropOffAddress.getFulladdress());
-            people.setText(num_people + "");
-            luggage.setText(num_luggage + "");
         }
+            retrieveQuote.setPaq(Integer.parseInt(luggage.getText().toString()));
+            retrieveQuote.setBags(Integer.parseInt(people.getText().toString()));
         handleListener();
     }
 
     private void handleListener() {
+        carLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openCarBox(BookingActivity.this);
+            }
+        });
         dateTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -307,21 +315,11 @@ public class BookingActivity extends AppCompatActivity implements
                 doChange();
             }
         });
-        pet.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                isPet = isChecked;
-                retrieveQuote.setPetfriendly(isChecked);
-                doChange();
-            }
-        });
-        eco.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                isEco = isChecked;
-            }
-        });
+
     }
 
     private void config() {
+        carLayout = (LinearLayout) findViewById(R.id.car);
         dateTime = (EditText) findViewById(R.id.date_time);
         dateTime.setInputType(InputType.TYPE_NULL);
         people = (TextView) findViewById(R.id.people_booking);
@@ -336,8 +334,6 @@ public class BookingActivity extends AppCompatActivity implements
         confirmTv2 = (TextView)findViewById(R.id.tv_book_booking2);
         waitAndReturn = (Switch) findViewById(R.id.w8);
         childSeat = (Switch) findViewById(R.id.child_seat);
-        pet = (Switch) findViewById(R.id.pet);
-        eco = (Switch) findViewById(R.id.eco);
         note = (EditText) findViewById(R.id.content_note);
 
         pay_by = (EditText) findViewById(R.id.pay_by_edit);
@@ -347,6 +343,7 @@ public class BookingActivity extends AppCompatActivity implements
         dropOff.setInputType(InputType.TYPE_NULL);
         viaAdd.setInputType(InputType.TYPE_NULL);
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -371,6 +368,88 @@ public class BookingActivity extends AppCompatActivity implements
         myIntent.putExtra("data", bundle);
         startActivityForResult(myIntent, type);
     }
+    private void openCarBox(Context context) {
+        final Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.car_selection);
+
+        ImageView dialogButton = (ImageView) dialog.findViewById(R.id.imageView_close);
+        dialogButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        LinearLayout salonLayout = (LinearLayout) dialog.findViewById(R.id.salon_layout);
+        final ImageView salon_tick = (ImageView) dialog.findViewById(R.id.salon_tick);
+
+        final LinearLayout mvp_layout = (LinearLayout) dialog.findViewById(R.id.mvp_layout);
+        final ImageView mvp_tick = (ImageView) dialog.findViewById(R.id.mvp_tick);
+
+        LinearLayout executive_layout = (LinearLayout) dialog.findViewById(R.id.executive_layout);
+        final ImageView executive_tick = (ImageView) dialog.findViewById(R.id.executive_tick);
+
+        LinearLayout estate_layout = (LinearLayout) dialog.findViewById(R.id.estate_layout);
+        final ImageView estate_tick = (ImageView) dialog.findViewById(R.id.estate_tick);
+
+        salonLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideImage(mvp_tick, executive_tick, salon_tick, estate_tick);
+                salon_tick.setVisibility(View.VISIBLE);
+                num_people = 4;
+                num_luggage = 2;
+            }
+        });
+
+        mvp_layout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideImage(mvp_tick, executive_tick, salon_tick, estate_tick);
+                mvp_tick.setVisibility(View.VISIBLE);
+                num_people = 6;
+                num_luggage = 5;
+            }
+        });
+
+        executive_layout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideImage(mvp_tick, executive_tick, salon_tick, estate_tick);
+                executive_tick.setVisibility(View.VISIBLE);
+                num_people = 4;
+                num_luggage = 2;
+            }
+        });
+
+        estate_layout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideImage(mvp_tick, executive_tick, salon_tick, estate_tick);
+                estate_tick.setVisibility(View.VISIBLE);
+                num_people = 4;
+                num_luggage = 3;
+            }
+        });
+
+        Button chooseCar = (Button) dialog.findViewById(R.id.choose_car);
+        chooseCar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (num_people != 0 && num_luggage != 0) {
+                    people.setText(num_people + "");
+                    luggage.setText(num_luggage + "");
+                    retrieveQuote.setPaq(num_people);
+                    retrieveQuote.setBags(num_luggage);
+                }
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+    }
+
 
     @Override
     public void onClick(View v) {
@@ -391,6 +470,12 @@ public class BookingActivity extends AppCompatActivity implements
                 }
             }
         }
+    }
+    private void hideImage(ImageView imageView1, ImageView imageView2, ImageView imageView3, ImageView imageView4) {
+        imageView1.setVisibility(View.INVISIBLE);
+        imageView2.setVisibility(View.INVISIBLE);
+        imageView3.setVisibility(View.INVISIBLE);
+        imageView4.setVisibility(View.INVISIBLE);
     }
 
     private void beforePostData() {
@@ -435,8 +520,8 @@ public class BookingActivity extends AppCompatActivity implements
             saveBooking.setPkLong(pickUpAddress.getLongitude());
             saveBooking.setPaq(Integer.parseInt(people.getText().toString()));
             saveBooking.setBags(Integer.parseInt(luggage.getText().toString()));
-            saveBooking.setPetfriendly(isPet);
-            saveBooking.setChildseat(isChildSeat);
+//            saveBooking.setPetfriendly(isPet);
+//            saveBooking.setChildseat(isChildSeat);
             saveBooking.setOutcode(pickUpAddress.getOutcode());
             saveBooking.setVehType(retrieveQuoteResult.getVehType());
             saveBooking.setRjType(":");
@@ -700,7 +785,8 @@ public class BookingActivity extends AppCompatActivity implements
 
 
     private void postQuotation(RetrieveQuote retrieveQuote) {
-
+        totalFare=0.00;
+        total.setText("£" + totalFare);
         String url = WebServiceTaskManager.URL + "Quotation";
         beforePostData();
         WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
@@ -732,6 +818,8 @@ public class BookingActivity extends AppCompatActivity implements
 
     private void postQuotationBeforeBooking(RetrieveQuote retrieveQuote) {
 
+        totalFare=0.00;
+        total.setText("£" + totalFare);
         String url = WebServiceTaskManager.URL + "Quotation";
 
         WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {

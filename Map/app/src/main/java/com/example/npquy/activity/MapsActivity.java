@@ -13,6 +13,7 @@ import android.location.GpsStatus;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -45,17 +46,16 @@ import com.example.npquy.entity.NearestDriver;
 import com.example.npquy.entity.RetrieveQuote;
 import com.example.npquy.entity.RetrieveQuoteResult;
 import com.example.npquy.entity.User;
+import com.example.npquy.service.Const;
 import com.example.npquy.service.GPSTracker;
 import com.example.npquy.service.SingleServiceTaskManager;
 import com.example.npquy.service.StopHandler;
 import com.example.npquy.service.WebServiceTaskManager;
-import com.example.npquy.service.volley.AuthFailureError;
 import com.example.npquy.service.volley.Request;
 import com.example.npquy.service.volley.RequestQueue;
 import com.example.npquy.service.volley.Response;
 import com.example.npquy.service.volley.VolleyError;
 import com.example.npquy.service.volley.toolbox.JsonObjectRequest;
-import com.example.npquy.service.volley.toolbox.StringRequest;
 import com.example.npquy.service.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -72,10 +72,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import flexjson.JSONDeserializer;
 import flexjson.JSONSerializer;
@@ -83,7 +81,7 @@ import flexjson.JSONSerializer;
 /**
  * @author npquy
  */
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener,LocationListener, GpsStatus.Listener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener, LocationListener, GpsStatus.Listener {
 
     private GoogleMap mMap;
     private LocationManager mService;
@@ -91,23 +89,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private EditText pickUp, dropOff, phoneNumber, mPhoneNumber, name;
 
-    private LinearLayout book, total;
-
-    private Boolean isCheck = false;
+    private LinearLayout book;
 
     private Address pickUpAddress, dropOffAddress;
 
-    private TextView people, luggage, numMinuteDisplayOnMarker, userEmail, totalFareTextView,tv_total_2, continueTextView, bookingTextView;
+    private TextView numMinuteDisplayOnMarker, totalFareTextView, tv_booking_1, tv_booking_2;
 
-    private LatLng yourLocation, lastLocation, currentLocation, pickUpLocation, defaultLocation,homeAddress;
+    private LatLng yourLocation, lastLocation, currentLocation, pickUpLocation, defaultLocation, homeAddress;
 
-    private LinearLayout carLayout;
 
     private NearestDriver yourNearestDriver;
     private NavigationView navigationView = null;
     private Toolbar toolbar = null;
 
-    private ImageView swap, locationImage,homeAddressImage;
+    private ImageView swap, locationImage, homeAddressImage;
     private Double totalFare;
     private int num_people, num_luggage;
     private RetrieveQuote retrieveQuote;
@@ -197,7 +192,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     if (addressList.size() != 0) {
                         Address homeAdd = addressList.get(0);
                         homeAddress = new LatLng(homeAdd.getLatitude(), homeAdd.getLongitude());
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(homeAddress,12.0f));
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(homeAddress, 12.0f));
+                        findNearestDriver(homeAddress);
+                        postQuotation();
                     } else {
                         Toast.makeText(MapsActivity.this, "Home address not set", Toast.LENGTH_LONG).show();
                     }
@@ -205,12 +202,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        carLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openCarBox(MapsActivity.this);
-            }
-        });
+
     }
 
     /**
@@ -218,48 +210,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     private void configActivity() {
         StopHandler.createInstance().setVersion(0);
-        String languageToLoad = "en"; // your language
-        Locale locale = new Locale(languageToLoad);
-        Locale.setDefault(locale);
-        Configuration config = new Configuration();
-        config.locale = locale;
-        mService = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-        mService.addGpsStatusListener(this);
-        getBaseContext().getResources().updateConfiguration(config,
-                getBaseContext().getResources().getDisplayMetrics());
+        configLanguage();
         setContentView(R.layout.activity_maps);
-        pickUp = (EditText) findViewById(R.id.pick_up);
-        people = (TextView) findViewById(R.id.people);
-        luggage = (TextView) findViewById(R.id.luggage);
-        dropOff = (EditText) findViewById(R.id.drop_off);
-        pickUp.setInputType(InputType.TYPE_NULL);
-        dropOff.setInputType(InputType.TYPE_NULL);
-        locationImage = (ImageView) findViewById(R.id.pick_up_img);
-        progressBar = (ProgressBar) findViewById(R.id.search_location_progress);
-        progressBar.setVisibility(View.INVISIBLE);
-        progressBar.setClickable(false);
-        userEmail = (TextView) findViewById(R.id.email_user);
-        book = (LinearLayout) findViewById(R.id.book);
-        continueTextView = (TextView) findViewById(R.id.tv_book_1);
-        bookingTextView = (TextView) findViewById(R.id.tv_book_2);
-        totalFareTextView = (TextView) findViewById(R.id.tv_total_1);
-        tv_total_2 = (TextView) findViewById(R.id.tv_total_2);
-        total = (LinearLayout) findViewById(R.id.total);
-        swap = (ImageView) findViewById(R.id.swap_location);
-        homeAddressImage = (ImageView) findViewById(R.id.home_address_img);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        carLayout = (LinearLayout) findViewById(R.id.car);
+        setViewById();
+
         userDb = new UserDb(this);
-        if(userDb.getCurrentUser() != null) {
+        if (userDb.getCurrentUser() != null) {
             user = userDb.getCurrentUser();
-        }else {
-            user =  new User();
+        } else {
+            user = new User();
             user.setCusID("0");
         }
         addressDb = new AddressDb(this);
-      //  marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.taxi_marker_layout, null);
         taxiMarker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.taxi_marker_layout, null);
-        numMinuteDisplayOnMarker = (TextView) findViewById(R.id.num_txt);
+
+        toolBarSetting();
+
+        setVisibleItem();
+    }
+
+    private void toolBarSetting() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
@@ -287,121 +257,43 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.setNavigationIcon(R.drawable.logo);
         toggle.syncState();
+    }
 
+    private void setViewById() {
+        pickUp = (EditText) findViewById(R.id.pick_up);
+        dropOff = (EditText) findViewById(R.id.drop_off);
+        pickUp.setInputType(InputType.TYPE_NULL);
+        dropOff.setInputType(InputType.TYPE_NULL);
+        locationImage = (ImageView) findViewById(R.id.pick_up_img);
+        progressBar = (ProgressBar) findViewById(R.id.search_location_progress);
+        progressBar.setVisibility(View.INVISIBLE);
+        progressBar.setClickable(false);
+        book = (LinearLayout) findViewById(R.id.book);
+        tv_booking_1 = (TextView) findViewById(R.id.tv_book_1);
+        tv_booking_2 = (TextView) findViewById(R.id.tv_book_2);
+        totalFareTextView = (TextView) findViewById(R.id.tv_total_1);
+        swap = (ImageView) findViewById(R.id.swap_location);
+        homeAddressImage = (ImageView) findViewById(R.id.home_address_img);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        numMinuteDisplayOnMarker = (TextView) findViewById(R.id.num_txt);
         navigationView = (NavigationView) findViewById(R.id.nav_view);
-        setVisibleItem();
+    }
+
+    private void configLanguage() {
+        String languageToLoad = "en"; // your language
+        Locale locale = new Locale(languageToLoad);
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.locale = locale;
+        mService = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        mService.addGpsStatusListener(this);
+        getBaseContext().getResources().updateConfiguration(config,
+                getBaseContext().getResources().getDisplayMetrics());
     }
 
     /**
      * POST /Quotation -> When you have both the pickup and dropoff addresses you will need to call another web service method at the following endpoint and display the returned quote
      */
-    /*private void postQuotation() {
-        beforePostData();
-        if (pickUpAddress != null && dropOffAddress != null) {
-            String url = WebServiceTaskManager.URL + "Quotation";
-
-            WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
-
-                @Override
-                public void handleResponse(String response) {
-                    Log.e("response_quotation", response, null);
-                    if(response != null) {
-                        try {
-                            RetrieveQuoteResult bookingSaved = new JSONDeserializer<RetrieveQuoteResult>().use(null,
-                                    RetrieveQuoteResult.class).deserialize(response);
-                            Log.e("Booking save", bookingSaved.toString());
-                            if (bookingSaved != null && bookingSaved.getTotalfare() != null) {
-                                totalFare = Double.parseDouble(bookingSaved.getTotalfare());
-                                totalFareTextView.setText("£" + totalFare);
-
-                                book.setClickable(bookingSaved.getInServiceArea());
-                            }
-                        } catch (Exception jsonEx) {
-                            Log.e("Json Exception", jsonEx.getLocalizedMessage());
-                        }
-                    }
-                    afterPostData();
-                }
-            };
-            retrieveQuote.setCustid(Integer.parseInt(user.getCusID()));
-            retrieveQuote.setPick(pickUpAddress.getFulladdress());
-            retrieveQuote.setPickLat(pickUpAddress.getLatitude());
-            retrieveQuote.setPickLong(pickUpAddress.getLongitude());
-            retrieveQuote.setDoffLat(dropOffAddress.getLatitude());
-            retrieveQuote.setDoffLong(dropOffAddress.getLongitude());
-            retrieveQuote.setDoff(dropOffAddress.getFulladdress());
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-            Date today = new Date();
-            String date = sdf.format(today);
-            retrieveQuote.setBookingdate(date);
-            retrieveQuote.setPaq(Integer.parseInt(people.getText().toString()));
-            retrieveQuote.setBags(Integer.parseInt(luggage.getText().toString()));
-            retrieveQuote.setPickpostcode(pickUpAddress.getPostcode());
-            retrieveQuote.setDroppostcode(dropOffAddress.getPostcode());
-            String json = new JSONSerializer().exclude("*.class").serialize(
-                    retrieveQuote);
-            Log.e("Quotation", json, null);
-            wst.addNameValuePair("", json);
-
-            wst.execute(new String[]{url});
-        }
-    }*/
-
-    /**
-     * POST /Quotation -> When you have both the pickup and dropoff addresses you will need to call another web service method at the following endpoint and display the returned quote
-     */
-    /*private void postQuotationDelay() {
-        beforePostData();
-        if (pickUpAddress != null && dropOffAddress != null) {
-            String url = WebServiceTaskManager.URL + "Quotation";
-
-            SingleServiceTaskManager wst = new SingleServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
-
-                @Override
-                public void handleResponse(String response) {
-                    Log.e("response_quotation", response, null);
-                    if(response != null) {
-                        try {
-                            RetrieveQuoteResult bookingSaved = new JSONDeserializer<RetrieveQuoteResult>().use(null,
-                                    RetrieveQuoteResult.class).deserialize(response);
-                            Log.e("Booking save", bookingSaved.toString());
-                            if (bookingSaved != null && bookingSaved.getTotalfare() != null) {
-                                totalFare = Double.parseDouble(bookingSaved.getTotalfare());
-                                totalFareTextView.setText("£" + totalFare);
-
-                                book.setClickable(bookingSaved.getInServiceArea());
-                            }
-                        } catch (Exception jsonEx) {
-                            Log.e("Json Exception", jsonEx.getLocalizedMessage());
-                        }
-                    }
-                    afterPostData();
-                }
-            };
-            retrieveQuote.setCustid(Integer.parseInt(user.getCusID()));
-            retrieveQuote.setPick(pickUpAddress.getFulladdress());
-            retrieveQuote.setPickLat(pickUpAddress.getLatitude());
-            retrieveQuote.setPickLong(pickUpAddress.getLongitude());
-            retrieveQuote.setDoffLat(dropOffAddress.getLatitude());
-            retrieveQuote.setDoffLong(dropOffAddress.getLongitude());
-            retrieveQuote.setDoff(dropOffAddress.getFulladdress());
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-            Date today = new Date();
-            String date = sdf.format(today);
-            retrieveQuote.setBookingdate(date);
-            retrieveQuote.setPaq(Integer.parseInt(people.getText().toString()));
-            retrieveQuote.setBags(Integer.parseInt(luggage.getText().toString()));
-            retrieveQuote.setPickpostcode(pickUpAddress.getPostcode());
-            retrieveQuote.setDroppostcode(dropOffAddress.getPostcode());
-            String json = new JSONSerializer().exclude("*.class").serialize(
-                    retrieveQuote);
-            Log.e("Quotation", json, null);
-            wst.addNameValuePair("", json);
-
-            wst.execute(new String[]{url});
-        }
-    }*/
-
     private String getJsonToPostData(RetrieveQuote data) {
         data.setCustid(Integer.parseInt(user.getCusID()));
         data.setPick(pickUpAddress.getFulladdress());
@@ -414,8 +306,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Date today = new Date();
         String date = sdf.format(today);
         data.setBookingdate(date);
-        data.setPaq(Integer.parseInt(people.getText().toString()));
-        data.setBags(Integer.parseInt(luggage.getText().toString()));
         data.setPickpostcode(pickUpAddress.getPostcode());
         data.setDroppostcode(dropOffAddress.getPostcode());
         String json = new JSONSerializer().exclude("*.class").serialize(
@@ -424,8 +314,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return json;
     }
 
-    public void postQuotation()  {
-        if(pickUpAddress == null || dropOffAddress == null) {
+    public void postQuotation() {
+        if (pickUpAddress == null || dropOffAddress == null) {
             return;
         }
         String url = WebServiceTaskManager.URL + "Quotation";
@@ -436,14 +326,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } catch (JSONException e) {
             Log.e("JSONException", e.getLocalizedMessage());
         }
-        if(retrieveQuoteJson == null) {
+        if (retrieveQuoteJson == null) {
             return;
         }
         JsonObjectRequest requestQuotation = new JsonObjectRequest(Request.Method.POST, url, retrieveQuoteJson, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 Log.e("response_quotation", response.toString(), null);
-                if(response != null) {
+                if (response != null) {
                     try {
                         RetrieveQuoteResult bookingSaved = new JSONDeserializer<RetrieveQuoteResult>().use(null,
                                 RetrieveQuoteResult.class).deserialize(response.toString());
@@ -459,7 +349,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 afterPostData();
             }
-        }, new Response.ErrorListener(){
+        }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.e("Exception", "Post data to /Quotation is failure! Status :" + error.networkResponse.statusCode);
@@ -468,16 +358,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         queue.add(requestQuotation);
     }
 
-
     private void beforePostData() {
-        continueTextView.setTextColor(Color.WHITE);
-        bookingTextView.setTextColor(Color.WHITE);
+        tv_booking_1.setTextColor(Color.WHITE);
+        tv_booking_2.setTextColor(Color.WHITE);
         book.setClickable(false);
+
     }
 
     private void afterPostData() {
-        continueTextView.setTextColor(Color.parseColor("#00CCCC"));
-        bookingTextView.setTextColor(Color.parseColor("#00CCCC"));
+        tv_booking_1.setTextColor(Color.parseColor("#00CCCC"));
+        tv_booking_2.setTextColor(Color.parseColor("#00CCCC"));
         book.setClickable(true);
     }
 
@@ -519,9 +409,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     findNearestDriver(pickUpLocation);
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pickUpLocation, 12.0f));
 
-                }catch (Exception e) {
+                } catch (Exception e) {
                     Log.e("Error", "No gps connection");
                 }
+                //    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pickUpLocation, 12.0f));
             }
         } else if (requestCode == 2 && resultCode == RESULT_OK) {
             if (data.hasExtra("dropOff")) {
@@ -556,15 +447,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.e("retrieveQuoteJson", retrieveQuoteJson);
                 bundle.putString("pickUpAddress", pickUpJson);
                 bundle.putString("dropOffAddress", dropOffJson);
-                bundle.putInt("people", Integer.parseInt(people.getText().toString()));
-                bundle.putInt("luggage", Integer.parseInt(luggage.getText().toString()));
                 bundle.putString("retrieveQuote", retrieveQuoteJson);
                 bundle.putDouble("totalFare", totalFare);
                 myIntent.putExtra("data", bundle);
                 startActivity(myIntent);
             }
-        }else {
-            Toast.makeText(MapsActivity.this, "Please fill the information",Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(MapsActivity.this, "Please fill the information", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -581,91 +470,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         imageView2.setVisibility(View.INVISIBLE);
         imageView3.setVisibility(View.INVISIBLE);
         imageView4.setVisibility(View.INVISIBLE);
-    }
-
-    /**
-     * show dialog for picking car
-     *
-     * @param context
-     */
-    private void openCarBox(Context context) {
-        final Dialog dialog = new Dialog(context);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.car_selection);
-
-        ImageView dialogButton = (ImageView) dialog.findViewById(R.id.imageView_close);
-        dialogButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-
-        LinearLayout salonLayout = (LinearLayout) dialog.findViewById(R.id.salon_layout);
-        final ImageView salon_tick = (ImageView) dialog.findViewById(R.id.salon_tick);
-
-        final LinearLayout mvp_layout = (LinearLayout) dialog.findViewById(R.id.mvp_layout);
-        final ImageView mvp_tick = (ImageView) dialog.findViewById(R.id.mvp_tick);
-
-        LinearLayout executive_layout = (LinearLayout) dialog.findViewById(R.id.executive_layout);
-        final ImageView executive_tick = (ImageView) dialog.findViewById(R.id.executive_tick);
-
-        LinearLayout estate_layout = (LinearLayout) dialog.findViewById(R.id.estate_layout);
-        final ImageView estate_tick = (ImageView) dialog.findViewById(R.id.estate_tick);
-
-        salonLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                hideImage(mvp_tick, executive_tick, salon_tick, estate_tick);
-                salon_tick.setVisibility(View.VISIBLE);
-                num_people = 4;
-                num_luggage = 2;
-            }
-        });
-
-        mvp_layout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                hideImage(mvp_tick, executive_tick, salon_tick, estate_tick);
-                mvp_tick.setVisibility(View.VISIBLE);
-                num_people = 6;
-                num_luggage = 5;
-            }
-        });
-
-        executive_layout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                hideImage(mvp_tick, executive_tick, salon_tick, estate_tick);
-                executive_tick.setVisibility(View.VISIBLE);
-                num_people = 4;
-                num_luggage = 2;
-            }
-        });
-
-        estate_layout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                hideImage(mvp_tick, executive_tick, salon_tick, estate_tick);
-                estate_tick.setVisibility(View.VISIBLE);
-                num_people = 4;
-                num_luggage = 3;
-            }
-        });
-
-        Button chooseCar = (Button) dialog.findViewById(R.id.choose_car);
-        chooseCar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (num_people != 0 && num_luggage != 0) {
-                    people.setText(num_people + "");
-                    luggage.setText(num_luggage + "");
-                }
-                dialog.dismiss();
-            }
-        });
-
-        dialog.show();
     }
 
     /**
@@ -726,6 +530,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             });
             findNearestDriver(yourLocation);
         } else {
+            defaultLocation = new LatLng(Const.latitude, Const.longitude);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 12.0f));
+            findNearestDriver(defaultLocation);
             Toast.makeText(this, "Can't find your location! Please check your GPS!", Toast.LENGTH_LONG).show();
         }
     }
@@ -746,7 +553,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (!addresses.isEmpty()) {
                 android.location.Address firstAddress = addresses.get(0);
                 yourAddressPick.setPostcode(firstAddress.getPostalCode());
-                if(firstAddress.getPostalCode() != null) {
+                if (firstAddress.getPostalCode() != null) {
                     String[] outCodes = firstAddress.getPostalCode().split(" ");
                     if (outCodes.length > 2) {
                         if (outCodes[1] != null || outCodes[1].isEmpty()) {
@@ -829,7 +636,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             @Override
             public void handleResponse(String response) {
-                if(response != null) {
+                if (response != null) {
                     Log.e("NearestDriver_response", response, null);
                     try {
                         yourNearestDriver = new JSONDeserializer<NearestDriver>().use(null,
@@ -860,40 +667,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         wst.execute(new String[]{url});
     }
 
-
-    /**
-     * POST /NearestDriver ->Find nearest driver
-     *
-     * @param location
-     */
-    private void findNearestDriverWithoutPostQuotation(LatLng location) {
-        String url = WebServiceTaskManager.URL + "NearestDriver";
-
-        WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
-
-            @Override
-            public void handleResponse(String response) {
-                Log.e("NearestDriver_response", response, null);
-                try {
-                    yourNearestDriver = new JSONDeserializer<NearestDriver>().use(null,
-                            NearestDriver.class).deserialize(response);
-                    //  postQuotation();
-                    numMinuteDisplayOnMarker.setText((int) (yourNearestDriver.getTravelTime() / 1) + " mins");
-                } catch (Exception e) {
-                    Log.e("Error Parse Json", e.getLocalizedMessage());
-                }
-            }
-        };
-
-        Location locate = new Location(location.latitude, location.longitude);
-        String json = new JSONSerializer().exclude("*.class").serialize(
-                locate);
-        Log.e("NearestDriver", json, null);
-        wst.addNameValuePair("", json);
-
-        wst.execute(new String[]{url});
-    }
-
     /**
      * set visible/invisible some items when login/logout was called
      */
@@ -906,7 +679,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             navigationView.getMenu().findItem(R.id.nav_profile).setVisible(false);
             navigationView.getMenu().findItem(R.id.nav_login).setVisible(true);
         } else {
-           // userEmail.setText(user.getEmail());
+            // userEmail.setText(user.getEmail());
             navigationView.getMenu().findItem(R.id.nav_login).setVisible(false);
             navigationView.getMenu().findItem(R.id.nav_booking_history).setVisible(true);
             navigationView.getMenu().findItem(R.id.nav_currentbooking).setVisible(true);
@@ -997,6 +770,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         dialog.show();
     }
+
     private void openDialogLogoutConfirm(Context context) {
         final Dialog dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -1038,14 +812,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     JSONObject root = new JSONObject(response);
                     int code = root.getInt("code");
                     String message = root.getString("message");
-                    if(code == 1) {
+                    if (code == 1) {
                         String cusId = root.getString("CustID");
                         if (cusId != null) {
                             Log.e("CusId", cusId, null);
                             user.setCusID(cusId);
                             userDb.login(user);
                         }
-                    }else {
+                    } else {
                         Toast.makeText(MapsActivity.this, message, Toast.LENGTH_SHORT);
                     }
                 } catch (Exception e) {
@@ -1139,6 +913,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         wst.execute(new String[]{url});
 
     }
+
     @Override
     public void onLocationChanged(android.location.Location location) {
     }
@@ -1162,16 +937,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             case GpsStatus.GPS_EVENT_STARTED:
 
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(yourLocation, 12.0f));
+                findNearestDriver(yourLocation);
                 break;
 
             case GpsStatus.GPS_EVENT_STOPPED:
 
-                defaultLocation = new LatLng(51.5034070,-0.1275920);
+                defaultLocation = new LatLng(51.5034070, -0.1275920);
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 12.0f));
+                findNearestDriver(defaultLocation);
                 break;
-
-
         }
-
     }
 }
