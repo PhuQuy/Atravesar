@@ -54,6 +54,7 @@ import com.example.npquy.service.volley.Request;
 import com.example.npquy.service.volley.RequestQueue;
 import com.example.npquy.service.volley.Response;
 import com.example.npquy.service.volley.VolleyError;
+import com.example.npquy.service.volley.toolbox.JsonObjectRequest;
 import com.example.npquy.service.volley.toolbox.StringRequest;
 import com.example.npquy.service.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -65,6 +66,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -422,20 +424,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return json;
     }
 
-    public void postQuotation(){
+    public void postQuotation()  {
         if(pickUpAddress == null || dropOffAddress == null) {
             return;
         }
         String url = WebServiceTaskManager.URL + "Quotation";
         RequestQueue queue = Volley.newRequestQueue(this);
-        StringRequest sr = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+        JSONObject retrieveQuoteJson = null;
+        try {
+            retrieveQuoteJson = new JSONObject(getJsonToPostData(retrieveQuote));
+        } catch (JSONException e) {
+            Log.e("JSONException", e.getLocalizedMessage());
+        }
+        if(retrieveQuoteJson == null) {
+            return;
+        }
+        JsonObjectRequest requestQuotation = new JsonObjectRequest(Request.Method.POST, url, retrieveQuoteJson, new Response.Listener<JSONObject>() {
             @Override
-            public void onResponse(String response) {
-                Log.e("response_quotation", response, null);
+            public void onResponse(JSONObject response) {
+                Log.e("response_quotation", response.toString(), null);
                 if(response != null) {
                     try {
                         RetrieveQuoteResult bookingSaved = new JSONDeserializer<RetrieveQuoteResult>().use(null,
-                                RetrieveQuoteResult.class).deserialize(response);
+                                RetrieveQuoteResult.class).deserialize(response.toString());
                         if (bookingSaved != null && bookingSaved.getTotalfare() != null) {
                             totalFare = Double.parseDouble(bookingSaved.getTotalfare());
                             totalFareTextView.setText("£" + totalFare);
@@ -453,22 +464,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onErrorResponse(VolleyError error) {
                 Log.e("Exception", "Post data to /Quotation is failure! Status :" + error.networkResponse.statusCode);
             }
-        }){
-            @Override
-            protected Map<String,String> getParams(){
-                Map<String,String> params = new HashMap<>();
-                params.put("", getJsonToPostData(retrieveQuote));
-                return params;
-            }
-
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String,String> params = new HashMap<String, String>();
-                params.put("Content-Type", "application/x-www-form-urlencoded");
-                return params;
-            }
-        };
-        queue.add(sr);
+        });
+        queue.add(requestQuotation);
     }
 
 
@@ -840,7 +837,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         progressBar.setVisibility(View.INVISIBLE);
                         postQuotation();
                         int minute = (int) (yourNearestDriver.getTravelTime() / 1);
-                        numMinuteDisplayOnMarker.setText(minute + (minute == 1 ? "min" : "mins"));
+                        numMinuteDisplayOnMarker.setText(minute + (minute == 1 ? " min" : " mins"));
                         LatLng taxiNearest = new LatLng(yourNearestDriver.getCurrentPosition().getLat(), yourNearestDriver.getCurrentPosition().getLgn());
                         MarkerOptions dragMark = new MarkerOptions().position(taxiNearest)
                                 .title("")
