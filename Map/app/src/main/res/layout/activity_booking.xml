@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/bottom_line">
 
-            <EditText
+            <com.example.npquy.service.CustomEditText
                 android:id="@+id/pick_up_booking"
                 android:layout_width="match_parent"
                 android:drawableRight="@drawable/ic_swap"
@@ -124,7 +124,7 @@
             <ImageView
                 android:layout_width="0dip"
                 android:layout_weight="0.3"
-                android:layout_height="40dp"
+                android:layout_height="50dp"
                 android:src="@drawable/saloon"/>
             <TextView
                 android:layout_width="0dip"

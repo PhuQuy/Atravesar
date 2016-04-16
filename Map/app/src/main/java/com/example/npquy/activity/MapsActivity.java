@@ -13,7 +13,6 @@ import android.location.GpsStatus;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -93,7 +92,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private Address pickUpAddress, dropOffAddress;
 
-    private TextView numMinuteDisplayOnMarker, totalFareTextView, tv_booking_1, tv_booking_2;
+    private TextView numMinuteDisplayOnMarker, minTextView,totalFareTextView, confirmTextView, bookingTextView;
 
     private LatLng yourLocation, lastLocation, currentLocation, pickUpLocation, defaultLocation, homeAddress;
 
@@ -102,17 +101,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private NavigationView navigationView = null;
     private Toolbar toolbar = null;
 
-    private ImageView swap, locationImage, homeAddressImage;
+    private ImageView swap, homeAddressImage;
     private Double totalFare;
-    private int num_people, num_luggage;
     private RetrieveQuote retrieveQuote;
-    private View marker, taxiMarker, homeMarker;
+    private View taxiMarker;
     private AutoCompleteTextView mEmailView, signUpEmail;
 
     private UserDb userDb;
     private AddressDb addressDb;
     private User user;
-    private String custId;
 
     private ProgressBar progressBar;
 
@@ -124,7 +121,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Config before running
         configActivity();
         configListener();
-
 
         retrieveQuote = new RetrieveQuote();
 
@@ -177,7 +173,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     pickUp.setText(pickUpAddress.getFulladdress());
                     dropOffAddress = address;
                     dropOff.setText(dropOffAddress.getFulladdress());
-                    postQuotation();
+                    LatLng newLocate = new LatLng(pickUpAddress.getLatitude(), pickUpAddress.getLongitude());
+                    findNearestDriver(newLocate);
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newLocate, 12.0f));
                 }
             }
         });
@@ -196,13 +194,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         findNearestDriver(homeAddress);
                         postQuotation();
                     } else {
-                        Toast.makeText(MapsActivity.this, "Home address not set", Toast.LENGTH_LONG).show();
+                        Intent myIntent = new Intent(MapsActivity.this, GetHomeAddressActivity.class);
+                        startActivityForResult(myIntent, 4);
                     }
+                }else {
+                    Toast.makeText(MapsActivity.this, "Please login to set up home address", Toast.LENGTH_LONG).show();
                 }
             }
         });
-
-
     }
 
     /**
@@ -264,18 +263,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         dropOff = (EditText) findViewById(R.id.drop_off);
         pickUp.setInputType(InputType.TYPE_NULL);
         dropOff.setInputType(InputType.TYPE_NULL);
-        locationImage = (ImageView) findViewById(R.id.pick_up_img);
         progressBar = (ProgressBar) findViewById(R.id.search_location_progress);
         progressBar.setVisibility(View.INVISIBLE);
         progressBar.setClickable(false);
         book = (LinearLayout) findViewById(R.id.book);
-        tv_booking_1 = (TextView) findViewById(R.id.tv_book_1);
-        tv_booking_2 = (TextView) findViewById(R.id.tv_book_2);
-        totalFareTextView = (TextView) findViewById(R.id.tv_total_1);
+        confirmTextView = (TextView) findViewById(R.id.continue_text_view);
+        bookingTextView = (TextView) findViewById(R.id.booking_text_view);
+        totalFareTextView = (TextView) findViewById(R.id.money_text_view);
         swap = (ImageView) findViewById(R.id.swap_location);
         homeAddressImage = (ImageView) findViewById(R.id.home_address_img);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         numMinuteDisplayOnMarker = (TextView) findViewById(R.id.num_txt);
+        minTextView = (TextView) findViewById(R.id.minute_text_view);
         navigationView = (NavigationView) findViewById(R.id.nav_view);
     }
 
@@ -315,10 +314,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void postQuotation() {
+        totalFareTextView.setText("£0.00");
         if (pickUpAddress == null || dropOffAddress == null) {
             return;
         }
-        String url = WebServiceTaskManager.URL + "Quotation";
+        String url = Const.URL + "Quotation";
         RequestQueue queue = Volley.newRequestQueue(this);
         JSONObject retrieveQuoteJson = null;
         try {
@@ -352,22 +352,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e("Exception", "Post data to /Quotation is failure! Status :" + error.networkResponse.statusCode);
+                Log.e("Exception", "Post data to /Quotation is failure!");
             }
         });
         queue.add(requestQuotation);
     }
 
     private void beforePostData() {
-        tv_booking_1.setTextColor(Color.WHITE);
-        tv_booking_2.setTextColor(Color.WHITE);
+        confirmTextView.setTextColor(Color.WHITE);
+        bookingTextView.setTextColor(Color.WHITE);
         book.setClickable(false);
 
     }
 
     private void afterPostData() {
-        tv_booking_1.setTextColor(Color.parseColor("#00CCCC"));
-        tv_booking_2.setTextColor(Color.parseColor("#00CCCC"));
+        confirmTextView.setTextColor(Color.parseColor("#00CCCC"));
+        bookingTextView.setTextColor(Color.parseColor("#00CCCC"));
         book.setClickable(true);
     }
 
@@ -412,13 +412,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 } catch (Exception e) {
                     Log.e("Error", "No gps connection");
                 }
-                //    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pickUpLocation, 12.0f));
             }
         } else if (requestCode == 2 && resultCode == RESULT_OK) {
             if (data.hasExtra("dropOff")) {
                 Address address = (Address) data.getExtras().get("dropOff");
                 dropOffAddress = address;
                 dropOff.setText(address.getFulladdress());
+            }
+        } else if (requestCode == 4 && resultCode == RESULT_OK) {
+            if (data.hasExtra("HomeAddress")) {
+                Address address = (Address) data.getExtras().get("HomeAddress");
+                if (userDb.getCurrentUser() != null) {
+                    User currentUser = userDb.getCurrentUser();
+                    addressDb.insertHomeAddress(address, currentUser.getCusID());
+                    homeAddress = new LatLng(address.getLatitude(), address.getLongitude());
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(homeAddress, 12.0f));
+                    findNearestDriver(homeAddress);
+                    postQuotation();
+                }else {
+                    Toast.makeText(this,"Please login to setting your home location",Toast.LENGTH_LONG).show();
+                }
             }
         }
         if (!pickUp.getText().toString().isEmpty() && !dropOff.getText().toString().isEmpty()) {
@@ -491,50 +504,49 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
 
-        double latitude, longitude;
+        Double latitude, longitude;
 
 
         latitude = mGPS.getLatitude();
         longitude = mGPS.getLongitude();
-
-        if (latitude != 0 && longitude != 0) {
+        Log.e("Locate", latitude + " " +longitude);
+        if (latitude != null && longitude != null) {
             // Add a marker in Sydney and move the camera
             yourLocation = new LatLng(mGPS.getLatitude(), mGPS.getLongitude());
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(yourLocation, 12.0f));
-            mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
-                public void onCameraChange(CameraPosition arg0) {
 
-                    currentLocation = arg0.target;
-                    beforePostData();
-                    if (lastLocation != null && calculationByDistance(currentLocation, lastLocation) > 20) {
-                        version++;
-                        progressBar.setVisibility(View.VISIBLE);
-                        StopHandler.createInstance().setVersion(version);
-                        findNearestDriver(currentLocation);
-
-                    }
-                    lastLocation = arg0.target;
-                    pickUpAddress = getLocationByGeoCode(currentLocation);
-                    pickUp.setText(pickUpAddress.getFulladdress());
-
-
-                }
-            });
-
-            mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
-                @Override
-                public boolean onMyLocationButtonClick() {
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(yourLocation, 12.0f));
-                    return true;
-                }
-            });
-            findNearestDriver(yourLocation);
         } else {
-            defaultLocation = new LatLng(Const.latitude, Const.longitude);
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 12.0f));
-            findNearestDriver(defaultLocation);
+            moveToDefaultLocation();
             Toast.makeText(this, "Can't find your location! Please check your GPS!", Toast.LENGTH_LONG).show();
         }
+        mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+            public void onCameraChange(CameraPosition arg0) {
+
+                currentLocation = arg0.target;
+                beforePostData();
+                if (lastLocation != null && calculationByDistance(currentLocation, lastLocation) > 20) {
+                    version++;
+                    progressBar.setVisibility(View.VISIBLE);
+                    StopHandler.createInstance().setVersion(version);
+                    findNearestDriver(currentLocation);
+
+                }
+                lastLocation = arg0.target;
+                pickUpAddress = getLocationByGeoCode(currentLocation);
+                pickUp.setText(pickUpAddress.getFulladdress());
+
+
+            }
+        });
+
+        mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+            @Override
+            public boolean onMyLocationButtonClick() {
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(yourLocation, 12.0f));
+                return true;
+            }
+        });
+        findNearestDriver(yourLocation);
     }
 
     /**
@@ -630,7 +642,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * @param location
      */
     private void findNearestDriver(LatLng location) {
-        String url = WebServiceTaskManager.URL + "NearestDriver";
+        String url = Const.URL + "NearestDriver";
+        numMinuteDisplayOnMarker.setText("");
+        minTextView.setText("");
 
         SingleServiceTaskManager wst = new SingleServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
 
@@ -644,7 +658,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         progressBar.setVisibility(View.INVISIBLE);
                         postQuotation();
                         int minute = (int) (yourNearestDriver.getTravelTime() / 1);
-                        numMinuteDisplayOnMarker.setText(minute + (minute == 1 ? " min" : " mins"));
+                        numMinuteDisplayOnMarker.setText(minute + "");
+                        if(minute > 1) {
+                            minTextView.setText("mins");
+                        }else {
+                            minTextView.setText("min");
+                        }
                         LatLng taxiNearest = new LatLng(yourNearestDriver.getCurrentPosition().getLat(), yourNearestDriver.getCurrentPosition().getLgn());
                         MarkerOptions dragMark = new MarkerOptions().position(taxiNearest)
                                 .title("")
@@ -801,7 +820,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     private void login() {
 
-        String url = WebServiceTaskManager.URL + "SignIn";
+        String url = Const.URL + "SignIn";
 
         WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
 
@@ -895,7 +914,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     private void signUp(User user) {
 
-        String url = WebServiceTaskManager.URL + "SignUp";
+        String url = Const.URL + "SignUp";
 
         WebServiceTaskManager wst = new WebServiceTaskManager(WebServiceTaskManager.POST_TASK, this, "") {
 
@@ -941,11 +960,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 break;
 
             case GpsStatus.GPS_EVENT_STOPPED:
-
-                defaultLocation = new LatLng(51.5034070, -0.1275920);
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 12.0f));
-                findNearestDriver(defaultLocation);
+                moveToDefaultLocation();
                 break;
         }
+    }
+
+    private void moveToDefaultLocation () {
+        defaultLocation = new LatLng(51.5034070, -0.1275920);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 12.0f));
+        yourLocation = defaultLocation;
+        findNearestDriver(defaultLocation);
     }
 }
